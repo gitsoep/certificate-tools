@@ -1,0 +1,21 @@
+services:
+  csrgenerator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: csr-generator
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_APP=app.py
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001').read()"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    labels:
+      - "com.docker.compose.project=csrgenerator"
+      - "description=CSR and Private Key Generator Web Application"
