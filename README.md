@@ -33,12 +33,32 @@ pip install -r requirements.txt
 
 ## Usage
 
-1. Start the Flask application:
+### Development Mode
+
+1. Start the Flask development server:
 ```bash
 python app.py
 ```
 
-2. Open your web browser and navigate to:
+### Production Mode
+
+1. Using Gunicorn (recommended):
+```bash
+gunicorn --bind 0.0.0.0:5001 --workers 4 app:app
+```
+
+Or use the startup script:
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+2. Using Docker:
+```bash
+docker-compose up -d
+```
+
+3. Open your web browser and navigate to:
 ```
 http://localhost:5000
 ```

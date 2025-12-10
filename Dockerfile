@@ -33,5 +33,5 @@ EXPOSE 5001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5001').read()" || exit 1
 
-# Run the application
-CMD ["python", "app.py"]
+# Run the application with gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "4", "--timeout", "120", "app:app"]
