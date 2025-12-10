@@ -17,7 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY app.py .
-COPY csr.conf .
 COPY templates/ templates/
 
 # Create a non-root user
