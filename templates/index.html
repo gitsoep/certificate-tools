@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSR Generator</title>
+    <title>Mosadex CSR Generator</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1d1f 0%, #252829 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -70,7 +70,7 @@
         
         input:focus, select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #00a9a5;
         }
         
         .form-row {
@@ -82,7 +82,7 @@
         button {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
             color: white;
             border: none;
             border-radius: 5px;
@@ -95,7 +95,7 @@
         
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 20px rgba(211, 84, 0, 0.4);
         }
         
         button:active {
@@ -103,8 +103,8 @@
         }
         
         .info {
-            background: #f0f4ff;
-            border-left: 4px solid #667eea;
+            background: #e6f7f7;
+            border-left: 4px solid #00a9a5;
             padding: 12px;
             margin-bottom: 20px;
             border-radius: 5px;
@@ -126,7 +126,7 @@
 <body>
     <div class="container">
         <h1>🔐 Mosadex CSR Generator</h1>
-        <p class="subtitle">Generate Certificate Signing Request and Private Key</p>
+        <p class="subtitle">Generate a CSR and private key for an mTLS certificate.</p>
         
         <div class="info">
             ℹ️ Fill in the form below to generate a CSR and private key.
