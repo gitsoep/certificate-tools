@@ -27,7 +27,11 @@ CONFIG_DEFAULTS = load_config_defaults()
 
 @app.route('/')
 def index():
-    return render_template('index.html', defaults=CONFIG_DEFAULTS)
+    return render_template('index.html')
+
+@app.route('/csr-generator')
+def csr_generator():
+    return render_template('csr_generator.html', defaults=CONFIG_DEFAULTS)
 
 @app.route('/generate', methods=['POST'])
 def generate_csr():

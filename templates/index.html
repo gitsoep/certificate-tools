@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soep CSR Generator</title>
+    <title>Certificate Tools - Understanding Certificates</title>
     <style>
         * {
             margin: 0;
@@ -114,7 +114,7 @@
             border-radius: 10px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             padding: 40px;
-            max-width: 600px;
+            max-width: 900px;
             width: 100%;
             margin: 0 auto;
         }
@@ -125,80 +125,116 @@
             text-align: center;
         }
         
+        h2 {
+            color: #d35400;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e67e22;
+        }
+        
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
         .subtitle {
             color: #666;
             text-align: center;
             margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            color: #555;
-            font-weight: 500;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .required {
-            color: #e74c3c;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #e67e22;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        button {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
-            color: white;
-            border: none;
-            border-radius: 5px;
             font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
         }
         
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(211, 84, 0, 0.4);
+        p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
         }
         
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .info {
+        .info-box {
             background: #e6f7f7;
             border-left: 4px solid #00a9a5;
-            padding: 12px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin: 20px 0;
             border-radius: 5px;
-            font-size: 13px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d35400;
+        }
+        
+        .cert-flow {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .flow-step {
+            display: inline-block;
+            background: #e67e22;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            font-weight: 600;
+        }
+        
+        .arrow {
+            display: inline-block;
+            color: #666;
+            font-size: 24px;
+            margin: 0 10px;
+        }
+        
+        ul {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        li {
             color: #555;
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin: 20px 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(211, 84, 0, 0.4);
         }
         
         @media (max-width: 768px) {
@@ -220,12 +256,18 @@
                 display: block;
             }
             
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
             .container {
                 padding: 20px;
+            }
+            
+            .flow-step {
+                display: block;
+                margin: 10px auto;
+            }
+            
+            .arrow {
+                display: block;
+                transform: rotate(90deg);
             }
         }
     </style>
@@ -235,12 +277,11 @@
     
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2>🔐 CSR Generator</h2>
-            <p>Mosadex Services</p>
+            <h2>🔐 Certificate Tools</h2>
         </div>
         <ul class="menu">
             <li><a href="/" class="active"><span class="menu-icon">🏠</span>Home</a></li>
-            <li><a href="/"><span class="menu-icon">🔑</span>Generate CSR</a></li>
+            <li><a href="/csr-generator"><span class="menu-icon">🔑</span>Generate CSR</a></li>
             <li><a href="/csr-signer"><span class="menu-icon">✍️</span>Sign CSR</a></li>
             <li><a href="/pfx-converter"><span class="menu-icon">🔄</span>PEM to PFX</a></li>
             <li><a href="/pfx-to-pem"><span class="menu-icon">📦</span>PFX to PEM</a></li>
@@ -250,87 +291,149 @@
     </div>
     
     <div class="main-content">
-    <div class="container">
-        <h1>🔐 Mosadex CSR Generator</h1>
-        <p class="subtitle">Generate a CSR and private key for an mTLS certificate.</p>
-        
-        <div class="info">
-            ℹ️ Fill in the form below to generate a CSR and private key.
+        <div class="container">
+            <h1>🔐 Understanding Digital Certificates</h1>
+            <p class="subtitle">A comprehensive guide to SSL/TLS certificates, CSRs, and certificate management</p>
+            
+            <div class="info-box">
+                <strong>📚 Welcome!</strong> This guide will help you understand digital certificates, how they work, and how to use the tools provided in this application.
+            </div>
+            
+            <h2>🔍 What is a Digital Certificate?</h2>
+            <p>A digital certificate is an electronic document that proves the ownership of a public key. It's like a digital passport that establishes your identity in the online world. Certificates are fundamental to secure communication over the internet.</p>
+            
+            <h3>Key Components of a Certificate:</h3>
+            <ul>
+                <li><strong>Subject Information:</strong> Details about the certificate owner (Common Name, Organization, Country, etc.)</li>
+                <li><strong>Public Key:</strong> The cryptographic key used for encryption and authentication</li>
+                <li><strong>Issuer Information:</strong> Details about the Certificate Authority (CA) that issued the certificate</li>
+                <li><strong>Validity Period:</strong> Start and expiration dates defining when the certificate is valid</li>
+                <li><strong>Digital Signature:</strong> The CA's signature proving the certificate's authenticity</li>
+                <li><strong>Serial Number:</strong> A unique identifier for the certificate</li>
+            </ul>
+            
+            <h2>🔐 What is a CSR (Certificate Signing Request)?</h2>
+            <p>A CSR is a block of encoded text that you give to a Certificate Authority when applying for an SSL/TLS certificate. It contains information about your organization and the public key that will be included in your certificate.</p>
+            
+            <div class="cert-flow">
+                <div class="flow-step">Generate Private Key</div>
+                <span class="arrow">→</span>
+                <div class="flow-step">Create CSR</div>
+                <span class="arrow">→</span>
+                <div class="flow-step">Submit to CA</div>
+                <span class="arrow">→</span>
+                <div class="flow-step">Receive Certificate</div>
+            </div>
+            
+            <h3>What's in a CSR?</h3>
+            <ul>
+                <li><strong>Common Name (CN):</strong> The fully qualified domain name (FQDN) or service name</li>
+                <li><strong>Organization (O):</strong> Legal name of your organization</li>
+                <li><strong>Organizational Unit (OU):</strong> Department or division name</li>
+                <li><strong>Country (C):</strong> Two-letter country code (e.g., NL, US)</li>
+                <li><strong>State/Province (ST):</strong> Full name of the state or province</li>
+                <li><strong>Locality (L):</strong> City name</li>
+                <li><strong>Email:</strong> Contact email address</li>
+                <li><strong>Public Key:</strong> The public portion of your key pair</li>
+            </ul>
+            
+            <h2>🔑 Public Key Infrastructure (PKI)</h2>
+            <p>PKI is the framework that manages digital certificates and public-key encryption. It consists of:</p>
+            
+            <ul>
+                <li><strong>Certificate Authority (CA):</strong> Trusted entity that issues certificates</li>
+                <li><strong>Registration Authority (RA):</strong> Verifies the identity of certificate requesters</li>
+                <li><strong>Certificate Database:</strong> Stores issued certificates and their status</li>
+                <li><strong>Certificate Policy:</strong> Rules governing certificate usage</li>
+            </ul>
+            
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> Your private key must be kept secret and secure. Never share it or transmit it over insecure channels. If compromised, your entire security is at risk.
+            </div>
+            
+            <h2>🛡️ Types of Certificates</h2>
+            
+            <h3>1. SSL/TLS Certificates</h3>
+            <p>Used to secure websites and enable HTTPS. They encrypt data in transit between a client and server.</p>
+            
+            <h3>2. Client Certificates (mTLS)</h3>
+            <p>Used for mutual authentication where both the client and server verify each other's identity. Common in API authentication and secure corporate networks.</p>
+            
+            <h3>3. Code Signing Certificates</h3>
+            <p>Used to digitally sign software and code, proving the publisher's identity and ensuring the code hasn't been tampered with.</p>
+            
+            <h3>4. Email Certificates (S/MIME)</h3>
+            <p>Used to encrypt and digitally sign emails, ensuring confidentiality and authenticity.</p>
+            
+            <h2>📝 Certificate File Formats</h2>
+            
+            <h3>Common Formats:</h3>
+            <ul>
+                <li><strong>PEM (.pem, .crt, .cer, .key):</strong> Base64 encoded text format, human-readable. Most common format for Linux/Unix systems.</li>
+                <li><strong>DER (.der, .cer):</strong> Binary format of PEM. Used mainly in Java environments.</li>
+                <li><strong>PFX/PKCS#12 (.pfx, .p12):</strong> Binary format that can contain both certificate and private key. Password-protected. Common on Windows.</li>
+                <li><strong>PKCS#7 (.p7b, .p7c):</strong> Container format for certificates only, no private key. Often used for certificate chains.</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>✅ Best Practice:</strong> Use PEM format for web servers and API services. Use PFX format when importing into Windows systems or when you need a single file with password protection.
+            </div>
+            
+            <h2>🔄 Certificate Lifecycle</h2>
+            
+            <h3>1. Generation</h3>
+            <p>Create a private key and CSR with the necessary information about your organization and domain.</p>
+            
+            <h3>2. Validation</h3>
+            <p>The Certificate Authority validates your organization's identity and domain ownership.</p>
+            
+            <h3>3. Issuance</h3>
+            <p>Once validated, the CA signs your certificate and issues it to you.</p>
+            
+            <h3>4. Deployment</h3>
+            <p>Install the certificate on your server or application along with the private key.</p>
+            
+            <h3>5. Renewal</h3>
+            <p>Certificates have expiration dates. Monitor and renew them before they expire to avoid service disruption.</p>
+            
+            <h3>6. Revocation</h3>
+            <p>If a certificate is compromised or no longer needed, it should be revoked before expiration.</p>
+            
+            <h2>🔧 Using This Application</h2>
+            
+            <h3>Generate CSR</h3>
+            <p>Create a Certificate Signing Request and private key for your SSL/TLS or client certificate needs. This is typically the first step in obtaining a certificate.</p>
+            
+            <h3>Sign CSR</h3>
+            <p>If you're operating your own CA (for internal use), you can sign CSRs to create certificates. This is common in enterprise environments for internal services.</p>
+            
+            <h3>Convert Formats</h3>
+            <p>Convert between PEM and PFX formats depending on your deployment requirements. PEM is ideal for Linux servers, while PFX is preferred for Windows environments.</p>
+            
+            <div class="info-box">
+                <strong>💡 Tip:</strong> For production environments, always use certificates from trusted public CAs. Self-signed certificates should only be used for testing or internal applications.
+            </div>
+            
+            <h2>🚀 Get Started</h2>
+            <p style="text-align: center;">Ready to create your certificate? Choose a tool to begin:</p>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="/csr-generator" class="cta-button">🔑 Generate CSR</a>
+                <a href="/csr-signer" class="cta-button">✍️ Sign CSR</a>
+                <a href="/pfx-converter" class="cta-button">🔄 Convert to PFX</a>
+            </div>
+            
+            <div class="warning-box" style="margin-top: 40px;">
+                <strong>⚠️ Security Reminder:</strong>
+                <ul style="margin-top: 10px;">
+                    <li>Always keep your private keys secure and never share them</li>
+                    <li>Use strong passwords for PFX files</li>
+                    <li>Monitor certificate expiration dates and renew proactively</li>
+                    <li>Use at least 2048-bit RSA keys (4096-bit recommended for high-security environments)</li>
+                    <li>Revoke certificates immediately if you suspect a compromise</li>
+                </ul>
+            </div>
         </div>
-        
-        <form action="/generate" method="POST">
-            <div class="form-group">
-                <label for="common_name">Common Name (CN) <span class="required">*</span></label>
-                <input type="text" id="common_name" name="common_name" 
-                       value="{{ defaults.common_name }}" placeholder="example.com or *.example.com" required>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="organization">Organization (O)</label>
-                    <input type="text" id="organization" name="organization" 
-                           value="{{ defaults.organization }}" placeholder="Your Company Name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="organizational_unit">Organizational Unit (OU)</label>
-                    <input type="text" id="organizational_unit" name="organizational_unit" 
-                           value="{{ defaults.organizational_unit }}" placeholder="IT Department">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="country">Country (C)</label>
-                    <input type="text" id="country" name="country" 
-                           value="{{ defaults.country }}" maxlength="2" placeholder="US">
-                </div>
-                
-                <div class="form-group">
-                    <label for="state">State/Province (ST)</label>
-                    <input type="text" id="state" name="state" 
-                           value="{{ defaults.state }}" placeholder="California">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="locality">City/Locality (L)</label>
-                    <input type="text" id="locality" name="locality" 
-                           value="{{ defaults.locality }}" placeholder="San Francisco">
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" 
-                           value="{{ defaults.email }}" placeholder="admin@example.com">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="key_size">Key Size (bits)</label>
-                <select id="key_size" name="key_size">
-                    <option value="2048" {% if defaults.key_size == '2048' %}selected{% endif %}>2048 (Recommended)</option>
-                    <option value="3072" {% if defaults.key_size == '3072' %}selected{% endif %}>3072</option>
-                    <option value="4096" {% if defaults.key_size == '4096' %}selected{% endif %}>4096 (Most Secure)</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="eku">Extended Key Usage (EKU)</label>
-                <select id="eku" name="eku">
-                    <option value="serverAuth">Server Authentication (TLS/SSL Server)</option>
-                    <option value="clientAuth" selected>Client Authentication (TLS/SSL Client)</option>
-                    <option value="codeSigning">Code Signing</option>
-                    <option value="emailProtection">Email Protection (S/MIME)</option>
-                    <option value="timeStamping">Time Stamping</option>
-                    <option value="ocspSigning">OCSP Signing</option>
-                </select>
-            </div>
-            
-            <button type="submit">🔑 Generate CSR and Private Key</button>
-        </form>
-    </div>
     </div>
     
     <script>
@@ -339,11 +442,11 @@
         }
         
         function showAbout() {
-            alert('CSR Generator v1.0\n\nA secure web application for generating Certificate Signing Requests and private keys.\n\nDeveloped by Soep Services');
+            alert('Certificate Tools v1.0\n\nA comprehensive suite of tools for managing SSL/TLS certificates and Certificate Signing Requests.');
         }
         
         function showHelp() {
-            alert('How to use:\n\n1. Fill in the certificate details\n2. Only Common Name is required\n3. Click "Generate CSR and Private Key"\n4. Copy or download your files\n\nImportant: Keep your private key secure!');
+            alert('Certificate Tools Help\n\n🔑 Generate CSR: Create a new Certificate Signing Request and private key\n\n✍️ Sign CSR: Sign a CSR with your CA certificate (for internal CA use)\n\n🔄 PEM to PFX: Convert PEM format certificates to PFX format\n\n📦 PFX to PEM: Extract certificates and keys from PFX files\n\nFor more information, read the home page guide.');
         }
         
         // Close sidebar when clicking outside on mobile

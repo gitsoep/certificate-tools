@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSR Generated - CSR Generator</title>
+    <title>Soep CSR Generator</title>
     <style>
         * {
             margin: 0;
@@ -114,7 +114,7 @@
             border-radius: 10px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             padding: 40px;
-            max-width: 900px;
+            max-width: 600px;
             width: 100%;
             margin: 0 auto;
         }
@@ -132,113 +132,73 @@
             font-size: 14px;
         }
         
-        .success-message {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 30px;
-            text-align: center;
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
             font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 14px;
         }
         
-        .output-section {
-            margin-bottom: 30px;
+        .required {
+            color: #e74c3c;
         }
         
-        .output-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        h2 {
-            color: #444;
-            font-size: 18px;
-        }
-        
-        .copy-btn {
-            background: #d35400;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: background 0.3s;
-        }
-        
-        .copy-btn:hover {
-            background: #e67e22;
-        }
-        
-        .copy-btn.copied {
-            background: #28a745;
-        }
-        
-        textarea {
+        input, select {
             width: 100%;
-            min-height: 200px;
-            padding: 15px;
+            padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            resize: vertical;
-            background: #f8f9fa;
+            font-size: 14px;
+            transition: border-color 0.3s;
         }
         
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 30px;
-            font-size: 13px;
+        input:focus, select:focus {
+            outline: none;
+            border-color: #e67e22;
         }
         
-        .warning strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .button-group {
-            display: flex;
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 30px;
         }
         
-        .btn {
-            flex: 1;
+        button {
+            width: 100%;
             padding: 14px;
+            background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+            color: white;
             border: none;
             border-radius: 5px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            text-align: center;
-            display: block;
+            margin-top: 10px;
         }
         
-        .btn-primary {
-            background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn:hover {
+        button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 20px rgba(211, 84, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .info {
+            background: #e6f7f7;
+            border-left: 4px solid #00a9a5;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #555;
         }
         
         @media (max-width: 768px) {
@@ -260,22 +220,12 @@
                 display: block;
             }
             
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
             .container {
                 padding: 20px;
-            }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            .output-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .copy-btn {
-                width: 100%;
             }
         }
     </style>
@@ -289,7 +239,7 @@
         </div>
         <ul class="menu">
             <li><a href="/"><span class="menu-icon">🏠</span>Home</a></li>
-            <li><a href="/csr-generator"><span class="menu-icon">🔑</span>Generate CSR</a></li>
+            <li><a href="/csr-generator" class="active"><span class="menu-icon">🔑</span>Generate CSR</a></li>
             <li><a href="/csr-signer"><span class="menu-icon">✍️</span>Sign CSR</a></li>
             <li><a href="/pfx-converter"><span class="menu-icon">🔄</span>PEM to PFX</a></li>
             <li><a href="/pfx-to-pem"><span class="menu-icon">📦</span>PFX to PEM</a></li>
@@ -300,43 +250,85 @@
     
     <div class="main-content">
     <div class="container">
-        <h1>✅ CSR Generated Successfully!</h1>
-        <p class="subtitle">Your Certificate Signing Request and Private Key have been generated</p>
+        <h1>🔐 CSR Generator</h1>
+        <p class="subtitle">Generate a CSR and private key for an mTLS certificate.</p>
         
-        <div class="success-message">
-            🎉 Your CSR and private key have been generated successfully. Copy and save them securely.
+        <div class="info">
+            ℹ️ Fill in the form below to generate a CSR and private key.
         </div>
         
-        <div class="warning">
-            <strong>⚠️ Important Security Notice:</strong>
-            Keep your private key secure and never share it with anyone. Store it in a safe location. 
-            You'll need it when installing the SSL certificate.
-        </div>
-        
-        <div class="output-section">
-            <div class="output-header">
-                <h2>🔑 Private Key</h2>
-                <button class="copy-btn" onclick="copyToClipboard('private_key', this)">
-                    📋 Copy Private Key
-                </button>
+        <form action="/generate" method="POST">
+            <div class="form-group">
+                <label for="common_name">Common Name (CN) <span class="required">*</span></label>
+                <input type="text" id="common_name" name="common_name" 
+                       value="{{ defaults.common_name }}" placeholder="example.com or *.example.com" required>
             </div>
-            <textarea id="private_key" readonly>{{ private_key }}</textarea>
-        </div>
-        
-        <div class="output-section">
-            <div class="output-header">
-                <h2>📄 Certificate Signing Request (CSR)</h2>
-                <button class="copy-btn" onclick="copyToClipboard('csr', this)">
-                    📋 Copy CSR
-                </button>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="organization">Organization (O)</label>
+                    <input type="text" id="organization" name="organization" 
+                           value="{{ defaults.organization }}" placeholder="Your Company Name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="organizational_unit">Organizational Unit (OU)</label>
+                    <input type="text" id="organizational_unit" name="organizational_unit" 
+                           value="{{ defaults.organizational_unit }}" placeholder="IT Department">
+                </div>
             </div>
-            <textarea id="csr" readonly>{{ csr }}</textarea>
-        </div>
-        
-        <div class="button-group">
-            <a href="/" class="btn btn-primary">🔄 Generate Another CSR</a>
-            <button class="btn btn-secondary" onclick="downloadFiles()">💾 Download as Files</button>
-        </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="country">Country (C)</label>
+                    <input type="text" id="country" name="country" 
+                           value="{{ defaults.country }}" maxlength="2" placeholder="US">
+                </div>
+                
+                <div class="form-group">
+                    <label for="state">State/Province (ST)</label>
+                    <input type="text" id="state" name="state" 
+                           value="{{ defaults.state }}" placeholder="California">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="locality">City/Locality (L)</label>
+                    <input type="text" id="locality" name="locality" 
+                           value="{{ defaults.locality }}" placeholder="San Francisco">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" 
+                           value="{{ defaults.email }}" placeholder="admin@example.com">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="key_size">Key Size (bits)</label>
+                <select id="key_size" name="key_size">
+                    <option value="2048" {% if defaults.key_size == '2048' %}selected{% endif %}>2048 (Recommended)</option>
+                    <option value="3072" {% if defaults.key_size == '3072' %}selected{% endif %}>3072</option>
+                    <option value="4096" {% if defaults.key_size == '4096' %}selected{% endif %}>4096 (Most Secure)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="eku">Extended Key Usage (EKU)</label>
+                <select id="eku" name="eku">
+                    <option value="serverAuth">Server Authentication (TLS/SSL Server)</option>
+                    <option value="clientAuth" selected>Client Authentication (TLS/SSL Client)</option>
+                    <option value="codeSigning">Code Signing</option>
+                    <option value="emailProtection">Email Protection (S/MIME)</option>
+                    <option value="timeStamping">Time Stamping</option>
+                    <option value="ocspSigning">OCSP Signing</option>
+                </select>
+            </div>
+            
+            <button type="submit">🔑 Generate CSR and Private Key</button>
+        </form>
     </div>
     </div>
     
@@ -363,43 +355,6 @@
                 sidebar.classList.remove('active');
             }
         });
-        
-        function copyToClipboard(elementId, button) {
-            const textarea = document.getElementById(elementId);
-            textarea.select();
-            document.execCommand('copy');
-            
-            const originalText = button.innerHTML;
-            button.innerHTML = '✓ Copied!';
-            button.classList.add('copied');
-            
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.classList.remove('copied');
-            }, 2000);
-        }
-        
-        function downloadFiles() {
-            // Download private key
-            const privateKey = document.getElementById('private_key').value;
-            const privateKeyBlob = new Blob([privateKey], { type: 'text/plain' });
-            const privateKeyUrl = URL.createObjectURL(privateKeyBlob);
-            const privateKeyLink = document.createElement('a');
-            privateKeyLink.href = privateKeyUrl;
-            privateKeyLink.download = 'private-key.pem';
-            privateKeyLink.click();
-            
-            // Download CSR
-            setTimeout(() => {
-                const csr = document.getElementById('csr').value;
-                const csrBlob = new Blob([csr], { type: 'text/plain' });
-                const csrUrl = URL.createObjectURL(csrBlob);
-                const csrLink = document.createElement('a');
-                csrLink.href = csrUrl;
-                csrLink.download = 'certificate-request.csr';
-                csrLink.click();
-            }, 100);
-        }
     </script>
 </body>
 </html>
