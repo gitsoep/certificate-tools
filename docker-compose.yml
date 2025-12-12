@@ -1,5 +1,5 @@
 services:
-  csrgenerator:
+  certificate-tools:
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,5 +17,5 @@ services:
       retries: 3
       start_period: 5s
     labels:
-      - "com.docker.compose.project=csrgenerator"
-      - "description=CSR and Private Key Generator Web Application"
+      - "com.docker.compose.project=certificate-tools"
+      - "description=Certificate Management Tools Web Application"
