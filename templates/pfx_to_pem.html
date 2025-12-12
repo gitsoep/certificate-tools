@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFX to PEM Converter - CSR Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1d1f 0%, #252829 100%);
+            min-height: 100vh;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #2c2f31;
+            min-height: 100vh;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #3a3d3f;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h2 {
+            color: #e67e22;
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .sidebar-header p {
+            color: #999;
+            font-size: 12px;
+            margin: 5px 0 0 0;
+        }
+        
+        .menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .menu li {
+            margin: 0;
+        }
+        
+        .menu a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #bbb;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .menu a:hover {
+            background: #3a3d3f;
+            color: #fff;
+            border-left-color: #e67e22;
+        }
+        
+        .menu a.active {
+            background: #3a3d3f;
+            color: #e67e22;
+            border-left-color: #e67e22;
+        }
+        
+        .menu-icon {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: #d35400;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #e67e22;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-button {
+            display: inline-block;
+            padding: 12px;
+            width: 100%;
+            background: #f8f9fa;
+            border: 2px dashed #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            color: #666;
+        }
+        
+        .file-input-button:hover {
+            background: #e9ecef;
+            border-color: #e67e22;
+        }
+        
+        .file-name {
+            display: block;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(211, 84, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #856404;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #721c24;
+            display: none;
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .output-section {
+            margin-bottom: 30px;
+        }
+        
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: #444;
+            font-size: 18px;
+        }
+        
+        .copy-btn {
+            background: #d35400;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #e67e22;
+        }
+        
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+            background: #f8f9fa;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                z-index: 999;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .output-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .copy-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>🔐 CSR Generator</h2>
+            <p>Mosadex Services</p>
+        </div>
+        <ul class="menu">
+            <li><a href="/"><span class="menu-icon">🏠</span>Home</a></li>
+            <li><a href="/"><span class="menu-icon">🔑</span>Generate CSR</a></li>
+            <li><a href="/csr-signer"><span class="menu-icon">✍️</span>Sign CSR</a></li>
+            <li><a href="/pfx-converter"><span class="menu-icon">🔄</span>PEM to PFX</a></li>
+            <li><a href="/pfx-to-pem" class="active"><span class="menu-icon">📦</span>PFX to PEM</a></li>
+            <li><a href="#" onclick="showAbout(); return false;"><span class="menu-icon">ℹ️</span>About</a></li>
+            <li><a href="#" onclick="showHelp(); return false;"><span class="menu-icon">❓</span>Help</a></li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+    <div class="container">
+        <h1>📦 PFX to PEM Converter</h1>
+        <p class="subtitle">Extract Private Key and Certificates from PFX</p>
+        
+        <div class="info">
+            ℹ️ Upload a PFX (PKCS#12) file to extract the private key, certificate, and chain certificates in PEM format.
+        </div>
+        
+        <div class="error" id="errorMessage"></div>
+        
+        <form id="pfxToPemForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="pfx_file">PFX File <span class="required">*</span></label>
+                <div class="file-input-wrapper">
+                    <label for="pfx_file" class="file-input-button">
+                        📁 Choose PFX File (.pfx, .p12)
+                    </label>
+                    <input type="file" id="pfx_file" name="pfx_file" accept=".pfx,.p12" required onchange="updateFileName(this, 'pfxFileName')">
+                    <span class="file-name" id="pfxFileName">No file chosen</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">PFX Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter PFX password (if protected)">
+            </div>
+            
+            <button type="submit" id="submitBtn">📦 Extract to PEM</button>
+        </form>
+        
+        <div class="results" id="results">
+            <div class="output-section" id="privateKeySection">
+                <div class="output-header">
+                    <h2>🔑 Private Key</h2>
+                    <button class="copy-btn" onclick="copyToClipboard('private_key', this)">
+                        📋 Copy Private Key
+                    </button>
+                </div>
+                <textarea id="private_key" readonly></textarea>
+            </div>
+            
+            <div class="output-section" id="certificateSection">
+                <div class="output-header">
+                    <h2>📄 Certificate</h2>
+                    <button class="copy-btn" onclick="copyToClipboard('certificate', this)">
+                        📋 Copy Certificate
+                    </button>
+                </div>
+                <textarea id="certificate" readonly></textarea>
+            </div>
+            
+            <div class="output-section" id="chainSection" style="display: none;">
+                <div class="output-header">
+                    <h2>🔗 Chain Certificates</h2>
+                    <button class="copy-btn" onclick="copyToClipboard('chain', this)">
+                        📋 Copy Chain
+                    </button>
+                </div>
+                <textarea id="chain" readonly></textarea>
+            </div>
+            
+            <button onclick="downloadAll()" style="background: #28a745;">💾 Download All as Files</button>
+        </div>
+    </div>
+    </div>
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+        
+        function showAbout() {
+            alert('CSR Generator v1.0\n\nA secure web application for generating Certificate Signing Requests and private keys.\n\nDeveloped by Mosadex Services B.V.');
+        }
+        
+        function showHelp() {
+            alert('PFX to PEM Converter Help:\n\n1. Upload your PFX file (.pfx or .p12)\n2. Enter the password if the PFX is protected\n3. Click "Extract to PEM"\n4. Copy or download the extracted files\n\nThe tool will extract:\n- Private Key\n- Certificate\n- Chain/Intermediate Certificates (if any)');
+        }
+        
+        function updateFileName(input, spanId) {
+            const span = document.getElementById(spanId);
+            if (input.files.length > 0) {
+                span.textContent = input.files[0].name;
+                span.style.color = '#28a745';
+            } else {
+                span.textContent = 'No file chosen';
+                span.style.color = '#666';
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function copyToClipboard(elementId, button) {
+            const textarea = document.getElementById(elementId);
+            textarea.select();
+            document.execCommand('copy');
+            
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Copied!';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('copied');
+            }, 2000);
+        }
+        
+        function downloadAll() {
+            // Download private key
+            const privateKey = document.getElementById('private_key').value;
+            if (privateKey) {
+                downloadFile(privateKey, 'private-key.pem');
+            }
+            
+            // Download certificate
+            setTimeout(() => {
+                const cert = document.getElementById('certificate').value;
+                if (cert) {
+                    downloadFile(cert, 'certificate.pem');
+                }
+            }, 100);
+            
+            // Download chain if exists
+            const chain = document.getElementById('chain').value;
+            if (chain) {
+                setTimeout(() => {
+                    downloadFile(chain, 'chain.pem');
+                }, 200);
+            }
+        }
+        
+        function downloadFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        document.getElementById('pfxToPemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Extracting...';
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/convert-pfx-to-pem', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Display results
+                    document.getElementById('private_key').value = data.private_key || 'No private key found';
+                    document.getElementById('certificate').value = data.certificate || 'No certificate found';
+                    
+                    // Show/hide chain section
+                    const chainSection = document.getElementById('chainSection');
+                    if (data.chain && data.chain.trim()) {
+                        document.getElementById('chain').value = data.chain;
+                        chainSection.style.display = 'block';
+                    } else {
+                        chainSection.style.display = 'none';
+                    }
+                    
+                    document.getElementById('results').style.display = 'block';
+                    
+                    // Scroll to results
+                    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const error = await response.json();
+                    showError(error.error || 'Failed to extract PFX');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📦 Extract to PEM';
+            }
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.menu-toggle');
+            const isClickInside = sidebar.contains(event.target) || toggle.contains(event.target);
+            
+            if (!isClickInside && window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

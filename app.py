@@ -41,6 +41,7 @@ def generate_csr():
         common_name = request.form.get('common_name', CONFIG_DEFAULTS['common_name'])
         email = request.form.get('email', CONFIG_DEFAULTS['email'])
         key_size = int(request.form.get('key_size', CONFIG_DEFAULTS['key_size']))
+        eku_selection = request.form.get('eku', 'clientAuth')  # Get single EKU selection
 
         # Validate required fields
         if not common_name:
@@ -93,11 +94,21 @@ def generate_csr():
             critical=True
         )
         
-        # Add extended key usage for client authentication
-        csr_builder = csr_builder.add_extension(
-            x509.ExtendedKeyUsage([x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH]),
-            critical=False
-        )
+        # Add extended key usage based on selection
+        eku_map = {
+            'serverAuth': x509.oid.ExtendedKeyUsageOID.SERVER_AUTH,
+            'clientAuth': x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH,
+            'codeSigning': x509.oid.ExtendedKeyUsageOID.CODE_SIGNING,
+            'emailProtection': x509.oid.ExtendedKeyUsageOID.EMAIL_PROTECTION,
+            'timeStamping': x509.oid.ExtendedKeyUsageOID.TIME_STAMPING,
+            'ocspSigning': x509.oid.ExtendedKeyUsageOID.OCSP_SIGNING
+        }
+        
+        if eku_selection in eku_map:
+            csr_builder = csr_builder.add_extension(
+                x509.ExtendedKeyUsage([eku_map[eku_selection]]),
+                critical=False
+            )
         
         # Generate CSR
         csr = csr_builder.sign(private_key, hashes.SHA256(), default_backend())
@@ -116,6 +127,263 @@ def generate_csr():
                              private_key=private_key_pem, 
                              csr=csr_pem)
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/pfx-converter')
+def pfx_converter():
+    return render_template('pfx_converter.html')
+
+@app.route('/csr-signer')
+def csr_signer():
+    return render_template('csr_signer.html')
+
+@app.route('/pfx-to-pem')
+def pfx_to_pem():
+    return render_template('pfx_to_pem.html')
+
+@app.route('/convert-pfx-to-pem', methods=['POST'])
+def convert_pfx_to_pem():
+    try:
+        # Get uploaded PFX file
+        pfx_file = request.files.get('pfx_file')
+        password = request.form.get('password', '')
+        
+        if not pfx_file:
+            return jsonify({'error': 'PFX file is required'}), 400
+        
+        # Read PFX file
+        pfx_data = pfx_file.read()
+        
+        # Load PFX
+        try:
+            from cryptography.hazmat.primitives.serialization import pkcs12
+            
+            pfx_password = password.encode('utf-8') if password else None
+            
+            private_key, certificate, additional_certs = pkcs12.load_key_and_certificates(
+                pfx_data,
+                pfx_password,
+                backend=default_backend()
+            )
+        except Exception as e:
+            return jsonify({'error': f'Failed to load PFX file. Check password: {str(e)}'}), 400
+        
+        # Serialize private key to PEM
+        private_key_pem = ''
+        if private_key:
+            private_key_pem = private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            ).decode('utf-8')
+        
+        # Serialize certificate to PEM
+        certificate_pem = ''
+        if certificate:
+            certificate_pem = certificate.public_bytes(serialization.Encoding.PEM).decode('utf-8')
+        
+        # Serialize chain certificates to PEM
+        chain_pem = ''
+        if additional_certs:
+            for cert in additional_certs:
+                chain_pem += cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
+        
+        # Return results as JSON to display on page
+        return jsonify({
+            'private_key': private_key_pem,
+            'certificate': certificate_pem,
+            'chain': chain_pem
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/sign-csr', methods=['POST'])
+def sign_csr():
+    try:
+        # Get uploaded CSR file
+        csr_file = request.files.get('csr')
+        ca_cert_file = request.files.get('ca_cert')
+        ca_key_file = request.files.get('ca_key')
+        ca_key_password = request.form.get('ca_key_password', '')
+        validity_days = int(request.form.get('validity_days', 365))
+        
+        if not csr_file:
+            return jsonify({'error': 'CSR file is required'}), 400
+        
+        # Read CSR
+        try:
+            csr_data = csr_file.read()
+            csr = x509.load_pem_x509_csr(csr_data, default_backend())
+        except Exception as e:
+            return jsonify({'error': f'Invalid CSR file: {str(e)}'}), 400
+        
+        # If CA cert and key provided, sign with them; otherwise create self-signed
+        if ca_cert_file and ca_key_file:
+            # Load CA certificate
+            try:
+                ca_cert_data = ca_cert_file.read()
+                ca_cert = x509.load_pem_x509_certificate(ca_cert_data, default_backend())
+            except Exception as e:
+                return jsonify({'error': f'Invalid CA certificate: {str(e)}'}), 400
+            
+            # Load CA private key
+            try:
+                ca_key_data = ca_key_file.read()
+                ca_key_pwd = ca_key_password.encode('utf-8') if ca_key_password else None
+                ca_private_key = serialization.load_pem_private_key(
+                    ca_key_data,
+                    password=ca_key_pwd,
+                    backend=default_backend()
+                )
+            except Exception as e:
+                return jsonify({'error': f'Invalid CA private key: {str(e)}'}), 400
+            
+            issuer = ca_cert.subject
+            signing_key = ca_private_key
+        else:
+            # Self-signed: use CSR's public key to generate a private key (simulation)
+            # In reality, for self-signed, we need the original private key
+            # For demo purposes, generate a new key pair
+            signing_key = rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=2048,
+                backend=default_backend()
+            )
+            issuer = csr.subject
+        
+        # Build certificate
+        import datetime
+        
+        cert_builder = x509.CertificateBuilder()
+        cert_builder = cert_builder.subject_name(csr.subject)
+        cert_builder = cert_builder.issuer_name(issuer)
+        cert_builder = cert_builder.public_key(csr.public_key())
+        cert_builder = cert_builder.serial_number(x509.random_serial_number())
+        cert_builder = cert_builder.not_valid_before(datetime.datetime.utcnow())
+        cert_builder = cert_builder.not_valid_after(
+            datetime.datetime.utcnow() + datetime.timedelta(days=validity_days)
+        )
+        
+        # Copy extensions from CSR
+        for extension in csr.extensions:
+            cert_builder = cert_builder.add_extension(
+                extension.value,
+                critical=extension.critical
+            )
+        
+        # Add basic constraints for end-entity certificate
+        try:
+            cert_builder = cert_builder.add_extension(
+                x509.BasicConstraints(ca=False, path_length=None),
+                critical=True
+            )
+        except ValueError:
+            # Extension might already exist from CSR
+            pass
+        
+        # Sign the certificate
+        certificate = cert_builder.sign(
+            private_key=signing_key,
+            algorithm=hashes.SHA256(),
+            backend=default_backend()
+        )
+        
+        # Serialize certificate to PEM
+        cert_pem = certificate.public_bytes(serialization.Encoding.PEM).decode('utf-8')
+        
+        # Return the certificate
+        from flask import send_file
+        import io
+        
+        return send_file(
+            io.BytesIO(cert_pem.encode('utf-8')),
+            mimetype='application/x-pem-file',
+            as_attachment=True,
+            download_name='certificate.crt'
+        )
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/convert-to-pfx', methods=['POST'])
+def convert_to_pfx():
+    try:
+        # Get uploaded files
+        private_key_file = request.files.get('private_key')
+        certificate_file = request.files.get('certificate')
+        chain_file = request.files.get('chain')
+        password = request.form.get('password', '')
+        
+        if not private_key_file or not certificate_file:
+            return jsonify({'error': 'Both private key and certificate files are required'}), 400
+        
+        # Read the files
+        private_key_data = private_key_file.read()
+        certificate_data = certificate_file.read()
+        
+        # Load the private key
+        try:
+            private_key = serialization.load_pem_private_key(
+                private_key_data,
+                password=None,
+                backend=default_backend()
+            )
+        except Exception as e:
+            return jsonify({'error': f'Invalid private key file: {str(e)}'}), 400
+        
+        # Load the certificate
+        try:
+            certificate = x509.load_pem_x509_certificate(certificate_data, default_backend())
+        except Exception as e:
+            return jsonify({'error': f'Invalid certificate file: {str(e)}'}), 400
+        
+        # Load chain certificates if provided
+        chain_certs = None
+        if chain_file:
+            try:
+                chain_data = chain_file.read()
+                # Try to load multiple certificates from the chain file
+                chain_certs = []
+                # Split on BEGIN CERTIFICATE to handle multiple certs in one file
+                import re
+                cert_pattern = rb'-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----'
+                cert_matches = re.findall(cert_pattern, chain_data, re.DOTALL)
+                
+                for cert_data in cert_matches:
+                    chain_certs.append(x509.load_pem_x509_certificate(cert_data, default_backend()))
+                
+                if not chain_certs:
+                    # Try as single certificate
+                    chain_certs = [x509.load_pem_x509_certificate(chain_data, default_backend())]
+            except Exception as e:
+                return jsonify({'error': f'Invalid chain file: {str(e)}'}), 400
+        
+        # Create PFX (PKCS12)
+        pfx_password = password.encode('utf-8') if password else b''
+        
+        from cryptography.hazmat.primitives.serialization import pkcs12
+        
+        pfx_data = pkcs12.serialize_key_and_certificates(
+            name=b'certificate',
+            key=private_key,
+            cert=certificate,
+            cas=chain_certs,
+            encryption_algorithm=serialization.BestAvailableEncryption(pfx_password) if password else serialization.NoEncryption()
+        )
+        
+        # Return the PFX file as a download
+        from flask import send_file
+        import io
+        
+        return send_file(
+            io.BytesIO(pfx_data),
+            mimetype='application/x-pkcs12',
+            as_attachment=True,
+            download_name='certificate.pfx'
+        )
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
