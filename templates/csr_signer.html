@@ -308,22 +308,8 @@
     </style>
 </head>
 <body>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>🔐 Certificate Tools</h2>
-        </div>
-        <ul class="menu">
-            <li><a href="/"><span class="menu-icon">🏠</span>Home</a></li>
-            <li><a href="/csr-generator"><span class="menu-icon">🔑</span>Generate CSR</a></li>
-            <li><a href="/csr-signer" class="active"><span class="menu-icon">✍️</span>Sign CSR</a></li>
-            <li><a href="/pfx-converter"><span class="menu-icon">🔄</span>PEM to PFX</a></li>
-            <li><a href="/pfx-to-pem"><span class="menu-icon">📦</span>PFX to PEM</a></li>
-            <li><a href="#" onclick="showAbout(); return false;"><span class="menu-icon">ℹ️</span>About</a></li>
-            <li><a href="#" onclick="showHelp(); return false;"><span class="menu-icon">❓</span>Help</a></li>
-        </ul>
-    </div>
+    {% set active_page = 'csr-signer' %}
+    {% include 'sidebar.html' %}
     
     <div class="main-content">
     <div class="container">
@@ -389,18 +375,6 @@
     </div>
     
     <script>
-        function toggleMenu() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
-        
-        function showAbout() {
-            alert('Certificate Tools v1.0\n\nA secure web application for generating Certificate Signing Requests and private keys.');
-        }
-        
-        function showHelp() {
-            alert('CSR Signer Help:\n\n1. Upload your CSR file (.csr or .pem)\n2. Set certificate validity period in days\n3. Optional: Provide CA certificate and private key for CA-signed certificate\n4. Click "Sign CSR" to download the signed certificate\n\nWithout CA files, a self-signed certificate will be created.');
-        }
-        
         function updateFileName(input, spanId) {
             const span = document.getElementById(spanId);
             if (input.files.length > 0) {
@@ -477,17 +451,6 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = '✍️ Sign CSR and Download Certificate';
-            }
-        });
-        
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.querySelector('.menu-toggle');
-            const isClickInside = sidebar.contains(event.target) || toggle.contains(event.target);
-            
-            if (!isClickInside && window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
             }
         });
     </script>

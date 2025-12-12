@@ -231,22 +231,8 @@
     </style>
 </head>
 <body>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>🔐 Certificate Tools</h2>
-        </div>
-        <ul class="menu">
-            <li><a href="/"><span class="menu-icon">🏠</span>Home</a></li>
-            <li><a href="/csr-generator" class="active"><span class="menu-icon">🔑</span>Generate CSR</a></li>
-            <li><a href="/csr-signer"><span class="menu-icon">✍️</span>Sign CSR</a></li>
-            <li><a href="/pfx-converter"><span class="menu-icon">🔄</span>PEM to PFX</a></li>
-            <li><a href="/pfx-to-pem"><span class="menu-icon">📦</span>PFX to PEM</a></li>
-            <li><a href="#" onclick="showAbout(); return false;"><span class="menu-icon">ℹ️</span>About</a></li>
-            <li><a href="#" onclick="showHelp(); return false;"><span class="menu-icon">❓</span>Help</a></li>
-        </ul>
-    </div>
+    {% set active_page = 'csr-generator' %}
+    {% include 'sidebar.html' %}
     
     <div class="main-content">
     <div class="container">
@@ -331,30 +317,5 @@
         </form>
     </div>
     </div>
-    
-    <script>
-        function toggleMenu() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
-        
-        function showAbout() {
-            alert('CSR Generator v1.0\n\nA secure web application for generating Certificate Signing Requests and private keys.\n\nDeveloped by Soep Services');
-        }
-        
-        function showHelp() {
-            alert('How to use:\n\n1. Fill in the certificate details\n2. Only Common Name is required\n3. Click "Generate CSR and Private Key"\n4. Copy or download your files\n\nImportant: Keep your private key secure!');
-        }
-        
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.querySelector('.menu-toggle');
-            const isClickInside = sidebar.contains(event.target) || toggle.contains(event.target);
-            
-            if (!isClickInside && window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
-            }
-        });
-    </script>
 </body>
 </html>

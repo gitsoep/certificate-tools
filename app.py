@@ -27,11 +27,11 @@ CONFIG_DEFAULTS = load_config_defaults()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', active_page='home')
 
 @app.route('/csr-generator')
 def csr_generator():
-    return render_template('csr_generator.html', defaults=CONFIG_DEFAULTS)
+    return render_template('csr_generator.html', defaults=CONFIG_DEFAULTS, active_page='csr-generator')
 
 @app.route('/generate', methods=['POST'])
 def generate_csr():
@@ -136,15 +136,15 @@ def generate_csr():
 
 @app.route('/pfx-converter')
 def pfx_converter():
-    return render_template('pfx_converter.html')
+    return render_template('pfx_converter.html', active_page='pfx-converter')
 
 @app.route('/csr-signer')
 def csr_signer():
-    return render_template('csr_signer.html')
+    return render_template('csr_signer.html', active_page='csr-signer')
 
 @app.route('/pfx-to-pem')
 def pfx_to_pem():
-    return render_template('pfx_to_pem.html')
+    return render_template('pfx_to_pem.html', active_page='pfx-to-pem')
 
 @app.route('/convert-pfx-to-pem', methods=['POST'])
 def convert_pfx_to_pem():
