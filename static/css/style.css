@@ -349,34 +349,41 @@ textarea {
 /* File Upload */
 .file-input-wrapper {
     position: relative;
-    overflow: hidden;
-    display: inline-block;
+    display: block;
     width: 100%;
 }
 
 .file-input-wrapper input[type=file] {
     position: absolute;
     left: -9999px;
+    opacity: 0;
 }
 
-.file-input-label {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    border: 2px dashed #e0e0e0;
+.file-input-label, .file-input-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+    color: white;
     border-radius: 5px;
     cursor: pointer;
-    transition: border-color 0.3s;
+    transition: all 0.3s;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 8px;
 }
 
-.file-input-label:hover {
-    border-color: #e67e22;
+.file-input-label:hover, .file-input-button:hover {
+    background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(211, 84, 0, 0.3);
 }
 
 .file-name {
-    margin-left: 10px;
+    display: block;
     color: #666;
     font-size: 14px;
+    margin-top: 5px;
+    font-style: italic;
 }
 
 /* Result Display */
