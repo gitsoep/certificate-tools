@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSR Decoder - Certificate Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% set active_page = 'csr-decoder' %}
+    {% include 'sidebar.html' %}
+    
+    <div class="main-content">
+    <div class="container">
+        <h1>🔍 CSR Decoder</h1>
+        <p class="subtitle">Decode and view the contents of a Certificate Signing Request (CSR).</p>
+        
+        <div class="info">
+            ℹ️ Upload a CSR file or paste the CSR text to decode and view its contents.
+        </div>
+        
+        <form id="decoderForm">
+            <div class="form-group">
+                <label for="csr_file">Upload CSR File</label>
+                <input type="file" id="csr_file" name="csr_file" accept=".csr,.pem,.txt">
+                <small>Upload a CSR file in PEM format</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="csr_text">Or Paste CSR Text</label>
+                <textarea id="csr_text" name="csr_text" rows="10" 
+                          placeholder="-----BEGIN CERTIFICATE REQUEST-----
+...
+-----END CERTIFICATE REQUEST-----"></textarea>
+                <small>Paste your CSR in PEM format</small>
+            </div>
+            
+            <button type="submit" class="btn">🔍 Decode CSR</button>
+        </form>
+        
+        <div id="result" style="display: none; margin-top: 30px;">
+            <h2>Decoded CSR Information</h2>
+            
+            <div class="result-section">
+                <h3>📋 Certificate Subject Information</h3>
+                <div id="subject-info" class="info-box"></div>
+            </div>
+            
+            <div class="result-section">
+                <h3>🔑 Key Information</h3>
+                <div id="key-info" class="info-box"></div>
+            </div>
+            
+            <div class="result-section" id="eku-section" style="display: none;">
+                <h3>🔐 Extended Key Usage</h3>
+                <div id="eku-info" class="info-box"></div>
+            </div>
+            
+            <div class="result-section">
+                <h3>🔒 Signature Algorithm</h3>
+                <div id="signature-info" class="info-box"></div>
+            </div>
+            
+            <div class="result-section" id="extensions-section" style="display: none;">
+                <h3>📝 Other Extensions</h3>
+                <div id="extensions-info" class="info-box"></div>
+            </div>
+        </div>
+        
+        <div id="error" style="display: none;" class="error-box"></div>
+    </div>
+    </div>
+    
+    <script>
+        document.getElementById('decoderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Clear previous results
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            // Create FormData
+            const formData = new FormData();
+            
+            const csrFile = document.getElementById('csr_file').files[0];
+            const csrText = document.getElementById('csr_text').value.trim();
+            
+            if (!csrFile && !csrText) {
+                showError('Please upload a CSR file or paste CSR text');
+                return;
+            }
+            
+            if (csrFile) {
+                formData.append('csr_file', csrFile);
+            } else {
+                formData.append('csr_text', csrText);
+            }
+            
+            try {
+                const response = await fetch('/decode-csr', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showError(data.error || 'Failed to decode CSR');
+                    return;
+                }
+                
+                displayResults(data);
+            } catch (error) {
+                showError('An error occurred: ' + error.message);
+            }
+        });
+        
+        function displayResults(data) {
+            // Display subject information in specific order
+            const fieldOrder = [
+                { key: 'commonName', label: 'Common Name' },
+                { key: 'organization', label: 'Organization' },
+                { key: 'organizationalUnitName', label: 'Organizational Unit' },
+                { key: 'countryName', label: 'Country' },
+                { key: 'stateOrProvinceName', label: 'State/Province' },
+                { key: 'localityName', label: 'City/Locality' },
+                { key: 'emailAddress', label: 'Email Address' }
+            ];
+            
+            const subjectHtml = fieldOrder.map(field => {
+                const value = data.subject[field.key];
+                if (value) {
+                    return `<div class="info-row"><strong>${field.label}:</strong> ${escapeHtml(value)}</div>`;
+                }
+                return '';
+            }).filter(row => row !== '').join('');
+            
+            document.getElementById('subject-info').innerHTML = subjectHtml || '<div class="info-row">No subject information found</div>';
+            
+            // Display key size prominently
+            const keySize = data.public_key.size || 'Unknown';
+            const keyHtml = `<div class="info-row"><strong>Key Size:</strong> ${keySize} bits</div>`;
+            document.getElementById('key-info').innerHTML = keyHtml;
+            
+            // Display Extended Key Usage separately if present
+            if (data.extended_key_usage) {
+                document.getElementById('eku-info').innerHTML = 
+                    `<div class="info-row">${escapeHtml(data.extended_key_usage)}</div>`;
+                document.getElementById('eku-section').style.display = 'block';
+            } else {
+                document.getElementById('eku-section').style.display = 'none';
+            }
+            
+            // Display signature algorithm
+            document.getElementById('signature-info').innerHTML = 
+                `<div class="info-row">${data.signature_algorithm}</div>`;
+            
+            // Display other extensions (excluding Extended Key Usage which is shown separately)
+            const otherExtensions = data.extensions.filter(ext => ext.name !== 'extendedKeyUsage');
+            
+            if (otherExtensions && otherExtensions.length > 0) {
+                const extensionsHtml = otherExtensions.map(ext => {
+                    const critical = ext.critical ? ' <span class="critical-badge">CRITICAL</span>' : '';
+                    return `
+                        <div class="extension-item">
+                            <strong>${formatFieldName(ext.name)}:</strong>${critical}
+                            <div class="extension-value">${escapeHtml(ext.value)}</div>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('extensions-info').innerHTML = extensionsHtml;
+                document.getElementById('extensions-section').style.display = 'block';
+            } else {
+                document.getElementById('extensions-section').style.display = 'none';
+            }
+            
+            document.getElementById('result').style.display = 'block';
+        }
+        
+        function formatFieldName(name) {
+            // Convert field names to more readable format
+            const nameMap = {
+                'countryName': 'Country (C)',
+                'stateOrProvinceName': 'State/Province (ST)',
+                'localityName': 'Locality (L)',
+                'organizationName': 'Organization (O)',
+                'organizationalUnitName': 'Organizational Unit (OU)',
+                'commonName': 'Common Name (CN)',
+                'emailAddress': 'Email Address',
+                'keyUsage': 'Key Usage',
+                'extendedKeyUsage': 'Extended Key Usage',
+                'subjectAltName': 'Subject Alternative Name',
+                'basicConstraints': 'Basic Constraints'
+            };
+            return nameMap[name] || name;
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Clear text area when file is selected
+        document.getElementById('csr_file').addEventListener('change', function() {
+            if (this.files.length > 0) {
+                document.getElementById('csr_text').value = '';
+            }
+        });
+        
+        // Clear file input when text is entered
+        document.getElementById('csr_text').addEventListener('input', function() {
+            if (this.value.trim()) {
+                document.getElementById('csr_file').value = '';
+            }
+        });
+    </script>
+    
+    <style>
+        .result-section {
+            margin-top: 20px;
+        }
+        
+        .result-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        
+        .info-row {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-row strong {
+            color: #495057;
+            display: inline-block;
+            min-width: 200px;
+        }
+        
+        .extension-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .extension-item:last-child {
+            border-bottom: none;
+        }
+        
+        .extension-value {
+            margin-top: 5px;
+            margin-left: 20px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .critical-badge {
+            background: #dc3545;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+        
+        .error-box {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</body>
+</html>

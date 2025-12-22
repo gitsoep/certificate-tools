@@ -7,6 +7,7 @@
     <ul class="menu">
         <li><a href="/" {% if active_page == 'home' %}class="active"{% endif %}><span class="menu-icon">🏠</span>Home</a></li>
         <li><a href="/csr-generator" {% if active_page == 'csr-generator' %}class="active"{% endif %}><span class="menu-icon">🔑</span>Generate CSR</a></li>
+        <li><a href="/csr-decoder" {% if active_page == 'csr-decoder' %}class="active"{% endif %}><span class="menu-icon">🔍</span>Decode CSR</a></li>
         <li><a href="/csr-signer" {% if active_page == 'csr-signer' %}class="active"{% endif %}><span class="menu-icon">✍️</span>Sign CSR</a></li>
         <li><a href="/pfx-converter" {% if active_page == 'pfx-converter' %}class="active"{% endif %}><span class="menu-icon">🔄</span>PEM to PFX</a></li>
         <li><a href="/pfx-to-pem" {% if active_page == 'pfx-to-pem' %}class="active"{% endif %}><span class="menu-icon">📦</span>PFX to PEM</a></li>
@@ -25,7 +26,7 @@
     }
     
     function showHelp() {
-        alert('Certificate Tools Help\n\n🔑 Generate CSR: Create a new Certificate Signing Request and private key\n\n✍️ Sign CSR: Sign a CSR with your CA certificate (for internal CA use)\n\n🔄 PEM to PFX: Convert PEM format certificates to PFX format\n\n📦 PFX to PEM: Extract certificates and keys from PFX files\n\nFor more information, read the home page guide.');
+        alert('Certificate Tools Help\n\n🔑 Generate CSR: Create a new Certificate Signing Request and private key\n\n🔍 Decode CSR: View and analyze the contents of a CSR\n\n✍️ Sign CSR: Sign a CSR with your CA certificate (for internal CA use)\n\n🔄 PEM to PFX: Convert PEM format certificates to PFX format\n\n📦 PFX to PEM: Extract certificates and keys from PFX files\n\nFor more information, read the home page guide.');
     }
     
     // Close sidebar when clicking outside on mobile

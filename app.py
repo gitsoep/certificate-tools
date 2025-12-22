@@ -146,6 +146,124 @@ def csr_signer():
 def pfx_to_pem():
     return render_template('pfx_to_pem.html', active_page='pfx-to-pem')
 
+@app.route('/csr-decoder')
+def csr_decoder():
+    return render_template('csr_decoder.html', active_page='csr-decoder')
+
+@app.route('/decode-csr', methods=['POST'])
+def decode_csr():
+    try:
+        # Get CSR input - either as file or text
+        csr_file = request.files.get('csr_file')
+        csr_text = request.form.get('csr_text', '')
+        
+        # Read CSR data
+        if csr_file:
+            csr_data = csr_file.read()
+        elif csr_text:
+            csr_data = csr_text.encode('utf-8')
+        else:
+            return jsonify({'error': 'CSR file or text is required'}), 400
+        
+        # Parse CSR
+        try:
+            csr = x509.load_pem_x509_csr(csr_data, default_backend())
+        except Exception as e:
+            return jsonify({'error': f'Invalid CSR format: {str(e)}'}), 400
+        
+        # Extract subject information in structured format
+        subject_info = {
+            'commonName': None,
+            'organization': None,
+            'organizationalUnitName': None,
+            'countryName': None,
+            'stateOrProvinceName': None,
+            'localityName': None,
+            'emailAddress': None
+        }
+        
+        for attribute in csr.subject:
+            oid_name = attribute.oid._name
+            if oid_name in subject_info:
+                subject_info[oid_name] = attribute.value
+        
+        # Extract public key information
+        public_key = csr.public_key()
+        key_type = type(public_key).__name__
+        
+        key_info = {
+            'type': key_type,
+            'size': None
+        }
+        
+        if hasattr(public_key, 'key_size'):
+            key_info['size'] = public_key.key_size
+        
+        # Extract extensions with special handling for Extended Key Usage
+        extensions_info = []
+        extended_key_usage = None
+        
+        for extension in csr.extensions:
+            ext_name = extension.oid._name
+            ext_critical = extension.critical
+            ext_value = str(extension.value)
+            
+            # Try to format specific extension types nicely
+            if isinstance(extension.value, x509.KeyUsage):
+                usage_list = []
+                if extension.value.digital_signature: usage_list.append('Digital Signature')
+                if extension.value.key_encipherment: usage_list.append('Key Encipherment')
+                if extension.value.content_commitment: usage_list.append('Content Commitment')
+                if extension.value.data_encipherment: usage_list.append('Data Encipherment')
+                if extension.value.key_agreement: usage_list.append('Key Agreement')
+                if extension.value.key_cert_sign: usage_list.append('Key Cert Sign')
+                if extension.value.crl_sign: usage_list.append('CRL Sign')
+                ext_value = ', '.join(usage_list)
+            elif isinstance(extension.value, x509.ExtendedKeyUsage):
+                eku_list = []
+                eku_display_list = []
+                eku_name_map = {
+                    'serverAuth': 'Server Authentication',
+                    'clientAuth': 'Client Authentication',
+                    'codeSigning': 'Code Signing',
+                    'emailProtection': 'Email Protection',
+                    'timeStamping': 'Time Stamping',
+                    'ocspSigning': 'OCSP Signing'
+                }
+                for oid in extension.value:
+                    oid_name = oid._name
+                    eku_list.append(oid_name)
+                    display_name = eku_name_map.get(oid_name, oid_name)
+                    eku_display_list.append(display_name)
+                ext_value = ', '.join(eku_display_list)
+                extended_key_usage = ext_value  # Store for separate display
+            elif isinstance(extension.value, x509.SubjectAlternativeName):
+                san_list = []
+                for name in extension.value:
+                    san_list.append(str(name.value))
+                ext_value = ', '.join(san_list)
+            
+            extensions_info.append({
+                'name': ext_name,
+                'critical': ext_critical,
+                'value': ext_value
+            })
+        
+        # Get signature algorithm
+        signature_algorithm = csr.signature_algorithm_oid._name
+        
+        # Return decoded information as JSON
+        return jsonify({
+            'subject': subject_info,
+            'public_key': key_info,
+            'extensions': extensions_info,
+            'signature_algorithm': signature_algorithm,
+            'extended_key_usage': extended_key_usage
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/convert-pfx-to-pem', methods=['POST'])
 def convert_pfx_to_pem():
     try:
