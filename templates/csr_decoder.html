@@ -4,70 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSR Decoder - Certificate Tools</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-neutral-900 min-h-screen flex">
     {% set active_page = 'csr-decoder' %}
     {% include 'sidebar.html' %}
     
-    <div class="main-content">
-    <div class="container">
-        <h1>🔍 CSR Decoder</h1>
-        <p class="subtitle">Decode and view the contents of a Certificate Signing Request (CSR).</p>
+    <div class="flex-1 lg:ml-64 p-6 md:p-10">
+    <div class="max-w-4xl mx-auto bg-white shadow-2xl p-8 md:p-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">🔍 CSR Decoder</h1>
+        <p class="text-xl text-gray-600 mb-8">Decode and view the contents of a Certificate Signing Request (CSR).</p>
         
-        <div class="info">
-            ℹ️ Upload a CSR file or paste the CSR text to decode and view its contents.
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 ">
+            <span class="text-blue-700">ℹ️ Upload a CSR file or paste the CSR text to decode and view its contents.</span>
         </div>
         
-        <form id="decoderForm">
-            <div class="form-group">
-                <label for="csr_file">Upload CSR File</label>
-                <input type="file" id="csr_file" name="csr_file" accept=".csr,.pem,.txt">
-                <small>Upload a CSR file in PEM format</small>
+        <form id="decoderForm" class="space-y-6">
+            <div>
+                <label for="csr_file" class="block text-sm font-semibold text-gray-700 mb-2">Upload CSR File</label>
+                <input type="file" id="csr_file" name="csr_file" accept=".csr,.pem,.txt"
+                       class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
+                <small class="text-gray-500 text-sm">Upload a CSR file in PEM format</small>
             </div>
             
-            <div class="form-group">
-                <label for="csr_text">Or Paste CSR Text</label>
+            <div>
+                <label for="csr_text" class="block text-sm font-semibold text-gray-700 mb-2">Or Paste CSR Text</label>
                 <textarea id="csr_text" name="csr_text" rows="10" 
                           placeholder="-----BEGIN CERTIFICATE REQUEST-----
 ...
------END CERTIFICATE REQUEST-----"></textarea>
-                <small>Paste your CSR in PEM format</small>
+-----END CERTIFICATE REQUEST-----"
+                          class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm"></textarea>
+                <small class="text-gray-500 text-sm">Paste your CSR in PEM format</small>
             </div>
             
-            <button type="submit" class="btn">🔍 Decode CSR</button>
+            <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
+                🔍 Decode CSR
+            </button>
         </form>
         
-        <div id="result" style="display: none; margin-top: 30px;">
-            <h2>Decoded CSR Information</h2>
+        <div id="result" class="hidden mt-8 space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">Decoded CSR Information</h2>
             
-            <div class="result-section">
-                <h3>📋 Certificate Subject Information</h3>
-                <div id="subject-info" class="info-box"></div>
+            <div class="bg-gray-50 border border-gray-200  p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 Certificate Subject Information</h3>
+                <div id="subject-info" class="space-y-2"></div>
             </div>
             
-            <div class="result-section">
-                <h3>🔑 Key Information</h3>
-                <div id="key-info" class="info-box"></div>
+            <div class="bg-gray-50 border border-gray-200  p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">🔑 Key Information</h3>
+                <div id="key-info" class="space-y-2"></div>
             </div>
             
-            <div class="result-section" id="eku-section" style="display: none;">
-                <h3>🔐 Extended Key Usage</h3>
-                <div id="eku-info" class="info-box"></div>
+            <div id="eku-section" class="hidden bg-gray-50 border border-gray-200  p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">🔐 Extended Key Usage</h3>
+                <div id="eku-info" class="space-y-2"></div>
             </div>
             
-            <div class="result-section">
-                <h3>🔒 Signature Algorithm</h3>
-                <div id="signature-info" class="info-box"></div>
+            <div class="bg-gray-50 border border-gray-200  p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">🔒 Signature Algorithm</h3>
+                <div id="signature-info" class="space-y-2"></div>
             </div>
             
-            <div class="result-section" id="extensions-section" style="display: none;">
-                <h3>📝 Other Extensions</h3>
-                <div id="extensions-info" class="info-box"></div>
+            <div id="extensions-section" class="hidden bg-gray-50 border border-gray-200  p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">📝 Other Extensions</h3>
+                <div id="extensions-info" class="space-y-2"></div>
             </div>
         </div>
         
-        <div id="error" style="display: none;" class="error-box"></div>
+        <div id="error" class="hidden mt-8 bg-red-50 border-l-4 border-red-500 p-4 text-red-700"></div>
     </div>
     </div>
     
@@ -76,8 +80,8 @@
             e.preventDefault();
             
             // Clear previous results
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('error').style.display = 'none';
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
             
             // Create FormData
             const formData = new FormData();
@@ -130,51 +134,51 @@
             const subjectHtml = fieldOrder.map(field => {
                 const value = data.subject[field.key];
                 if (value) {
-                    return `<div class="info-row"><strong>${field.label}:</strong> ${escapeHtml(value)}</div>`;
+                    return `<div class="py-2 border-b border-gray-200 last:border-b-0"><strong class="text-gray-700">${field.label}:</strong> <span class="text-gray-600">${escapeHtml(value)}</span></div>`;
                 }
                 return '';
             }).filter(row => row !== '').join('');
             
-            document.getElementById('subject-info').innerHTML = subjectHtml || '<div class="info-row">No subject information found</div>';
+            document.getElementById('subject-info').innerHTML = subjectHtml || '<div class="text-gray-500">No subject information found</div>';
             
             // Display key size prominently
             const keySize = data.public_key.size || 'Unknown';
-            const keyHtml = `<div class="info-row"><strong>Key Size:</strong> ${keySize} bits</div>`;
+            const keyHtml = `<div class="py-2"><strong class="text-gray-700">Key Size:</strong> <span class="text-gray-600">${keySize} bits</span></div>`;
             document.getElementById('key-info').innerHTML = keyHtml;
             
             // Display Extended Key Usage separately if present
             if (data.extended_key_usage) {
                 document.getElementById('eku-info').innerHTML = 
-                    `<div class="info-row">${escapeHtml(data.extended_key_usage)}</div>`;
-                document.getElementById('eku-section').style.display = 'block';
+                    `<div class="text-gray-600">${escapeHtml(data.extended_key_usage)}</div>`;
+                document.getElementById('eku-section').classList.remove('hidden');
             } else {
-                document.getElementById('eku-section').style.display = 'none';
+                document.getElementById('eku-section').classList.add('hidden');
             }
             
             // Display signature algorithm
             document.getElementById('signature-info').innerHTML = 
-                `<div class="info-row">${data.signature_algorithm}</div>`;
+                `<div class="text-gray-600">${data.signature_algorithm}</div>`;
             
             // Display other extensions (excluding Extended Key Usage which is shown separately)
             const otherExtensions = data.extensions.filter(ext => ext.name !== 'extendedKeyUsage');
             
             if (otherExtensions && otherExtensions.length > 0) {
                 const extensionsHtml = otherExtensions.map(ext => {
-                    const critical = ext.critical ? ' <span class="critical-badge">CRITICAL</span>' : '';
+                    const critical = ext.critical ? ' <span class="bg-red-500 text-white px-2 py-1  text-xs font-bold ml-2">CRITICAL</span>' : '';
                     return `
-                        <div class="extension-item">
-                            <strong>${formatFieldName(ext.name)}:</strong>${critical}
-                            <div class="extension-value">${escapeHtml(ext.value)}</div>
+                        <div class="py-3 border-b border-gray-200 last:border-b-0">
+                            <strong class="text-gray-700">${formatFieldName(ext.name)}:</strong>${critical}
+                            <div class="mt-2 ml-5 text-gray-600 font-mono text-sm">${escapeHtml(ext.value)}</div>
                         </div>
                     `;
                 }).join('');
                 document.getElementById('extensions-info').innerHTML = extensionsHtml;
-                document.getElementById('extensions-section').style.display = 'block';
+                document.getElementById('extensions-section').classList.remove('hidden');
             } else {
-                document.getElementById('extensions-section').style.display = 'none';
+                document.getElementById('extensions-section').classList.add('hidden');
             }
             
-            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').classList.remove('hidden');
         }
         
         function formatFieldName(name) {
@@ -198,7 +202,7 @@
         function showError(message) {
             const errorDiv = document.getElementById('error');
             errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
+            errorDiv.classList.remove('hidden');
         }
         
         function escapeHtml(text) {
@@ -221,75 +225,5 @@
             }
         });
     </script>
-    
-    <style>
-        .result-section {
-            margin-top: 20px;
-        }
-        
-        .result-section h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-        }
-        
-        .info-box {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-        }
-        
-        .info-row {
-            padding: 8px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-row strong {
-            color: #495057;
-            display: inline-block;
-            min-width: 200px;
-        }
-        
-        .extension-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .extension-item:last-child {
-            border-bottom: none;
-        }
-        
-        .extension-value {
-            margin-top: 5px;
-            margin-left: 20px;
-            color: #666;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-        
-        .critical-badge {
-            background: #dc3545;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.7em;
-            margin-left: 5px;
-            font-weight: bold;
-        }
-        
-        .error-box {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-    </style>
 </body>
 </html>

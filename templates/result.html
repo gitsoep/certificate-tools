@@ -4,49 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSR Generated - CSR Generator</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-neutral-900 min-h-screen flex">
     {% include 'sidebar.html' %}
     
-    <div class="main-content">
-    <div class="container">
-        <h1>✅ CSR Generated Successfully!</h1>
-        <p class="subtitle">Your Certificate Signing Request and Private Key have been generated</p>
+    <div class="flex-1 lg:ml-64 p-6 md:p-10">
+    <div class="max-w-4xl mx-auto bg-white shadow-2xl p-8 md:p-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">✅ CSR Generated Successfully!</h1>
+        <p class="text-xl text-gray-600 mb-8">Your Certificate Signing Request and Private Key have been generated</p>
         
-        <div class="success-message">
-            🎉 Your CSR and private key have been generated successfully. Copy and save them securely.
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-8">
+            <span class="text-green-700">🎉 Your CSR and private key have been generated successfully. Copy and save them securely.</span>
         </div>
         
-        <div class="warning">
-            <strong>⚠️ Important Security Notice:</strong>
-            Keep your private key secure and never share it with anyone. Store it in a safe location. 
-            You'll need it when installing the SSL certificate.
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8">
+            <strong class="text-yellow-800">⚠️ Important Security Notice:</strong>
+            <p class="text-yellow-700 mt-2">Keep your private key secure and never share it with anyone. Store it in a safe location. You'll need it when installing the SSL certificate.</p>
         </div>
         
-        <div class="output-section">
-            <div class="output-header">
-                <h2>🔑 Private Key</h2>
-                <button class="copy-btn" onclick="copyToClipboard('private_key', this)">
+        <div class="bg-gray-50 border border-gray-200  p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">🔑 Private Key</h2>
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 transition-colors" onclick="copyToClipboard('private_key', this)">
                     📋 Copy Private Key
                 </button>
             </div>
-            <textarea id="private_key" readonly>{{ private_key }}</textarea>
+                <textarea id="private_key" readonly class="w-full h-64 p-4 border border-gray-300 font-mono text-sm focus:outline-none bg-white">{{ private_key }}</textarea>
         </div>
         
-        <div class="output-section">
-            <div class="output-header">
-                <h2>📄 Certificate Signing Request (CSR)</h2>
-                <button class="copy-btn" onclick="copyToClipboard('csr', this)">
+        <div class="bg-gray-50 border border-gray-200  p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">📄 Certificate Signing Request (CSR)</h2>
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 transition-colors" onclick="copyToClipboard('csr', this)">
                     📋 Copy CSR
                 </button>
             </div>
-            <textarea id="csr" readonly>{{ csr }}</textarea>
+                <textarea id="csr" readonly class="w-full h-64 p-4 border border-gray-300 font-mono text-sm focus:outline-none bg-white">{{ csr }}</textarea>
         </div>
         
-        <div class="button-group">
-            <a href="/csr-generator" class="btn btn-primary">🔄 Generate Another CSR</a>
-            <button class="btn btn-secondary" onclick="downloadFiles()">💾 Download as Files</button>
+        <div class="flex flex-col sm:flex-row gap-4">
+                <a href="/csr-generator" class="flex-1 text-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
+                🔄 Generate Another CSR
+            </a>
+            <button class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200" onclick="downloadFiles()">
+                💾 Download as Files
+            </button>
         </div>
     </div>
     </div>
@@ -59,11 +62,11 @@
             
             const originalText = button.innerHTML;
             button.innerHTML = '✓ Copied!';
-            button.classList.add('copied');
+            button.classList.add('bg-green-600');
             
             setTimeout(() => {
                 button.innerHTML = originalText;
-                button.classList.remove('copied');
+                button.classList.remove('bg-green-600');
             }, 2000);
         }
         

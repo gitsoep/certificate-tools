@@ -4,48 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificate Tools - Understanding Certificates</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-neutral-900 min-h-screen flex">
     {% include 'sidebar.html' %}
     
-    <div class="main-content">
-        <div class="container">
-            <h1>🔐 Understanding Digital Certificates</h1>
-            <p class="subtitle">A comprehensive guide to SSL/TLS certificates, CSRs, and certificate management</p>
+    <div class="flex-1 lg:ml-64 p-6 md:p-10">
+        <div class="max-w-5xl mx-auto bg-white shadow-2xl p-8 md:p-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">🔐 Understanding Digital Certificates</h1>
+            <p class="text-xl text-gray-600 mb-8">A comprehensive guide to SSL/TLS certificates, CSRs, and certificate management</p>
             
-            <div class="info-box">
-                <strong>📚 Welcome!</strong> This guide will help you understand digital certificates, how they work, and how to use the tools provided in this application.
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 ">
+                <strong class="text-blue-800">📚 Welcome!</strong> <span class="text-blue-700">This guide will help you understand digital certificates, how they work, and how to use the tools provided in this application.</span>
             </div>
             
-            <h2>🔍 What is a Digital Certificate?</h2>
-            <p>A digital certificate is an electronic document that proves the ownership of a public key. It's like a digital passport that establishes your identity in the online world. Certificates are fundamental to secure communication over the internet.</p>
+            <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-4">🔍 What is a Digital Certificate?</h2>
+            <p class="text-gray-700 mb-6 leading-relaxed">A digital certificate is an electronic document that proves the ownership of a public key. It's like a digital passport that establishes your identity in the online world. Certificates are fundamental to secure communication over the internet.</p>
             
-            <h3>Key Components of a Certificate:</h3>
-            <ul>
-                <li><strong>Subject Information:</strong> Details about the certificate owner (Common Name, Organization, Country, etc.)</li>
-                <li><strong>Public Key:</strong> The cryptographic key used for encryption and authentication</li>
-                <li><strong>Issuer Information:</strong> Details about the Certificate Authority (CA) that issued the certificate</li>
-                <li><strong>Validity Period:</strong> Start and expiration dates defining when the certificate is valid</li>
-                <li><strong>Digital Signature:</strong> The CA's signature proving the certificate's authenticity</li>
-                <li><strong>Serial Number:</strong> A unique identifier for the certificate</li>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-3">Key Components of a Certificate:</h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-700 mb-8 ml-4">
+                <li><strong class="text-gray-900">Subject Information:</strong> Details about the certificate owner (Common Name, Organization, Country, etc.)</li>
+                <li><strong class="text-gray-900">Public Key:</strong> The cryptographic key used for encryption and authentication</li>
+                <li><strong class="text-gray-900">Issuer Information:</strong> Details about the Certificate Authority (CA) that issued the certificate</li>
+                <li><strong class="text-gray-900">Validity Period:</strong> Start and expiration dates defining when the certificate is valid</li>
+                <li><strong class="text-gray-900">Digital Signature:</strong> The CA's signature proving the certificate's authenticity</li>
+                <li><strong class="text-gray-900">Serial Number:</strong> A unique identifier for the certificate</li>
             </ul>
             
-            <h2>🔐 What is a CSR (Certificate Signing Request)?</h2>
-            <p>A CSR is a block of encoded text that you give to a Certificate Authority when applying for an SSL/TLS certificate. It contains information about your organization and the public key that will be included in your certificate.</p>
+            <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-4">🔐 What is a CSR (Certificate Signing Request)?</h2>
+            <p class="text-gray-700 mb-6 leading-relaxed">A CSR is a block of encoded text that you give to a Certificate Authority when applying for an SSL/TLS certificate. It contains information about your organization and the public key that will be included in your certificate.</p>
             
-            <div class="cert-flow">
-                <div class="flow-step">Generate Private Key</div>
-                <span class="arrow">→</span>
-                <div class="flow-step">Create CSR</div>
-                <span class="arrow">→</span>
-                <div class="flow-step">Submit to CA</div>
-                <span class="arrow">→</span>
-                <div class="flow-step">Receive Certificate</div>
+            <div class="flex flex-wrap items-center justify-center gap-4 my-8 bg-gradient-to-r from-orange-50 to-yellow-50 p-6">
+                <div class="bg-white px-6 py-3 shadow-md font-semibold text-gray-800">Generate Private Key</div>
+                <span class="text-2xl text-orange-600 font-bold">→</span>
+                <div class="bg-white px-6 py-3 shadow-md font-semibold text-gray-800">Create CSR</div>
+                <span class="text-2xl text-orange-600 font-bold">→</span>
+                <div class="bg-white px-6 py-3 shadow-md font-semibold text-gray-800">Submit to CA</div>
+                <span class="text-2xl text-orange-600 font-bold">→</span>
+                <div class="bg-white px-6 py-3 shadow-md font-semibold text-gray-800">Receive Certificate</div>
             </div>
             
-            <h3>What's in a CSR?</h3>
-            <ul>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-3">What's in a CSR?</h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-700 mb-8 ml-4">
                 <li><strong>Common Name (CN):</strong> The fully qualified domain name (FQDN) or service name</li>
                 <li><strong>Organization (O):</strong> Legal name of your organization</li>
                 <li><strong>Organizational Unit (OU):</strong> Department or division name</li>
@@ -56,95 +56,95 @@
                 <li><strong>Public Key:</strong> The public portion of your key pair</li>
             </ul>
             
-            <h2>🔑 Public Key Infrastructure (PKI)</h2>
-            <p>PKI is the framework that manages digital certificates and public-key encryption. It consists of:</p>
+            <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-4">🔑 Public Key Infrastructure (PKI)</h2>
+            <p class="text-gray-700 mb-6 leading-relaxed">PKI is the framework that manages digital certificates and public-key encryption. It consists of:</p>
             
-            <ul>
-                <li><strong>Certificate Authority (CA):</strong> Trusted entity that issues certificates</li>
-                <li><strong>Registration Authority (RA):</strong> Verifies the identity of certificate requesters</li>
-                <li><strong>Certificate Database:</strong> Stores issued certificates and their status</li>
-                <li><strong>Certificate Policy:</strong> Rules governing certificate usage</li>
+            <ul class="list-disc list-inside space-y-2 text-gray-700 mb-8 ml-4">
+                <li><strong class="text-gray-900">Certificate Authority (CA):</strong> Trusted entity that issues certificates</li>
+                <li><strong class="text-gray-900">Registration Authority (RA):</strong> Verifies the identity of certificate requesters</li>
+                <li><strong class="text-gray-900">Certificate Database:</strong> Stores issued certificates and their status</li>
+                <li><strong class="text-gray-900">Certificate Policy:</strong> Rules governing certificate usage</li>
             </ul>
             
-            <div class="warning-box">
-                <strong>⚠️ Important:</strong> Your private key must be kept secret and secure. Never share it or transmit it over insecure channels. If compromised, your entire security is at risk.
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8">
+                <strong class="text-yellow-800">⚠️ Important:</strong> <span class="text-yellow-700">Your private key must be kept secret and secure. Never share it or transmit it over insecure channels. If compromised, your entire security is at risk.</span>
             </div>
             
-            <h2>🛡️ Types of Certificates</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-4">🛡️ Types of Certificates</h2>
             
-            <h3>1. SSL/TLS Certificates</h3>
-            <p>Used to secure websites and enable HTTPS. They encrypt data in transit between a client and server.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">1. SSL/TLS Certificates</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Used to secure websites and enable HTTPS. They encrypt data in transit between a client and server.</p>
             
-            <h3>2. Client Certificates (mTLS)</h3>
-            <p>Used for mutual authentication where both the client and server verify each other's identity. Common in API authentication and secure corporate networks.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">2. Client Certificates (mTLS)</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Used for mutual authentication where both the client and server verify each other's identity. Common in API authentication and secure corporate networks.</p>
             
-            <h3>3. Code Signing Certificates</h3>
-            <p>Used to digitally sign software and code, proving the publisher's identity and ensuring the code hasn't been tampered with.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">3. Code Signing Certificates</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Used to digitally sign software and code, proving the publisher's identity and ensuring the code hasn't been tampered with.</p>
             
-            <h3>4. Email Certificates (S/MIME)</h3>
-            <p>Used to encrypt and digitally sign emails, ensuring confidentiality and authenticity.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">4. Email Certificates (S/MIME)</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Used to encrypt and digitally sign emails, ensuring confidentiality and authenticity.</p>
             
-            <h2>📝 Certificate File Formats</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-4">📝 Certificate File Formats</h2>
             
-            <h3>Common Formats:</h3>
-            <ul>
-                <li><strong>PEM (.pem, .crt, .cer, .key):</strong> Base64 encoded text format, human-readable. Most common format for Linux/Unix systems.</li>
-                <li><strong>DER (.der, .cer):</strong> Binary format of PEM. Used mainly in Java environments.</li>
-                <li><strong>PFX/PKCS#12 (.pfx, .p12):</strong> Binary format that can contain both certificate and private key. Password-protected. Common on Windows.</li>
-                <li><strong>PKCS#7 (.p7b, .p7c):</strong> Container format for certificates only, no private key. Often used for certificate chains.</li>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-3">Common Formats:</h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-700 mb-8 ml-4">
+                <li><strong class="text-gray-900">PEM (.pem, .crt, .cer, .key):</strong> Base64 encoded text format, human-readable. Most common format for Linux/Unix systems.</li>
+                <li><strong class="text-gray-900">DER (.der, .cer):</strong> Binary format of PEM. Used mainly in Java environments.</li>
+                <li><strong class="text-gray-900">PFX/PKCS#12 (.pfx, .p12):</strong> Binary format that can contain both certificate and private key. Password-protected. Common on Windows.</li>
+                <li><strong class="text-gray-900">PKCS#7 (.p7b, .p7c):</strong> Container format for certificates only, no private key. Often used for certificate chains.</li>
             </ul>
             
-            <div class="success-box">
-                <strong>✅ Best Practice:</strong> Use PEM format for web servers and API services. Use PFX format when importing into Windows systems or when you need a single file with password protection.
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-8">
+                <strong class="text-green-800">✅ Best Practice:</strong> <span class="text-green-700">Use PEM format for web servers and API services. Use PFX format when importing into Windows systems or when you need a single file with password protection.</span>
             </div>
             
-            <h2>🔄 Certificate Lifecycle</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-4">🔄 Certificate Lifecycle</h2>
             
-            <h3>1. Generation</h3>
-            <p>Create a private key and CSR with the necessary information about your organization and domain.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">1. Generation</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Create a private key and CSR with the necessary information about your organization and domain.</p>
             
-            <h3>2. Validation</h3>
-            <p>The Certificate Authority validates your organization's identity and domain ownership.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">2. Validation</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">The Certificate Authority validates your organization's identity and domain ownership.</p>
             
-            <h3>3. Issuance</h3>
-            <p>Once validated, the CA signs your certificate and issues it to you.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">3. Issuance</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Once validated, the CA signs your certificate and issues it to you.</p>
             
-            <h3>4. Deployment</h3>
-            <p>Install the certificate on your server or application along with the private key.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">4. Deployment</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Install the certificate on your server or application along with the private key.</p>
             
-            <h3>5. Renewal</h3>
-            <p>Certificates have expiration dates. Monitor and renew them before they expire to avoid service disruption.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">5. Renewal</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Certificates have expiration dates. Monitor and renew them before they expire to avoid service disruption.</p>
             
-            <h3>6. Revocation</h3>
-            <p>If a certificate is compromised or no longer needed, it should be revoked before expiration.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">6. Revocation</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">If a certificate is compromised or no longer needed, it should be revoked before expiration.</p>
             
-            <h2>🔧 Using This Application</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-4">🔧 Using This Application</h2>
             
-            <h3>Generate CSR</h3>
-            <p>Create a Certificate Signing Request and private key for your SSL/TLS or client certificate needs. This is typically the first step in obtaining a certificate.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">Generate CSR</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Create a Certificate Signing Request and private key for your SSL/TLS or client certificate needs. This is typically the first step in obtaining a certificate.</p>
             
-            <h3>Sign CSR</h3>
-            <p>If you're operating your own CA (for internal use), you can sign CSRs to create certificates. This is common in enterprise environments for internal services.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">Sign CSR</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">If you're operating your own CA (for internal use), you can sign CSRs to create certificates. This is common in enterprise environments for internal services.</p>
             
-            <h3>Convert Formats</h3>
-            <p>Convert between PEM and PFX formats depending on your deployment requirements. PEM is ideal for Linux servers, while PFX is preferred for Windows environments.</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">Convert Formats</h3>
+            <p class="text-gray-700 mb-6 leading-relaxed">Convert between PEM and PFX formats depending on your deployment requirements. PEM is ideal for Linux servers, while PFX is preferred for Windows environments.</p>
             
-            <div class="info-box">
-                <strong>💡 Tip:</strong> For production environments, always use certificates from trusted public CAs. Self-signed certificates should only be used for testing or internal applications.
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 ">
+                <strong class="text-blue-800">💡 Tip:</strong> <span class="text-blue-700">For production environments, always use certificates from trusted public CAs. Self-signed certificates should only be used for testing or internal applications.</span>
             </div>
             
-            <h2>🚀 Get Started</h2>
-            <p style="text-align: center;">Ready to create your certificate? Choose a tool to begin:</p>
+            <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-6 text-center">🚀 Get Started</h2>
+            <p class="text-center text-gray-700 mb-8">Ready to create your certificate? Choose a tool to begin:</p>
             
-            <div style="text-align: center; margin-top: 30px;">
-                <a href="/csr-generator" class="cta-button">🔑 Generate CSR</a>
-                <a href="/csr-signer" class="cta-button">✍️ Sign CSR</a>
-                <a href="/pfx-converter" class="cta-button">🔄 Convert to PFX</a>
+            <div class="flex flex-wrap justify-center gap-4 my-8">
+                <a href="/csr-generator" class="inline-block bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-8 shadow-lg transform hover:scale-105 transition-all duration-200">🔑 Generate CSR</a>
+                <a href="/csr-signer" class="inline-block bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-8 shadow-lg transform hover:scale-105 transition-all duration-200">✍️ Sign CSR</a>
+                <a href="/pfx-converter" class="inline-block bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-4 px-8 shadow-lg transform hover:scale-105 transition-all duration-200">🔄 Convert to PFX</a>
             </div>
             
-            <div class="warning-box" style="margin-top: 40px;">
-                <strong>⚠️ Security Reminder:</strong>
-                <ul style="margin-top: 10px;">
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 mt-10">
+                <strong class="text-yellow-800 text-lg">⚠️ Security Reminder:</strong>
+                <ul class="list-disc list-inside space-y-2 text-yellow-700 mt-3 ml-4">
                     <li>Always keep your private keys secure and never share them</li>
                     <li>Use strong passwords for PFX files</li>
                     <li>Monitor certificate expiration dates and renew proactively</li>

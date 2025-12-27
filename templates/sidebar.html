@@ -1,24 +1,32 @@
-<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+<button class="lg:hidden fixed top-4 left-4 z-50 bg-orange-600 hover:bg-orange-700 text-white p-3 shadow-lg transition-colors" onclick="toggleMenu()">☰</button>
 
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <h2>🔐 Certificate Tools</h2>
+<div class="fixed lg:static inset-y-0 left-0 w-64 bg-neutral-900 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-40 shadow-2xl" id="sidebar">
+    <div class="p-6 border-b border-neutral-800">
+        <h2 class="text-xl font-bold text-orange-500">🔐 Certificate Tools</h2>
     </div>
-    <ul class="menu">
-        <li><a href="/" {% if active_page == 'home' %}class="active"{% endif %}><span class="menu-icon">🏠</span>Home</a></li>
-        <li><a href="/csr-generator" {% if active_page == 'csr-generator' %}class="active"{% endif %}><span class="menu-icon">🔑</span>Generate CSR</a></li>
-        <li><a href="/csr-decoder" {% if active_page == 'csr-decoder' %}class="active"{% endif %}><span class="menu-icon">🔍</span>Decode CSR</a></li>
-        <li><a href="/csr-signer" {% if active_page == 'csr-signer' %}class="active"{% endif %}><span class="menu-icon">✍️</span>Sign CSR</a></li>
-        <li><a href="/pfx-converter" {% if active_page == 'pfx-converter' %}class="active"{% endif %}><span class="menu-icon">🔄</span>PEM to PFX</a></li>
-        <li><a href="/pfx-to-pem" {% if active_page == 'pfx-to-pem' %}class="active"{% endif %}><span class="menu-icon">📦</span>PFX to PEM</a></li>
-        <li><a href="#" onclick="showAbout(); return false;"><span class="menu-icon">ℹ️</span>About</a></li>
-        <li><a href="#" onclick="showHelp(); return false;"><span class="menu-icon">❓</span>Help</a></li>
-    </ul>
+    <nav class="mt-4">
+        <ul class="space-y-1">
+            <li><a href="/" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'home' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🏠</span>Home</a></li>
+            <li><a href="/csr-generator" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-generator' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🔑</span>Generate CSR</a></li>
+            <li><a href="/csr-decoder" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-decoder' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🔍</span>Decode CSR</a></li>
+            <li><a href="/csr-signer" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-signer' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">✍️</span>Sign CSR</a></li>
+            <li><a href="/pfx-converter" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'pfx-converter' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🔄</span>PEM to PFX</a></li>
+            <li><a href="/pfx-to-pem" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'pfx-to-pem' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">📦</span>PFX to PEM</a></li>
+            <li><a href="#" onclick="showAbout(); return false;" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 border-transparent"><span class="text-lg mr-3">ℹ️</span>About</a></li>
+            <li><a href="#" onclick="showHelp(); return false;" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 border-transparent"><span class="text-lg mr-3">❓</span>Help</a></li>
+        </ul>
+    </nav>
 </div>
+
+<!-- Overlay for mobile -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden" onclick="toggleMenu()"></div>
 
 <script>
     function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('active');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
     }
     
     function showAbout() {
@@ -32,11 +40,11 @@
     // Close sidebar when clicking outside on mobile
     document.addEventListener('click', function(event) {
         const sidebar = document.getElementById('sidebar');
-        const toggle = document.querySelector('.menu-toggle');
+        const toggle = document.querySelector('.lg\\:hidden');
         const isClickInside = sidebar.contains(event.target) || toggle.contains(event.target);
         
-        if (!isClickInside && window.innerWidth <= 768) {
-            sidebar.classList.remove('active');
+        if (!isClickInside && window.innerWidth < 1024 && !sidebar.classList.contains('-translate-x-full')) {
+            toggleMenu();
         }
     });
 </script>
