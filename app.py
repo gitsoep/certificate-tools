@@ -44,19 +44,56 @@ def generate_csr():
         organizational_unit = request.form.get('organizational_unit', CONFIG_DEFAULTS['organizational_unit'])
         common_name = request.form.get('common_name', CONFIG_DEFAULTS['common_name'])
         email = request.form.get('email', CONFIG_DEFAULTS['email'])
-        key_size = int(request.form.get('key_size', CONFIG_DEFAULTS['key_size']))
+        key_option = request.form.get('key_option', 'generate')
         eku_selection = request.form.get('eku', 'clientAuth')  # Get single EKU selection
 
         # Validate required fields
         if not common_name:
             return jsonify({'error': 'Common Name is required'}), 400
 
-        # Generate private key
-        private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=key_size,
-            backend=default_backend()
-        )
+        # Handle private key - either generate new or use existing
+        if key_option == 'existing':
+            # Use existing private key
+            key_input_method = request.form.get('key_input_method', 'paste')
+            
+            if key_input_method == 'paste':
+                # Get private key from text input
+                private_key_text = request.form.get('private_key_text', '').strip()
+                if not private_key_text:
+                    return jsonify({'error': 'Private key text is required when using existing key'}), 400
+                
+                try:
+                    private_key_data = private_key_text.encode('utf-8')
+                    private_key = serialization.load_pem_private_key(
+                        private_key_data,
+                        password=None,
+                        backend=default_backend()
+                    )
+                except Exception as e:
+                    return jsonify({'error': f'Invalid private key: {str(e)}'}), 400
+            else:
+                # Get private key from file upload
+                private_key_file = request.files.get('private_key_file')
+                if not private_key_file:
+                    return jsonify({'error': 'Private key file is required when using file upload'}), 400
+                
+                try:
+                    private_key_data = private_key_file.read()
+                    private_key = serialization.load_pem_private_key(
+                        private_key_data,
+                        password=None,
+                        backend=default_backend()
+                    )
+                except Exception as e:
+                    return jsonify({'error': f'Invalid private key file: {str(e)}'}), 400
+        else:
+            # Generate new private key
+            key_size = int(request.form.get('key_size', CONFIG_DEFAULTS['key_size']))
+            private_key = rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=key_size,
+                backend=default_backend()
+            )
 
         # Build subject attributes
         subject_attrs = [
@@ -117,19 +154,27 @@ def generate_csr():
         # Generate CSR
         csr = csr_builder.sign(private_key, hashes.SHA256(), default_backend())
 
-        # Serialize private key to PEM format
-        private_key_pem = private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()
-        ).decode('utf-8')
-
         # Serialize CSR to PEM format
         csr_pem = csr.public_bytes(serialization.Encoding.PEM).decode('utf-8')
 
-        return render_template('result.html', 
-                             private_key=private_key_pem, 
-                             csr=csr_pem)
+        # Determine if we should show the private key (only if it was newly generated)
+        show_private_key = (key_option != 'existing')
+        
+        if show_private_key:
+            # Serialize private key to PEM format
+            private_key_pem = private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            ).decode('utf-8')
+            return render_template('result.html', 
+                                 private_key=private_key_pem, 
+                                 csr=csr_pem,
+                                 show_private_key=True)
+        else:
+            return render_template('result.html', 
+                                 csr=csr_pem,
+                                 show_private_key=False)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

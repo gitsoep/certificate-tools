@@ -19,7 +19,7 @@
                 <span class="text-blue-700">ℹ️ Fill in the form below to generate a CSR and private key.</span>
             </div>
             
-            <form action="/generate" method="POST" class="space-y-6">
+            <form action="/generate" method="POST" enctype="multipart/form-data" class="space-y-6">
                 <div>
                     <label for="common_name" class="block text-sm font-semibold text-gray-700 mb-2">Common Name (CN) <span class="text-red-500">*</span></label>
                     <input type="text" id="common_name" name="common_name" 
@@ -85,15 +85,6 @@
                 </div>
                 
                 <div>
-                    <label for="key_size" class="block text-sm font-semibold text-gray-700 mb-2">Key Size (bits)</label>
-                    <select id="key_size" name="key_size" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition bg-white">
-                        <option value="2048" {% if defaults.key_size == '2048' %}selected{% endif %}>2048 (Recommended)</option>
-                        <option value="3072" {% if defaults.key_size == '3072' %}selected{% endif %}>3072</option>
-                        <option value="4096" {% if defaults.key_size == '4096' %}selected{% endif %}>4096 (Most Secure)</option>
-                    </select>
-                </div>
-                
-                <div>
                     <label for="eku" class="block text-sm font-semibold text-gray-700 mb-2">Extended Key Usage (EKU)</label>
                     <select id="eku" name="eku" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition bg-white">
                         <option value="serverAuth">Server Authentication (TLS/SSL Server)</option>
@@ -104,6 +95,60 @@
                         <option value="ocspSigning">OCSP Signing</option>
                     </select>
                 </div>
+
+                <div class="border-t border-gray-300 pt-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Private Key Configuration</h2>
+                    
+                    <div>
+                        <label for="key_option" class="block text-sm font-semibold text-gray-700 mb-2">Private Key Option</label>
+                        <select id="key_option" name="key_option" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition bg-white" onchange="toggleKeyOptions()">
+                            <option value="generate" selected>Generate New Private Key</option>
+                            <option value="existing">Use Existing Private Key</option>
+                        </select>
+                    </div>
+
+                    <div id="key_size_div" class="mt-4">
+                        <label for="key_size" class="block text-sm font-semibold text-gray-700 mb-2">Key Size (bits)</label>
+                        <select id="key_size" name="key_size" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition bg-white">
+                            <option value="2048" {% if defaults.key_size == '2048' %}selected{% endif %}>2048 (Recommended)</option>
+                            <option value="3072" {% if defaults.key_size == '3072' %}selected{% endif %}>3072</option>
+                            <option value="4096" {% if defaults.key_size == '4096' %}selected{% endif %}>4096 (Most Secure)</option>
+                        </select>
+                    </div>
+
+                    <div id="key_existing_div" style="display: none;" class="mt-4 space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Input Method</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="key_input_method" value="paste" checked onchange="toggleKeyInputMethod()" class="mr-2">
+                                    <span>Paste PEM Text</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="key_input_method" value="file" onchange="toggleKeyInputMethod()" class="mr-2">
+                                    <span>Upload File</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="key_paste_div">
+                            <label for="private_key_text" class="block text-sm font-semibold text-gray-700 mb-2">Private Key (PEM format)</label>
+                            <textarea id="private_key_text" name="private_key_text" 
+                                      rows="8"
+                                      placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"
+                                      class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm"></textarea>
+                            <p class="text-sm text-gray-500 mt-2">Paste your existing private key in PEM format</p>
+                        </div>
+
+                        <div id="key_file_div" style="display: none;">
+                            <label for="private_key_file" class="block text-sm font-semibold text-gray-700 mb-2">Upload Private Key File</label>
+                            <input type="file" id="private_key_file" name="private_key_file" 
+                                   accept=".pem,.key"
+                                   class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
+                            <p class="text-sm text-gray-500 mt-2">Upload your existing private key in PEM format (.pem or .key file)</p>
+                        </div>
+                    </div>
+                </div>
                 
                 <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
                     🔑 Generate CSR and Private Key
@@ -111,5 +156,35 @@
             </form>
         </div>
     </div>
+    
+    <script>
+        function toggleKeyOptions() {
+            const keyOption = document.getElementById('key_option').value;
+            const keySizeDiv = document.getElementById('key_size_div');
+            const keyExistingDiv = document.getElementById('key_existing_div');
+            
+            if (keyOption === 'generate') {
+                keySizeDiv.style.display = 'block';
+                keyExistingDiv.style.display = 'none';
+            } else {
+                keySizeDiv.style.display = 'none';
+                keyExistingDiv.style.display = 'block';
+            }
+        }
+
+        function toggleKeyInputMethod() {
+            const method = document.querySelector('input[name="key_input_method"]:checked').value;
+            const pasteDiv = document.getElementById('key_paste_div');
+            const fileDiv = document.getElementById('key_file_div');
+            
+            if (method === 'paste') {
+                pasteDiv.style.display = 'block';
+                fileDiv.style.display = 'none';
+            } else {
+                pasteDiv.style.display = 'none';
+                fileDiv.style.display = 'block';
+            }
+        }
+    </script>
 </body>
 </html>

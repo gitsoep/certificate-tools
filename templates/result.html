@@ -12,12 +12,13 @@
     <div class="flex-1 lg:ml-64 p-6 md:p-10">
     <div class="max-w-4xl mx-auto bg-white shadow-2xl p-8 md:p-12">
         <h1 class="text-4xl font-bold text-gray-800 mb-4">✅ CSR Generated Successfully!</h1>
-        <p class="text-xl text-gray-600 mb-8">Your Certificate Signing Request and Private Key have been generated</p>
+        <p class="text-xl text-gray-600 mb-8">Your Certificate Signing Request has been generated</p>
         
             <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-8">
-            <span class="text-green-700">🎉 Your CSR and private key have been generated successfully. Copy and save them securely.</span>
+            <span class="text-green-700">🎉 Your CSR {% if show_private_key %}and private key have{% else %}has{% endif %} been generated successfully. Copy and save {% if show_private_key %}them{% else %}it{% endif %} securely.</span>
         </div>
         
+        {% if show_private_key %}
             <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8">
             <strong class="text-yellow-800">⚠️ Important Security Notice:</strong>
             <p class="text-yellow-700 mt-2">Keep your private key secure and never share it with anyone. Store it in a safe location. You'll need it when installing the SSL certificate.</p>
@@ -32,6 +33,7 @@
             </div>
                 <textarea id="private_key" readonly class="w-full h-64 p-4 border border-gray-300 font-mono text-sm focus:outline-none bg-white">{{ private_key }}</textarea>
         </div>
+        {% endif %}
         
         <div class="bg-gray-50 border border-gray-200  p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
@@ -71,6 +73,7 @@
         }
         
         function downloadFiles() {
+            {% if show_private_key %}
             // Download private key
             const privateKey = document.getElementById('private_key').value;
             const privateKeyBlob = new Blob([privateKey], { type: 'text/plain' });
@@ -80,8 +83,9 @@
             privateKeyLink.download = 'private-key.pem';
             privateKeyLink.click();
             
-            // Download CSR
+            // Download CSR after a short delay
             setTimeout(() => {
+            {% endif %}
                 const csr = document.getElementById('csr').value;
                 const csrBlob = new Blob([csr], { type: 'text/plain' });
                 const csrUrl = URL.createObjectURL(csrBlob);
@@ -89,7 +93,9 @@
                 csrLink.href = csrUrl;
                 csrLink.download = 'certificate-request.csr';
                 csrLink.click();
+            {% if show_private_key %}
             }, 100);
+            {% endif %}
         }
     </script>
 </body>
