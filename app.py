@@ -36,6 +36,10 @@ AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
 REDIRECT_PATH = "/auth/callback"
 SCOPE = ["https://vault.azure.net/.default"]
 
+# External URL for OAuth callbacks (when behind reverse proxy)
+# Example: https://certificate-tools.soep.org
+EXTERNAL_URL = os.environ.get('EXTERNAL_URL', '').rstrip('/')
+
 def _build_msal_app(cache=None, authority=None):
     """Build a confidential client application for MSAL"""
     return msal.ConfidentialClientApplication(
@@ -47,10 +51,15 @@ def _build_msal_app(cache=None, authority=None):
 
 def _build_auth_url(authority=None, scopes=None, state=None):
     """Build the authorization URL for user login"""
+    if EXTERNAL_URL:
+        redirect_uri = f"{EXTERNAL_URL}{REDIRECT_PATH}"
+    else:
+        redirect_uri = url_for("authorized", _external=True, _scheme='https')
+    
     return _build_msal_app(authority=authority).get_authorization_request_url(
         scopes or [],
         state=state or str(uuid.uuid4()),
-        redirect_uri=url_for("authorized", _external=True, _scheme='https')
+        redirect_uri=redirect_uri
     )
 
 def _get_token_from_cache(scope=None):
@@ -120,10 +129,16 @@ def authorized():
     """Handle the redirect from Azure AD after authentication"""
     if request.args.get('state'):
         cache = _load_cache()
+        
+        if EXTERNAL_URL:
+            redirect_uri = f"{EXTERNAL_URL}{REDIRECT_PATH}"
+        else:
+            redirect_uri = url_for('authorized', _external=True, _scheme='https')
+        
         result = _build_msal_app(cache=cache).acquire_token_by_authorization_code(
             request.args['code'],
             scopes=SCOPE,
-            redirect_uri=url_for('authorized', _external=True, _scheme='https')
+            redirect_uri=redirect_uri
         )
         
         if "error" in result:
@@ -140,9 +155,15 @@ def authorized():
 def logout():
     """Log out the current user"""
     session.clear()
+    
+    if EXTERNAL_URL:
+        post_logout_uri = EXTERNAL_URL
+    else:
+        post_logout_uri = url_for("index", _external=True, _scheme='https')
+    
     return redirect(
         AUTHORITY + "/oauth2/v2.0/logout" +
-        "?post_logout_redirect_uri=" + url_for("index", _external=True, _scheme='https')
+        "?post_logout_redirect_uri=" + post_logout_uri
     )
 
 
@@ -852,4 +873,17 @@ def sign_csr_akv():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    # Startup checks
+    if CLIENT_ID and not EXTERNAL_URL:
+        print("⚠️  WARNING: Azure authentication is configured but EXTERNAL_URL is not set.")
+        print("⚠️  OAuth callbacks may fail when behind a reverse proxy.")
+        print("⚠️  Set EXTERNAL_URL in your .env file to your public HTTPS domain.")
+        print("⚠️  Example: EXTERNAL_URL=https://certificate-tools.soep.org")
+        print()
+    
+    if EXTERNAL_URL:
+        print(f"✓ Using external URL for OAuth callbacks: {EXTERNAL_URL}")
+        print(f"✓ OAuth redirect URI will be: {EXTERNAL_URL}{REDIRECT_PATH}")
+        print()
+    
     app.run(debug=True, host='0.0.0.0', port=5001)

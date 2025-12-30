@@ -4,6 +4,19 @@
 
 The application has been updated to work correctly behind a reverse proxy with HTTPS termination.
 
+### Critical Configuration: EXTERNAL_URL
+
+**The most important setting for reverse proxy deployments is the `EXTERNAL_URL` environment variable.**
+
+When set, this overrides Flask's URL generation and ensures OAuth callbacks use your public HTTPS domain instead of internal IPs/ports.
+
+**Example:**
+```bash
+EXTERNAL_URL=https://certificate-tools.soep.org
+```
+
+Without this setting, Flask may generate URLs like `http://159.69.201.202:8085/auth/callback` which will cause Azure AD authentication to fail.
+
 ### Modified Files
 
 #### 1. **app.py**
@@ -142,12 +155,13 @@ https://your-domain.com/auth/callback
 
 ## Production Checklist
 
+- [ ] Set `EXTERNAL_URL` in .env to your public HTTPS URL (e.g., `https://certificate-tools.soep.org`)
 - [ ] Reverse proxy configured with X-Forwarded-* headers
 - [ ] SSL/TLS certificate installed on proxy
-- [ ] Azure AD redirect URI updated to HTTPS public URL
+- [ ] Azure AD redirect URI matches EXTERNAL_URL exactly: `https://your-domain.com/auth/callback`
 - [ ] .env file configured with correct client ID/secret
 - [ ] FLASK_SECRET_KEY set to a strong random value
 - [ ] Application running behind proxy (not directly exposed)
 - [ ] Test OAuth login flow end-to-end
 - [ ] Verify session persistence across requests
-- [ ] Check logs for any header-related warnings
+- [ ] Check startup output confirms correct OAuth redirect URI
