@@ -24,35 +24,80 @@
         
         <form id="pfxForm" enctype="multipart/form-data" class="space-y-6">
             <div>
-                <label for="private_key" class="block text-sm font-semibold text-gray-700 mb-2">Private Key File <span class="text-red-500">*</span></label>
-                <div class="flex flex-col space-y-2">
-                        <label for="private_key" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Private Key <span class="text-red-500">*</span></label>
+                <div class="mb-3">
+                    <label class="inline-flex items-center mr-6">
+                        <input type="radio" name="key_input_method" value="file" checked onchange="toggleInputMethod('key')" class="form-radio h-4 w-4 text-orange-600">
+                        <span class="ml-2 text-gray-700">Upload File</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="key_input_method" value="paste" onchange="toggleInputMethod('key')" class="form-radio h-4 w-4 text-orange-600">
+                        <span class="ml-2 text-gray-700">Paste Text</span>
+                    </label>
+                </div>
+                <div id="key_file_input" class="flex flex-col space-y-2">
+                    <label for="private_key" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
                         📁 Choose Private Key (.pem, .key)
                     </label>
-                    <input type="file" id="private_key" name="private_key" accept=".pem,.key" required onchange="updateFileName(this, 'keyFileName')" class="hidden">
+                    <input type="file" id="private_key" name="private_key" accept=".pem,.key" onchange="updateFileName(this, 'keyFileName')" class="hidden">
                     <span class="text-sm text-gray-600" id="keyFileName">No file chosen</span>
                 </div>
-            </div>
-            
-            <div>
-                <label for="certificate" class="block text-sm font-semibold text-gray-700 mb-2">Certificate File <span class="text-red-500">*</span></label>
-                <div class="flex flex-col space-y-2">
-                        <label for="certificate" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
-                        📁 Choose Certificate (.crt, .cer, .pem)
-                    </label>
-                    <input type="file" id="certificate" name="certificate" accept=".crt,.cer,.pem" required onchange="updateFileName(this, 'certFileName')" class="hidden">
-                    <span class="text-sm text-gray-600" id="certFileName">No file chosen</span>
+                <div id="key_text_input" class="hidden">
+                    <textarea name="private_key_text" rows="8" placeholder="Paste your private key in PEM format here..." class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm"></textarea>
                 </div>
             </div>
             
             <div>
-                <label for="chain" class="block text-sm font-semibold text-gray-700 mb-2">Chain/Intermediate Certificate File (Optional)</label>
-                <div class="flex flex-col space-y-2">
+                <label for="key_password" class="block text-sm font-semibold text-gray-700 mb-2">Private Key Password (if encrypted)</label>
+                <input type="password" id="key_password" name="key_password" placeholder="Leave empty if key is not encrypted"
+                       class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Certificate <span class="text-red-500">*</span></label>
+                <div class="mb-3">
+                    <label class="inline-flex items-center mr-6">
+                        <input type="radio" name="cert_input_method" value="file" checked onchange="toggleInputMethod('cert')" class="form-radio h-4 w-4 text-orange-600">
+                        <span class="ml-2 text-gray-700">Upload File</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="cert_input_method" value="paste" onchange="toggleInputMethod('cert')" class="form-radio h-4 w-4 text-orange-600">
+                        <span class="ml-2 text-gray-700">Paste Text</span>
+                    </label>
+                </div>
+                <div id="cert_file_input" class="flex flex-col space-y-2">
+                    <label for="certificate" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
+                        📁 Choose Certificate (.crt, .cer, .pem)
+                    </label>
+                    <input type="file" id="certificate" name="certificate" accept=".crt,.cer,.pem" onchange="updateFileName(this, 'certFileName')" class="hidden">
+                    <span class="text-sm text-gray-600" id="certFileName">No file chosen</span>
+                </div>
+                <div id="cert_text_input" class="hidden">
+                    <textarea name="certificate_text" rows="12" placeholder="Paste your certificate in PEM format here..." class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm"></textarea>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Chain/Intermediate Certificate (Optional)</label>
+                <div class="mb-3">
+                    <label class="inline-flex items-center mr-6">
+                        <input type="radio" name="chain_input_method" value="file" checked onchange="toggleInputMethod('chain')" class="form-radio h-4 w-4 text-orange-600">
+                        <span class="ml-2 text-gray-700">Upload File</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="chain_input_method" value="paste" onchange="toggleInputMethod('chain')" class="form-radio h-4 w-4 text-orange-600">
+                        <span class="ml-2 text-gray-700">Paste Text</span>
+                    </label>
+                </div>
+                <div id="chain_file_input" class="flex flex-col space-y-2">
                     <label for="chain" class="inline-block bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
                         📁 Choose Chain File (.crt, .cer, .pem)
                     </label>
                     <input type="file" id="chain" name="chain" accept=".crt,.cer,.pem" onchange="updateFileName(this, 'chainFileName')" class="hidden">
                     <span class="text-sm text-gray-600" id="chainFileName">No file chosen</span>
+                </div>
+                <div id="chain_text_input" class="hidden">
+                    <textarea name="chain_text" rows="8" placeholder="Paste your chain/intermediate certificate(s) in PEM format here..." class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm"></textarea>
                 </div>
             </div>
             
@@ -70,6 +115,20 @@
     </div>
     
     <script>
+        function toggleInputMethod(type) {
+            const fileInput = document.getElementById(type + '_file_input');
+            const textInput = document.getElementById(type + '_text_input');
+            const method = document.querySelector('input[name="' + type + '_input_method"]:checked').value;
+            
+            if (method === 'file') {
+                fileInput.classList.remove('hidden');
+                textInput.classList.add('hidden');
+            } else {
+                fileInput.classList.add('hidden');
+                textInput.classList.remove('hidden');
+            }
+        }
+        
         function updateFileName(input, spanId) {
             const span = document.getElementById(spanId);
             if (input.files.length > 0) {

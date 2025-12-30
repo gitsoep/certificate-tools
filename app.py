@@ -477,41 +477,64 @@ def sign_csr():
 @app.route('/convert-to-pfx', methods=['POST'])
 def convert_to_pfx():
     try:
-        # Get uploaded files
+        # Get private key - either from file or text
         private_key_file = request.files.get('private_key')
+        private_key_text = request.form.get('private_key_text', '')
+        key_password = request.form.get('key_password', '')
+        
+        if private_key_file:
+            private_key_data = private_key_file.read()
+        elif private_key_text:
+            private_key_data = private_key_text.encode('utf-8')
+        else:
+            return jsonify({'error': 'Private key (file or text) is required'}), 400
+        
+        # Get certificate - either from file or text
         certificate_file = request.files.get('certificate')
+        certificate_text = request.form.get('certificate_text', '')
+        
+        if certificate_file:
+            certificate_data = certificate_file.read()
+        elif certificate_text:
+            certificate_data = certificate_text.encode('utf-8')
+        else:
+            return jsonify({'error': 'Certificate (file or text) is required'}), 400
+        
+        # Get chain - either from file or text (optional)
         chain_file = request.files.get('chain')
+        chain_text = request.form.get('chain_text', '')
+        chain_data = None
+        
+        if chain_file:
+            chain_data = chain_file.read()
+        elif chain_text:
+            chain_data = chain_text.encode('utf-8')
+        
+        # PFX password
         password = request.form.get('password', '')
         
-        if not private_key_file or not certificate_file:
-            return jsonify({'error': 'Both private key and certificate files are required'}), 400
-        
-        # Read the files
-        private_key_data = private_key_file.read()
-        certificate_data = certificate_file.read()
-        
-        # Load the private key
+        # Load the private key (with optional password)
         try:
+            key_pwd = key_password.encode('utf-8') if key_password else None
             private_key = serialization.load_pem_private_key(
                 private_key_data,
-                password=None,
+                password=key_pwd,
                 backend=default_backend()
             )
         except Exception as e:
-            return jsonify({'error': f'Invalid private key file: {str(e)}'}), 400
+            return jsonify({'error': f'Invalid private key or wrong password: {str(e)}'}), 400
         
         # Load the certificate
         try:
             certificate = x509.load_pem_x509_certificate(certificate_data, default_backend())
         except Exception as e:
-            return jsonify({'error': f'Invalid certificate file: {str(e)}'}), 400
+            return jsonify({'error': f'Invalid certificate: {str(e)}'}), 400
         
         # Load chain certificates if provided
         chain_certs = None
-        if chain_file:
+        if chain_data:
             try:
-                chain_data = chain_file.read()
-                # Try to load multiple certificates from the chain file
+                # Try to load multiple certificates from the chain data
                 chain_certs = []
                 # Split on BEGIN CERTIFICATE to handle multiple certs in one file
                 import re
@@ -525,7 +548,7 @@ def convert_to_pfx():
                     # Try as single certificate
                     chain_certs = [x509.load_pem_x509_certificate(chain_data, default_backend())]
             except Exception as e:
-                return jsonify({'error': f'Invalid chain file: {str(e)}'}), 400
+                return jsonify({'error': f'Invalid chain certificate: {str(e)}'}), 400
         
         # Create PFX (PKCS12)
         pfx_password = password.encode('utf-8') if password else b''

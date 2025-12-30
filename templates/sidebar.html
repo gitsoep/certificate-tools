@@ -12,8 +12,6 @@
             <li><a href="/csr-signer" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-signer' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">✍️</span>Sign CSR</a></li>
             <li><a href="/pfx-converter" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'pfx-converter' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🔄</span>PEM to PFX</a></li>
             <li><a href="/pfx-to-pem" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'pfx-to-pem' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">📦</span>PFX to PEM</a></li>
-            <li><a href="#" onclick="showAbout(); return false;" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 border-transparent"><span class="text-lg mr-3">ℹ️</span>About</a></li>
-            <li><a href="#" onclick="showHelp(); return false;" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 border-transparent"><span class="text-lg mr-3">❓</span>Help</a></li>
         </ul>
     </nav>
 </div>
@@ -27,14 +25,6 @@
         const overlay = document.getElementById('sidebar-overlay');
         sidebar.classList.toggle('-translate-x-full');
         overlay.classList.toggle('hidden');
-    }
-    
-    function showAbout() {
-        alert('Certificate Tools v1.0\n\nA comprehensive suite of tools for managing SSL/TLS certificates and Certificate Signing Requests.');
-    }
-    
-    function showHelp() {
-        alert('Certificate Tools Help\n\n🔑 Generate CSR: Create a new Certificate Signing Request and private key\n\n🔍 Decode CSR: View and analyze the contents of a CSR\n\n✍️ Sign CSR: Sign a CSR with your CA certificate (for internal CA use)\n\n🔄 PEM to PFX: Convert PEM format certificates to PFX format\n\n📦 PFX to PEM: Extract certificates and keys from PFX files\n\nFor more information, read the home page guide.');
     }
     
     // Close sidebar when clicking outside on mobile

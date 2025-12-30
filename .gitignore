@@ -150,3 +150,4 @@ Thumbs.db
 
 # Application specific
 *.conf.local
+cacert/
