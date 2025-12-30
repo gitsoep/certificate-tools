@@ -99,6 +99,13 @@ pip install -r requirements.txt
 
 4. **Important**: Add `.env` to `.gitignore` to protect your secrets!
 
+5. **For Production/Reverse Proxy Deployments**:
+   - The application is configured to work behind a reverse proxy (nginx, Apache, Traefik, etc.)
+   - Supports X-Forwarded-* headers for proper HTTPS/host detection
+   - OAuth callbacks will automatically use HTTPS when behind a proxy
+   - See [REVERSE_PROXY_CONFIG.md](REVERSE_PROXY_CONFIG.md) for nginx, Apache, and Traefik examples
+   - **Important**: Set your Azure AD redirect URI to your public HTTPS URL (e.g., `https://cert-tools.example.com/auth/callback`)
+
 
 ## Usage
 
@@ -127,7 +134,12 @@ chmod +x start.sh
 docker-compose up -d
 ```
 
-The application will be available at `http://localhost:5001`
+3. **Behind a Reverse Proxy**:
+   - Configure your reverse proxy (nginx, Apache, Traefik) to forward to port 5001
+   - Ensure X-Forwarded-Host, X-Forwarded-Proto headers are set
+   - See [REVERSE_PROXY_CONFIG.md](REVERSE_PROXY_CONFIG.md) for complete examples
+
+The application will be available at `http://localhost:5001` (or your configured domain)
 
 ## Using the Application
 

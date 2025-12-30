@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_session import Session
+from werkzeug.middleware.proxy_fix import ProxyFix
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
@@ -19,6 +20,12 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', os.urandom(24).hex())
 app.config['SESSION_TYPE'] = 'filesystem'
+
+# Configure proxy support - trust X-Forwarded-* headers
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
+
 Session(app)
 
 # Azure AD Configuration
@@ -43,7 +50,7 @@ def _build_auth_url(authority=None, scopes=None, state=None):
     return _build_msal_app(authority=authority).get_authorization_request_url(
         scopes or [],
         state=state or str(uuid.uuid4()),
-        redirect_uri=url_for("authorized", _external=True)
+        redirect_uri=url_for("authorized", _external=True, _scheme='https')
     )
 
 def _get_token_from_cache(scope=None):
@@ -116,7 +123,7 @@ def authorized():
         result = _build_msal_app(cache=cache).acquire_token_by_authorization_code(
             request.args['code'],
             scopes=SCOPE,
-            redirect_uri=url_for('authorized', _external=True)
+            redirect_uri=url_for('authorized', _external=True, _scheme='https')
         )
         
         if "error" in result:
@@ -135,7 +142,7 @@ def logout():
     session.clear()
     return redirect(
         AUTHORITY + "/oauth2/v2.0/logout" +
-        "?post_logout_redirect_uri=" + url_for("index", _external=True)
+        "?post_logout_redirect_uri=" + url_for("index", _external=True, _scheme='https')
     )
 
 
