@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask_session import Session
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
@@ -7,8 +8,76 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import configparser
 import os
+import msal
+import uuid
+from dotenv import load_dotenv
+from functools import wraps
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', os.urandom(24).hex())
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
+
+# Azure AD Configuration
+CLIENT_ID = os.environ.get('AZURE_CLIENT_ID')
+CLIENT_SECRET = os.environ.get('AZURE_CLIENT_SECRET')
+TENANT_ID = os.environ.get('AZURE_TENANT_ID', 'common')
+AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
+REDIRECT_PATH = "/auth/callback"
+SCOPE = ["https://vault.azure.net/.default"]
+
+def _build_msal_app(cache=None, authority=None):
+    """Build a confidential client application for MSAL"""
+    return msal.ConfidentialClientApplication(
+        CLIENT_ID,
+        authority=authority or AUTHORITY,
+        client_credential=CLIENT_SECRET,
+        token_cache=cache
+    )
+
+def _build_auth_url(authority=None, scopes=None, state=None):
+    """Build the authorization URL for user login"""
+    return _build_msal_app(authority=authority).get_authorization_request_url(
+        scopes or [],
+        state=state or str(uuid.uuid4()),
+        redirect_uri=url_for("authorized", _external=True)
+    )
+
+def _get_token_from_cache(scope=None):
+    """Get token from the session cache"""
+    cache = _load_cache()
+    cca = _build_msal_app(cache=cache)
+    accounts = cca.get_accounts()
+    if accounts:
+        result = cca.acquire_token_silent(scope or SCOPE, account=accounts[0])
+        _save_cache(cache)
+        return result
+    return None
+
+def _load_cache():
+    """Load the token cache from session"""
+    cache = msal.SerializableTokenCache()
+    if session.get("token_cache"):
+        cache.deserialize(session["token_cache"])
+    return cache
+
+def _save_cache(cache):
+    """Save the token cache to session"""
+    if cache.has_state_changed:
+        session["token_cache"] = cache.serialize()
+
+def login_required(f):
+    """Decorator to require Azure login for routes"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("user"):
+            return redirect(url_for("login", next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 def load_config_defaults():
     defaults = {
@@ -27,11 +96,53 @@ CONFIG_DEFAULTS = load_config_defaults()
 
 @app.route('/')
 def index():
-    return render_template('index.html', active_page='home')
+    user = session.get("user")
+    return render_template('index.html', active_page='home', user=user)
+
+@app.route('/login')
+def login():
+    """Redirect user to Azure AD login page"""
+    # Clear any existing session
+    session.clear()
+    # Build authentication URL
+    auth_url = _build_auth_url(scopes=SCOPE)
+    return redirect(auth_url)
+
+@app.route('/auth/callback')
+def authorized():
+    """Handle the redirect from Azure AD after authentication"""
+    if request.args.get('state'):
+        cache = _load_cache()
+        result = _build_msal_app(cache=cache).acquire_token_by_authorization_code(
+            request.args['code'],
+            scopes=SCOPE,
+            redirect_uri=url_for('authorized', _external=True)
+        )
+        
+        if "error" in result:
+            return render_template('login.html', error=result.get("error_description"))
+        
+        if "access_token" in result:
+            # Save user info to session
+            session["user"] = result.get("id_token_claims")
+            _save_cache(cache)
+        
+    return redirect(url_for('index'))
+
+@app.route('/logout')
+def logout():
+    """Log out the current user"""
+    session.clear()
+    return redirect(
+        AUTHORITY + "/oauth2/v2.0/logout" +
+        "?post_logout_redirect_uri=" + url_for("index", _external=True)
+    )
+
 
 @app.route('/csr-generator')
 def csr_generator():
-    return render_template('csr_generator.html', defaults=CONFIG_DEFAULTS, active_page='csr-generator')
+    user = session.get("user")
+    return render_template('csr_generator.html', defaults=CONFIG_DEFAULTS, active_page='csr-generator', user=user)
 
 @app.route('/generate', methods=['POST'])
 def generate_csr():
@@ -181,19 +292,29 @@ def generate_csr():
 
 @app.route('/pfx-converter')
 def pfx_converter():
-    return render_template('pfx_converter.html', active_page='pfx-converter')
+    user = session.get("user")
+    return render_template('pfx_converter.html', active_page='pfx-converter', user=user)
 
 @app.route('/csr-signer')
 def csr_signer():
-    return render_template('csr_signer.html', active_page='csr-signer')
+    user = session.get("user")
+    return render_template('csr_signer.html', active_page='csr-signer', user=user)
+
+@app.route('/csr-signer-akv')
+@login_required
+def csr_signer_akv():
+    user = session.get("user")
+    return render_template('csr_signer_akv.html', active_page='csr-signer-akv', user=user)
 
 @app.route('/pfx-to-pem')
 def pfx_to_pem():
-    return render_template('pfx_to_pem.html', active_page='pfx-to-pem')
+    user = session.get("user")
+    return render_template('pfx_to_pem.html', active_page='pfx-to-pem', user=user)
 
 @app.route('/csr-decoder')
 def csr_decoder():
-    return render_template('csr_decoder.html', active_page='csr-decoder')
+    user = session.get("user")
+    return render_template('csr_decoder.html', active_page='csr-decoder', user=user)
 
 @app.route('/decode-csr', methods=['POST'])
 def decode_csr():
@@ -574,6 +695,152 @@ def convert_to_pfx():
             download_name='certificate.pfx'
         )
         
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/sign-csr-akv', methods=['POST'])
+@login_required
+def sign_csr_akv():
+    try:
+        from azure.identity import ClientSecretCredential
+        from azure.core.credentials import AccessToken
+        from azure.keyvault.certificates import CertificateClient
+        from azure.keyvault.secrets import SecretClient
+        import datetime
+        
+        # Get user's access token from session
+        token = _get_token_from_cache(SCOPE)
+        if not token or "access_token" not in token:
+            return jsonify({'error': 'Azure authentication expired. Please log in again.'}), 401
+        
+        # Create a custom credential using the user's token
+        class UserCredential:
+            def __init__(self, access_token):
+                self.token = access_token
+            
+            def get_token(self, *scopes, **kwargs):
+                # Return the token with a far future expiration
+                return AccessToken(self.token, int(datetime.datetime.now().timestamp()) + 3600)
+        
+        credential = UserCredential(token["access_token"])
+        
+        # Get CSR input - either as file or text
+        csr_file = request.files.get('csr_file')
+        csr_text = request.form.get('csr_text', '')
+        
+        # Read CSR data
+        if csr_file:
+            csr_data = csr_file.read()
+        elif csr_text:
+            csr_data = csr_text.encode('utf-8')
+        else:
+            return jsonify({'error': 'CSR file or text is required'}), 400
+        
+        # Parse CSR
+        try:
+            csr = x509.load_pem_x509_csr(csr_data, default_backend())
+        except Exception as e:
+            return jsonify({'error': f'Invalid CSR format: {str(e)}'}), 400
+        
+        # Get Azure Key Vault parameters
+        vault_url = request.form.get('vault_url', '').strip()
+        certificate_name = request.form.get('certificate_name', '').strip()
+        validity_days = int(request.form.get('validity_days', 365))
+        
+        if not vault_url:
+            return jsonify({'error': 'Key Vault URL is required'}), 400
+        if not certificate_name:
+            return jsonify({'error': 'Certificate name is required'}), 400
+        
+        # Get CA certificate from Key Vault
+        try:
+            cert_client = CertificateClient(vault_url=vault_url, credential=credential)
+            certificate = cert_client.get_certificate(certificate_name)
+            
+            # Get the certificate in PEM format
+            ca_cert = x509.load_der_x509_certificate(certificate.cer, default_backend())
+        except Exception as e:
+            return jsonify({'error': f'Failed to retrieve certificate from Key Vault: {str(e)}'}), 400
+        
+        # Get the private key from Key Vault (stored as secret)
+        try:
+            secret_client = SecretClient(vault_url=vault_url, credential=credential)
+            
+            # The private key is stored as a secret with the same name
+            secret = secret_client.get_secret(certificate_name)
+            
+            # Parse the secret value which contains the private key
+            # Key Vault stores it as PFX, we need to extract the private key
+            from cryptography.hazmat.primitives.serialization import pkcs12
+            
+            # The secret value is base64-encoded PFX
+            import base64
+            pfx_data = base64.b64decode(secret.value)
+            
+            # Load PFX (no password for Key Vault certificates)
+            private_key, _, _ = pkcs12.load_key_and_certificates(
+                pfx_data,
+                password=None,
+                backend=default_backend()
+            )
+        except Exception as e:
+            return jsonify({'error': f'Failed to retrieve private key from Key Vault: {str(e)}. Make sure the certificate has an exportable private key.'}), 400
+        
+        # Build and sign certificate
+        cert_builder = x509.CertificateBuilder()
+        cert_builder = cert_builder.subject_name(csr.subject)
+        cert_builder = cert_builder.issuer_name(ca_cert.subject)
+        cert_builder = cert_builder.public_key(csr.public_key())
+        cert_builder = cert_builder.serial_number(x509.random_serial_number())
+        cert_builder = cert_builder.not_valid_before(datetime.datetime.utcnow())
+        cert_builder = cert_builder.not_valid_after(
+            datetime.datetime.utcnow() + datetime.timedelta(days=validity_days)
+        )
+        
+        # Copy extensions from CSR
+        for extension in csr.extensions:
+            try:
+                cert_builder = cert_builder.add_extension(
+                    extension.value,
+                    critical=extension.critical
+                )
+            except ValueError:
+                # Skip if extension already exists
+                pass
+        
+        # Add basic constraints for end-entity certificate
+        try:
+            cert_builder = cert_builder.add_extension(
+                x509.BasicConstraints(ca=False, path_length=None),
+                critical=True
+            )
+        except ValueError:
+            # Extension might already exist from CSR
+            pass
+        
+        # Sign the certificate
+        signed_certificate = cert_builder.sign(
+            private_key=private_key,
+            algorithm=hashes.SHA256(),
+            backend=default_backend()
+        )
+        
+        # Serialize certificate to PEM
+        cert_pem = signed_certificate.public_bytes(serialization.Encoding.PEM).decode('utf-8')
+        
+        # Return the certificate
+        from flask import send_file
+        import io
+        
+        return send_file(
+            io.BytesIO(cert_pem.encode('utf-8')),
+            mimetype='application/x-pem-file',
+            as_attachment=True,
+            download_name='certificate.crt'
+        )
+        
+    except ImportError as e:
+        return jsonify({'error': f'Azure SDK not installed: {str(e)}. Please install: pip install azure-identity azure-keyvault-certificates azure-keyvault-secrets'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

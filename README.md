@@ -23,6 +23,7 @@ A comprehensive certificate management web application built with Flask that han
 - 🔏 Support for self-signed certificate generation
 - 📅 Configurable validity period
 - 🔐 Encrypted CA private key support
+- ☁️ **Azure Key Vault Integration** - Sign CSRs using CA certificates stored in Azure Key Vault
 
 ### Format Conversion
 - 🔄 Convert PEM to PFX (PKCS#12)
@@ -48,6 +49,9 @@ A comprehensive certificate management web application built with Flask that han
 - Flask 3.0.0
 - cryptography 41.0.7
 - Gunicorn 21.2.0 (for production deployment)
+- azure-identity 1.15.0+ (for Azure Key Vault integration)
+- azure-keyvault-certificates 4.8.0+ (for Azure Key Vault integration)
+- azure-keyvault-secrets 4.8.0+ (for Azure Key Vault integration)
 
 ## Installation
 
@@ -61,6 +65,40 @@ cd certificate-tools
 ```bash
 pip install -r requirements.txt
 ```
+
+3. **Configure Azure Authentication** (required for Azure Key Vault features):
+
+   a. Create an Azure AD App Registration:
+      - Go to [Azure Portal > Azure Active Directory > App registrations](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps)
+      - Click "New registration"
+      - Set name (e.g., "Certificate Tools")
+      - Set redirect URI to `http://localhost:5001/auth/callback` (or your domain)
+      - Click "Register"
+   
+   b. Configure API Permissions:
+      - Go to "API permissions" in your app registration
+      - Add "Azure Key Vault" > "user_impersonation" permission
+      - Grant admin consent if you have admin rights
+   
+   c. Create Client Secret:
+      - Go to "Certificates & secrets"
+      - Create a new client secret and copy the value
+   
+   d. Create environment file:
+      ```bash
+      cp .env.example .env
+      ```
+      
+   e. Edit `.env` and fill in your Azure AD app details:
+      ```bash
+      AZURE_CLIENT_ID=your-client-id-here
+      AZURE_CLIENT_SECRET=your-client-secret-here
+      AZURE_TENANT_ID=common
+      FLASK_SECRET_KEY=your-generated-secret-key
+      ```
+
+4. **Important**: Add `.env` to `.gitignore` to protect your secrets!
+
 
 ## Usage
 
@@ -128,6 +166,34 @@ The application will be available at `http://localhost:5001`
 
 6. Download the signed certificate
 
+### Sign a CSR with Azure Key Vault
+
+**Important**: This feature requires Azure authentication. You must be logged in with your Azure account.
+
+1. Click "Sign in with Azure" in the sidebar if not already logged in
+
+2. Navigate to "Sign CSR (AKV)" from the menu
+
+3. Provide your CSR (upload file or paste text)
+
+4. Set the validity period (in days)
+
+5. Configure Azure Key Vault:
+   - **Key Vault URL**: Your Azure Key Vault URL (e.g., https://my-keyvault.vault.azure.net/)
+   - **Certificate Name**: The name of the CA certificate stored in the Key Vault
+
+6. Click "Sign CSR with Azure Key Vault"
+
+7. Download the signed certificate
+
+**Note**: You must have appropriate permissions on the Azure Key Vault to access certificates and secrets. The application uses your Azure credentials to authenticate to Key Vault.
+
+6. Click "Sign CSR with Azure Key Vault"
+
+7. Download the signed certificate
+
+**Note**: The certificate in Azure Key Vault must have an exportable private key for signing operations.
+
 ### Convert PEM to PFX
 
 1. Navigate to "PEM to PFX" from the menu
@@ -178,8 +244,7 @@ certificate-tools/
 │   └── workflows/
 │       └── docker-publish.yml  # CI/CD pipeline for GHCR
 ├── README.md                   # This file
-└── templates/
-    ├── index.html              # CSR generation form
+└── templates/    ├── csr_signer_akv.html     # Azure Key Vault CSR signing page    ├── index.html              # CSR generation form
     ├── result.html             # CSR/Key results display
     ├── csr_signer.html         # CSR signing page
     ├── pfx_converter.html      # PEM to PFX converter

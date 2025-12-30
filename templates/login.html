@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Certificate Tools</title>
+    <script src="/static/js/tailwindcss.js"></script>
+</head>
+<body class="bg-neutral-900 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full mx-4">
+        <div class="bg-white shadow-2xl rounded-lg p-8 md:p-12">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">🔐 Azure Login Required</h1>
+                <p class="text-gray-600">Sign in with your Azure account to access certificate tools</p>
+            </div>
+            
+            {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                <p class="text-red-700">{{ error }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="space-y-4">
+                <a href="{{ url_for('login') }}" 
+                   class="block w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg text-center transform hover:scale-105 transition-all duration-200">
+                    Sign in with Microsoft
+                </a>
+                
+                <a href="{{ url_for('index') }}" 
+                   class="block w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-4 px-6 rounded-lg text-center transition-colors">
+                    Back to Home
+                </a>
+            </div>
+            
+            <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+                <p class="text-sm text-blue-800">
+                    <strong>ℹ️ Why login?</strong><br>
+                    Azure login is required to access your Azure Key Vault resources securely using your own credentials.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

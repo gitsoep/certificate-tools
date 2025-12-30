@@ -4,12 +4,41 @@
     <div class="p-6 border-b border-neutral-800">
         <h2 class="text-xl font-bold text-orange-500">🔐 Certificate Tools</h2>
     </div>
+    
+    <!-- User Info Section -->
+    {% if user %}
+    <div class="p-4 border-b border-neutral-800 bg-neutral-800">
+        <div class="flex items-center mb-2">
+            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-2">
+                {{ user.name[0] if user.name else 'U' }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-white truncate">{{ user.name or 'User' }}</p>
+                <p class="text-xs text-gray-400 truncate">{{ user.preferred_username or user.email or '' }}</p>
+            </div>
+        </div>
+        <a href="/logout" class="block w-full text-center text-sm bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded transition-colors">
+            Sign Out
+        </a>
+    </div>
+    {% else %}
+    <div class="p-4 border-b border-neutral-800 bg-neutral-800">
+        <a href="/login" class="block w-full text-center text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors">
+            🔐 Sign in with Azure
+        </a>
+    </div>
+    {% endif %}
+    
     <nav class="mt-4">
         <ul class="space-y-1">
             <li><a href="/" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'home' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🏠</span>Home</a></li>
             <li><a href="/csr-generator" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-generator' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🔑</span>Generate CSR</a></li>
             <li><a href="/csr-decoder" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-decoder' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🔍</span>Decode CSR</a></li>
             <li><a href="/csr-signer" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-signer' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">✍️</span>Sign CSR</a></li>
+            <li><a href="/csr-signer-akv" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-signer-akv' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}">
+                <span class="text-lg mr-3">☁️</span>Sign CSR (AKV)
+                {% if not user %}<span class="ml-auto text-xs bg-blue-600 px-2 py-1 rounded">Login</span>{% endif %}
+            </a></li>
             <li><a href="/pfx-converter" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'pfx-converter' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">🔄</span>PEM to PFX</a></li>
             <li><a href="/pfx-to-pem" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'pfx-to-pem' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}"><span class="text-lg mr-3">📦</span>PFX to PEM</a></li>
         </ul>
