@@ -40,6 +40,9 @@ SCOPE = ["https://vault.azure.net/.default"]
 # Example: https://certificate-tools.soep.org
 EXTERNAL_URL = os.environ.get('EXTERNAL_URL', '').rstrip('/')
 
+# Application title
+APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
+
 def _build_msal_app(cache=None, authority=None):
     """Build a confidential client application for MSAL"""
     return msal.ConfidentialClientApplication(
@@ -113,7 +116,7 @@ CONFIG_DEFAULTS = load_config_defaults()
 @app.route('/')
 def index():
     user = session.get("user")
-    return render_template('index.html', active_page='home', user=user)
+    return render_template('index.html', active_page='home', user=user, app_title=APP_TITLE)
 
 @app.route('/login')
 def login():
@@ -142,7 +145,7 @@ def authorized():
         )
         
         if "error" in result:
-            return render_template('login.html', error=result.get("error_description"))
+            return render_template('login.html', error=result.get("error_description"), app_title=APP_TITLE)
         
         if "access_token" in result:
             # Save user info to session
@@ -170,7 +173,7 @@ def logout():
 @app.route('/csr-generator')
 def csr_generator():
     user = session.get("user")
-    return render_template('csr_generator.html', defaults=CONFIG_DEFAULTS, active_page='csr-generator', user=user)
+    return render_template('csr_generator.html', defaults=CONFIG_DEFAULTS, active_page='csr-generator', user=user, app_title=APP_TITLE)
 
 @app.route('/generate', methods=['POST'])
 def generate_csr():
@@ -309,11 +312,13 @@ def generate_csr():
             return render_template('result.html', 
                                  private_key=private_key_pem, 
                                  csr=csr_pem,
-                                 show_private_key=True)
+                                 show_private_key=True,
+                                 app_title=APP_TITLE)
         else:
             return render_template('result.html', 
                                  csr=csr_pem,
-                                 show_private_key=False)
+                                 show_private_key=False,
+                                 app_title=APP_TITLE)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -321,29 +326,29 @@ def generate_csr():
 @app.route('/pfx-converter')
 def pfx_converter():
     user = session.get("user")
-    return render_template('pfx_converter.html', active_page='pfx-converter', user=user)
+    return render_template('pfx_converter.html', active_page='pfx-converter', user=user, app_title=APP_TITLE)
 
 @app.route('/csr-signer')
 def csr_signer():
     user = session.get("user")
-    return render_template('csr_signer.html', active_page='csr-signer', user=user)
+    return render_template('csr_signer.html', active_page='csr-signer', user=user, app_title=APP_TITLE)
 
 @app.route('/csr-signer-akv')
 @login_required
 def csr_signer_akv():
     user = session.get("user")
     default_vault_url = os.environ.get('DEFAULT_KEYVAULT_URL', '')
-    return render_template('csr_signer_akv.html', active_page='csr-signer-akv', user=user, default_vault_url=default_vault_url)
+    return render_template('csr_signer_akv.html', active_page='csr-signer-akv', user=user, default_vault_url=default_vault_url, app_title=APP_TITLE)
 
 @app.route('/pfx-to-pem')
 def pfx_to_pem():
     user = session.get("user")
-    return render_template('pfx_to_pem.html', active_page='pfx-to-pem', user=user)
+    return render_template('pfx_to_pem.html', active_page='pfx-to-pem', user=user, app_title=APP_TITLE)
 
 @app.route('/csr-decoder')
 def csr_decoder():
     user = session.get("user")
-    return render_template('csr_decoder.html', active_page='csr-decoder', user=user)
+    return render_template('csr_decoder.html', active_page='csr-decoder', user=user, app_title=APP_TITLE)
 
 @app.route('/decode-csr', methods=['POST'])
 def decode_csr():
