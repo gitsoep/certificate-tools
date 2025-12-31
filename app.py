@@ -865,13 +865,21 @@ def sign_csr_akv():
             pfx_data = base64.b64decode(secret.value)
             
             # Load PFX (no password for Key Vault certificates)
-            private_key, _, _ = pkcs12.load_key_and_certificates(
+            private_key, cert_from_pfx, additional_certs = pkcs12.load_key_and_certificates(
                 pfx_data,
                 password=None,
                 backend=default_backend()
             )
         except Exception as e:
             return jsonify({'error': f'Failed to retrieve private key from Key Vault: {str(e)}. Make sure the certificate has an exportable private key.'}), 400
+        
+        # Build CA chain (including the CA cert itself)
+        ca_chain_pem = ca_cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
+        
+        # Add any additional certificates from the chain
+        if additional_certs:
+            for chain_cert in additional_certs:
+                ca_chain_pem += chain_cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
         
         # Build and sign certificate
         cert_builder = x509.CertificateBuilder()
@@ -915,9 +923,10 @@ def sign_csr_akv():
         # Serialize certificate to PEM
         cert_pem = signed_certificate.public_bytes(serialization.Encoding.PEM).decode('utf-8')
         
-        # Return the certificate as JSON
+        # Return the certificate and CA chain as JSON
         return jsonify({
-            'certificate': cert_pem
+            'certificate': cert_pem,
+            'ca_chain': ca_chain_pem
         })
         
     except ImportError as e:
