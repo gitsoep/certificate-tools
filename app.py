@@ -857,16 +857,10 @@ def sign_csr_akv():
         # Serialize certificate to PEM
         cert_pem = signed_certificate.public_bytes(serialization.Encoding.PEM).decode('utf-8')
         
-        # Return the certificate
-        from flask import send_file
-        import io
-        
-        return send_file(
-            io.BytesIO(cert_pem.encode('utf-8')),
-            mimetype='application/x-pem-file',
-            as_attachment=True,
-            download_name='certificate.crt'
-        )
+        # Return the certificate as JSON
+        return jsonify({
+            'certificate': cert_pem
+        })
         
     except ImportError as e:
         return jsonify({'error': f'Azure SDK not installed: {str(e)}. Please install: pip install azure-identity azure-keyvault-certificates azure-keyvault-secrets'}), 500

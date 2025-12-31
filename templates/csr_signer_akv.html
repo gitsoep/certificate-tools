@@ -98,6 +98,29 @@
                 ☁️ Sign CSR with Azure Key Vault
             </button>
         </form>
+        
+        <!-- Result Section -->
+        <div id="resultSection" class="hidden mt-8 space-y-4">
+            <div class="border-t-4 border-green-500 pt-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">✅ Signed Certificate</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-semibold text-gray-700">Certificate (PEM Format)</label>
+                            <button type="button" onclick="copyCertificate()" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 transition">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <textarea id="certificateOutput" readonly rows="15" class="w-full px-4 py-3 border border-gray-300 bg-gray-50 font-mono text-sm resize-y"></textarea>
+                    </div>
+                    
+                    <button type="button" onclick="downloadCertificate()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
+                        💾 Download Certificate
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
     </div>
     
@@ -135,7 +158,7 @@
             errorDiv.classList.remove('hidden');
             setTimeout(() => {
                 errorDiv.classList.add('hidden');
-            }, 8000);
+            }, 60000);
         }
         
         function showSuccess(message) {
@@ -147,12 +170,37 @@
             }, 3000);
         }
         
+        let certificateData = '';
+        
+        function copyCertificate() {
+            const textarea = document.getElementById('certificateOutput');
+            textarea.select();
+            document.execCommand('copy');
+            showSuccess('Certificate copied to clipboard!');
+        }
+        
+        function downloadCertificate() {
+            const blob = new Blob([certificateData], { type: 'application/x-pem-file' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'certificate.crt';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showSuccess('Certificate downloaded!');
+        }
+        
         document.getElementById('signerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.textContent = '⏳ Connecting to Azure Key Vault...';
+            
+            // Hide previous results
+            document.getElementById('resultSection').classList.add('hidden');
             
             const formData = new FormData(this);
             
@@ -163,18 +211,21 @@
                 });
                 
                 if (response.ok) {
-                    // Download the certificate
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'certificate.crt';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
+                    const result = await response.json();
                     
-                    showSuccess('Certificate signed and downloaded successfully!');
+                    // Store certificate data
+                    certificateData = result.certificate;
+                    
+                    // Display certificate in text field
+                    document.getElementById('certificateOutput').value = certificateData;
+                    
+                    // Show result section
+                    document.getElementById('resultSection').classList.remove('hidden');
+                    
+                    // Scroll to result
+                    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    showSuccess('Certificate signed successfully!');
                     
                     // Reset CSR input only
                     document.querySelector('[name="csr_text"]').value = '';
