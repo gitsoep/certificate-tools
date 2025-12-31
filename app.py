@@ -97,14 +97,14 @@ def login_required(f):
 
 def load_config_defaults():
     defaults = {
-        'country': 'NL',
-        'state': 'Gelderland',
-        'locality': 'Nijmegen',
-        'organization': 'Mosadex Services B.V.',
-        'organizational_unit': 'Example',
-        'common_name': 'Mosadex ExampleService PRD',
-        'email': 'example@mosadex-services.nl',
-        'key_size': '4096'
+        'country': os.environ.get('DEFAULT_COUNTRY', 'NL'),
+        'state': os.environ.get('DEFAULT_STATE', 'Gelderland'),
+        'locality': os.environ.get('DEFAULT_LOCALITY', 'Nijmegen'),
+        'organization': os.environ.get('DEFAULT_ORGANIZATION', 'Soep Org'),
+        'organizational_unit': os.environ.get('DEFAULT_OU', 'Example Unit'),
+        'common_name': os.environ.get('DEFAULT_CN', 'Soep Example'),
+        'email': os.environ.get('DEFAULT_EMAIL', 'example@gitsoep.nl'),
+        'key_size': os.environ.get('DEFAULT_KEY_SIZE', '4096')
     }
     return defaults
 
@@ -332,7 +332,8 @@ def csr_signer():
 @login_required
 def csr_signer_akv():
     user = session.get("user")
-    return render_template('csr_signer_akv.html', active_page='csr-signer-akv', user=user)
+    default_vault_url = os.environ.get('DEFAULT_KEYVAULT_URL', '')
+    return render_template('csr_signer_akv.html', active_page='csr-signer-akv', user=user, default_vault_url=default_vault_url)
 
 @app.route('/pfx-to-pem')
 def pfx_to_pem():
