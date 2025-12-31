@@ -732,6 +732,59 @@ def convert_to_pfx():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/list-akv-certificates', methods=['POST'])
+@login_required
+def list_akv_certificates():
+    """List certificates from Azure Key Vault"""
+    try:
+        from azure.identity import ClientSecretCredential
+        from azure.core.credentials import AccessToken
+        from azure.keyvault.certificates import CertificateClient
+        import datetime
+        
+        # Get user's access token from session
+        token = _get_token_from_cache(SCOPE)
+        if not token or "access_token" not in token:
+            return jsonify({'error': 'Azure authentication expired. Please log in again.'}), 401
+        
+        # Create a custom credential using the user's token
+        class UserCredential:
+            def __init__(self, access_token):
+                self.token = access_token
+            
+            def get_token(self, *scopes, **kwargs):
+                # Return the token with a far future expiration
+                return AccessToken(self.token, int(datetime.datetime.now().timestamp()) + 3600)
+        
+        credential = UserCredential(token["access_token"])
+        
+        # Get vault URL from request
+        vault_url = request.json.get('vault_url', '').strip()
+        
+        if not vault_url:
+            return jsonify({'error': 'Key Vault URL is required'}), 400
+        
+        # List certificates from Key Vault
+        try:
+            cert_client = CertificateClient(vault_url=vault_url, credential=credential)
+            certificates = []
+            
+            for cert_properties in cert_client.list_properties_of_certificates():
+                certificates.append({
+                    'name': cert_properties.name,
+                    'enabled': cert_properties.enabled
+                })
+            
+            return jsonify({'certificates': certificates})
+            
+        except Exception as e:
+            return jsonify({'error': f'Failed to list certificates from Key Vault: {str(e)}'}), 400
+        
+    except ImportError as e:
+        return jsonify({'error': f'Azure SDK not installed: {str(e)}'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/sign-csr-akv', methods=['POST'])
 @login_required
 def sign_csr_akv():
