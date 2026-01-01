@@ -42,22 +42,22 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">CSR <span class="text-red-500">*</span></label>
                 <div class="mb-3">
                     <label class="inline-flex items-center mr-6">
-                        <input type="radio" name="csr_input_method" value="file" checked onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-orange-600">
+                        <input type="radio" name="csr_input_method" value="file" onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-orange-600">
                         <span class="ml-2 text-gray-700">Upload File</span>
                     </label>
                     <label class="inline-flex items-center">
-                        <input type="radio" name="csr_input_method" value="paste" onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-orange-600">
+                        <input type="radio" name="csr_input_method" value="paste" checked onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-orange-600">
                         <span class="ml-2 text-gray-700">Paste Text</span>
                     </label>
                 </div>
-                <div id="csr_file_input" class="flex flex-col space-y-2">
+                <div id="csr_file_input" class="hidden flex flex-col space-y-2">
                     <label for="csr_file" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
                         📁 Choose CSR File (.csr, .pem)
                     </label>
                     <input type="file" id="csr_file" name="csr_file" accept=".csr,.pem" onchange="updateFileName(this, 'csrFileName')" class="hidden">
                     <span class="text-sm text-gray-600" id="csrFileName">No file chosen</span>
                 </div>
-                <div id="csr_text_input" class="hidden">
+                <div id="csr_text_input">
                     <textarea name="csr_text" rows="10" placeholder="Paste your CSR in PEM format here..." class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm"></textarea>
                 </div>
             </div>

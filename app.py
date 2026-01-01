@@ -583,9 +583,9 @@ def sign_csr():
         cert_builder = cert_builder.issuer_name(issuer)
         cert_builder = cert_builder.public_key(csr.public_key())
         cert_builder = cert_builder.serial_number(x509.random_serial_number())
-        cert_builder = cert_builder.not_valid_before(datetime.datetime.utcnow())
+        cert_builder = cert_builder.not_valid_before(datetime.datetime.now(datetime.UTC))
         cert_builder = cert_builder.not_valid_after(
-            datetime.datetime.utcnow() + datetime.timedelta(days=validity_days)
+            datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=validity_days)
         )
         
         # Copy extensions from CSR
@@ -887,9 +887,9 @@ def sign_csr_akv():
         cert_builder = cert_builder.issuer_name(ca_cert.subject)
         cert_builder = cert_builder.public_key(csr.public_key())
         cert_builder = cert_builder.serial_number(x509.random_serial_number())
-        cert_builder = cert_builder.not_valid_before(datetime.datetime.utcnow())
+        cert_builder = cert_builder.not_valid_before(datetime.datetime.now(datetime.UTC))
         cert_builder = cert_builder.not_valid_after(
-            datetime.datetime.utcnow() + datetime.timedelta(days=validity_days)
+            datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=validity_days)
         )
         
         # Copy extensions from CSR
