@@ -57,7 +57,7 @@ def _build_auth_url(authority=None, scopes=None, state=None):
     if EXTERNAL_URL:
         redirect_uri = f"{EXTERNAL_URL}{REDIRECT_PATH}"
     else:
-        redirect_uri = url_for("authorized", _external=True, _scheme='https')
+        redirect_uri = url_for("authorized", _external=True)
     
     return _build_msal_app(authority=authority).get_authorization_request_url(
         scopes or [],
@@ -136,7 +136,7 @@ def authorized():
         if EXTERNAL_URL:
             redirect_uri = f"{EXTERNAL_URL}{REDIRECT_PATH}"
         else:
-            redirect_uri = url_for('authorized', _external=True, _scheme='https')
+            redirect_uri = url_for('authorized', _external=True)
         
         result = _build_msal_app(cache=cache).acquire_token_by_authorization_code(
             request.args['code'],
@@ -162,7 +162,7 @@ def logout():
     if EXTERNAL_URL:
         post_logout_uri = EXTERNAL_URL
     else:
-        post_logout_uri = url_for("index", _external=True, _scheme='https')
+        post_logout_uri = url_for("index", _external=True)
     
     return redirect(
         AUTHORITY + "/oauth2/v2.0/logout" +
@@ -309,13 +309,13 @@ def generate_csr():
                 format=serialization.PrivateFormat.TraditionalOpenSSL,
                 encryption_algorithm=serialization.NoEncryption()
             ).decode('utf-8')
-            return render_template('result.html', 
+            return render_template('csr-generator-result.html', 
                                  private_key=private_key_pem, 
                                  csr=csr_pem,
                                  show_private_key=True,
                                  app_title=APP_TITLE)
         else:
-            return render_template('result.html', 
+            return render_template('csr-generator-result.html', 
                                  csr=csr_pem,
                                  show_private_key=False,
                                  app_title=APP_TITLE)

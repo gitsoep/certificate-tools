@@ -257,7 +257,7 @@ certificate-tools/
 │       └── docker-publish.yml  # CI/CD pipeline for GHCR
 ├── README.md                   # This file
 └── templates/    ├── csr_signer_akv.html     # Azure Key Vault CSR signing page    ├── index.html              # CSR generation form
-    ├── result.html             # CSR/Key results display
+    ├── csr-generator-result.html  # CSR/Key results display
     ├── csr_signer.html         # CSR signing page
     ├── pfx_converter.html      # PEM to PFX converter
     └── pfx_to_pem.html         # PFX to PEM converter
