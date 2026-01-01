@@ -121,6 +121,12 @@
                         💾 Download Certificate
                     </button>
                     
+                    <!-- Blob Storage URL -->
+                    <div id="blobUrlSection" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">☁️ Uploaded to Azure Blob Storage:</p>
+                        <a id="blobUrlLink" href="#" target="_blank" class="text-blue-600 hover:text-blue-800 underline break-all text-sm"></a>
+                    </div>
+                    
                     <!-- CA Chain Section -->
                     <div class="border-t border-gray-300 pt-4 mt-4">
                         <div>
@@ -347,6 +353,17 @@
                     
                     // Display CA chain in text field
                     document.getElementById('caChainOutput').value = caChainData;
+                    
+                    // Display blob URL if available
+                    if (result.blob_url) {
+                        const blobUrlSection = document.getElementById('blobUrlSection');
+                        const blobUrlLink = document.getElementById('blobUrlLink');
+                        blobUrlLink.href = result.blob_url;
+                        blobUrlLink.textContent = result.blob_url;
+                        blobUrlSection.classList.remove('hidden');
+                    } else {
+                        document.getElementById('blobUrlSection').classList.add('hidden');
+                    }
                     
                     // Show result section
                     document.getElementById('resultSection').classList.remove('hidden');

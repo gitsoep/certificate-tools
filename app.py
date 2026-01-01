@@ -43,6 +43,10 @@ EXTERNAL_URL = os.environ.get('EXTERNAL_URL', '').rstrip('/')
 # Application title
 APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
 
+# Azure Blob Storage Configuration
+AZURE_BLOB_STORAGE_URL = os.environ.get('AZURE_BLOB_STORAGE_URL', '').rstrip('/')
+AZURE_BLOB_STORAGE_CONTAINER = os.environ.get('AZURE_BLOB_STORAGE_CONTAINER', 'storage')
+
 def _build_msal_app(cache=None, authority=None):
     """Build a confidential client application for MSAL"""
     return msal.ConfidentialClientApplication(
@@ -923,11 +927,82 @@ def sign_csr_akv():
         # Serialize certificate to PEM
         cert_pem = signed_certificate.public_bytes(serialization.Encoding.PEM).decode('utf-8')
         
+        # Upload certificate to Azure Blob Storage
+        blob_url = None
+        if AZURE_BLOB_STORAGE_URL and AZURE_BLOB_STORAGE_CONTAINER:
+            try:
+                from azure.storage.blob import BlobServiceClient
+                
+                # Get a token specifically for Azure Storage
+                storage_scope = ["https://storage.azure.com/.default"]
+                storage_token = _get_token_from_cache(storage_scope)
+                
+                if not storage_token or "access_token" not in storage_token:
+                    # Token not in cache, acquire it silently
+                    cache = _load_cache()
+                    cca = _build_msal_app(cache=cache)
+                    accounts = cca.get_accounts()
+                    if accounts:
+                        storage_token = cca.acquire_token_silent(storage_scope, account=accounts[0])
+                        _save_cache(cache)
+                
+                if storage_token and "access_token" in storage_token:
+                    # Create a custom credential for blob storage
+                    class StorageCredential:
+                        def __init__(self, access_token):
+                            self.token = access_token
+                        
+                        def get_token(self, *scopes, **kwargs):
+                            return AccessToken(self.token, int(datetime.datetime.now().timestamp()) + 3600)
+                    
+                    storage_credential = StorageCredential(storage_token["access_token"])
+                    
+                    # Create blob service client using storage credential
+                    blob_service_client = BlobServiceClient(
+                        account_url=AZURE_BLOB_STORAGE_URL,
+                        credential=storage_credential
+                    )
+                else:
+                    raise Exception("Failed to acquire storage token")
+                
+                # Get container client
+                container_client = blob_service_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
+                
+                # Generate blob name: CA-name/CN-timestamp.crt
+                # Extract CN from the certificate
+                cn = None
+                for attr in signed_certificate.subject:
+                    if attr.oid == NameOID.COMMON_NAME:
+                        cn = attr.value
+                        break
+                
+                # Create a safe filename from CN
+                import re
+                safe_cn = re.sub(r'[^\w\-\.]', '_', cn) if cn else 'certificate'
+                timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                blob_name = f"{certificate_name}/{safe_cn}_{timestamp}.crt"
+                
+                # Upload the certificate
+                blob_client = container_client.get_blob_client(blob_name)
+                blob_client.upload_blob(cert_pem, overwrite=True)
+                
+                # Generate the blob URL
+                blob_url = f"{AZURE_BLOB_STORAGE_URL}/{AZURE_BLOB_STORAGE_CONTAINER}/{blob_name}"
+                
+            except Exception as e:
+                # Don't fail the request if blob upload fails, just log it
+                print(f"Warning: Failed to upload certificate to blob storage: {str(e)}")
+        
         # Return the certificate and CA chain as JSON
-        return jsonify({
+        response_data = {
             'certificate': cert_pem,
             'ca_chain': ca_chain_pem
-        })
+        }
+        
+        if blob_url:
+            response_data['blob_url'] = blob_url
+        
+        return jsonify(response_data)
         
     except ImportError as e:
         return jsonify({'error': f'Azure SDK not installed: {str(e)}. Please install: pip install azure-identity azure-keyvault-certificates azure-keyvault-secrets'}), 500
