@@ -317,11 +317,13 @@ def generate_csr():
                                  private_key=private_key_pem, 
                                  csr=csr_pem,
                                  show_private_key=True,
+                                 user=session.get("user"),
                                  app_title=APP_TITLE)
         else:
             return render_template('csr-generator-result.html', 
                                  csr=csr_pem,
                                  show_private_key=False,
+                                 user=session.get("user"),
                                  app_title=APP_TITLE)
 
     except Exception as e:
@@ -353,6 +355,12 @@ def pfx_to_pem():
 def csr_decoder():
     user = session.get("user")
     return render_template('csr_decoder.html', active_page='csr-decoder', user=user, app_title=APP_TITLE)
+
+@app.route('/certificate-list')
+@login_required
+def certificate_list():
+    user = session.get("user")
+    return render_template('certificate_list.html', active_page='certificate-list', user=user, app_title=APP_TITLE)
 
 @app.route('/decode-csr', methods=['POST'])
 def decode_csr():
@@ -463,6 +471,122 @@ def decode_csr():
             'extensions': extensions_info,
             'signature_algorithm': signature_algorithm,
             'extended_key_usage': extended_key_usage
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/list-certificates', methods=['POST'])
+@login_required
+def list_certificates():
+    """List all certificates from Azure Blob Storage with expiration dates"""
+    try:
+        from azure.storage.blob import BlobServiceClient
+        from azure.core.credentials import AccessToken
+        import datetime
+        
+        if not AZURE_BLOB_STORAGE_URL or not AZURE_BLOB_STORAGE_CONTAINER:
+            return jsonify({'error': 'Azure Blob Storage is not configured'}), 400
+        
+        # Get a token specifically for Azure Storage
+        storage_scope = ["https://storage.azure.com/.default"]
+        storage_token = _get_token_from_cache(storage_scope)
+        
+        if not storage_token or "access_token" not in storage_token:
+            # Token not in cache, acquire it silently
+            cache = _load_cache()
+            cca = _build_msal_app(cache=cache)
+            accounts = cca.get_accounts()
+            if accounts:
+                storage_token = cca.acquire_token_silent(storage_scope, account=accounts[0])
+                _save_cache(cache)
+        
+        if not storage_token or "access_token" not in storage_token:
+            return jsonify({'error': 'Failed to acquire storage token. Please log out and log in again.'}), 401
+        
+        # Create a custom credential for blob storage
+        class StorageCredential:
+            def __init__(self, access_token):
+                self.token = access_token
+            
+            def get_token(self, *scopes, **kwargs):
+                return AccessToken(self.token, int(datetime.datetime.now().timestamp()) + 3600)
+        
+        storage_credential = StorageCredential(storage_token["access_token"])
+        
+        # Create blob service client
+        blob_service_client = BlobServiceClient(
+            account_url=AZURE_BLOB_STORAGE_URL,
+            credential=storage_credential
+        )
+        
+        # Get container client
+        container_client = blob_service_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
+        
+        # Get filter parameter (optional)
+        filter_ca = request.json.get('ca_filter') if request.is_json else None
+        
+        # List all blobs and collect CA directories
+        certificates = []
+        ca_directories = set()
+        
+        for blob in container_client.list_blobs():
+            # Only process .crt and .pem files
+            if blob.name.endswith(('.crt', '.pem')):
+                # Extract CA directory from blob path (format: CA-name/filename.crt)
+                ca_name = None
+                if '/' in blob.name:
+                    ca_name = blob.name.split('/')[0]
+                    ca_directories.add(ca_name)
+                
+                # Apply filter if specified
+                if filter_ca and ca_name != filter_ca:
+                    continue
+                
+                try:
+                    # Download blob content
+                    blob_client = container_client.get_blob_client(blob.name)
+                    cert_data = blob_client.download_blob().readall()
+                    
+                    # Parse certificate
+                    cert = x509.load_pem_x509_certificate(cert_data, default_backend())
+                    
+                    # Extract common name
+                    cn = None
+                    for attr in cert.subject:
+                        if attr.oid == NameOID.COMMON_NAME:
+                            cn = attr.value
+                            break
+                    
+                    # Extract issuer common name
+                    issuer_cn = None
+                    for attr in cert.issuer:
+                        if attr.oid == NameOID.COMMON_NAME:
+                            issuer_cn = attr.value
+                            break
+                    
+                    certificates.append({
+                        'name': blob.name,
+                        'ca_directory': ca_name or 'root',
+                        'common_name': cn or 'Unknown',
+                        'issuer': issuer_cn or 'Unknown',
+                        'not_before': cert.not_valid_before.isoformat() if hasattr(cert, 'not_valid_before') else cert.not_valid_before_utc.isoformat(),
+                        'not_after': cert.not_valid_after.isoformat() if hasattr(cert, 'not_valid_after') else cert.not_valid_after_utc.isoformat(),
+                        'size': blob.size,
+                        'last_modified': blob.last_modified.isoformat() if blob.last_modified else None,
+                        'url': f"{AZURE_BLOB_STORAGE_URL}/{AZURE_BLOB_STORAGE_CONTAINER}/{blob.name}"
+                    })
+                except Exception as e:
+                    # Skip files that can't be parsed as certificates
+                    print(f"Warning: Failed to parse {blob.name}: {str(e)}")
+                    continue
+        
+        # Sort by expiration date ascending (expiring first on top)
+        certificates.sort(key=lambda x: x['not_after'], reverse=False)
+        
+        return jsonify({
+            'certificates': certificates,
+            'ca_directories': sorted(list(ca_directories))
         })
         
     except Exception as e:
