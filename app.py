@@ -362,6 +362,11 @@ def certificate_list():
     user = session.get("user")
     return render_template('certificate_list.html', active_page='certificate-list', user=user, app_title=APP_TITLE)
 
+@app.route('/mosadex-pki')
+def mosadex_pki():
+    user = session.get("user")
+    return render_template('mosadex_pki.html', active_page='mosadex-pki', user=user, app_title=APP_TITLE)
+
 @app.route('/decode-csr', methods=['POST'])
 def decode_csr():
     try:
