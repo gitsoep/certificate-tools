@@ -362,10 +362,18 @@ def certificate_list():
     user = session.get("user")
     return render_template('certificate_list.html', active_page='certificate-list', user=user, app_title=APP_TITLE)
 
-@app.route('/mosadex-pki')
-def mosadex_pki():
+@app.route('/pki')
+@login_required
+def pki():
     user = session.get("user")
-    return render_template('mosadex_pki.html', active_page='mosadex-pki', user=user, app_title=APP_TITLE)
+    default_vault_url = os.environ.get('DEFAULT_KEYVAULT_URL', '')
+    return render_template(
+        'pki.html',
+        active_page='pki',
+        user=user,
+        default_vault_url=default_vault_url,
+        app_title=APP_TITLE
+    )
 
 @app.route('/decode-csr', methods=['POST'])
 def decode_csr():

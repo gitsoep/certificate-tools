@@ -143,63 +143,68 @@
                                         </select>
                                         <p class="text-red-500 text-xs italic hidden">Please fill out this field.</p>
                                     </div>
-                                    
+                                    <div class="w-full md:w-1/2 px-3">
+                                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="validity_days">
+                                            Certificate Validity (Days)
+                                        </label>
+                                        <input name="validity_days" id="validity_days" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" type="number" value="365" min="1" max="3650">
+                                    </div>
                                 </div>
 
                                 <div class="flex flex-wrap -mx-3 mb-6 w-4/5">
                                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                         <label for="common_name"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">common_name:</label>
-                                        <input id="common_name" name="common_name"
+                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">common name:</label>
+                                        <input id="common_name" name="common_name" readonly
                                             class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                                     </div>
 
 
                                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                         <label for="email_address"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">email_address (optional):</label>
-                                        <input id="email_address" name="email_address"
+                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">email address (optional):</label>
+                                        <input id="email_address" name="email_address" readonly
                                             class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                                     </div>
                                 </div>
 
                                 <div class="flex flex-wrap -mx-3 mb-6 w-4/5">
                                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                        <label for="organization_name"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">organization_name:</label>
-                                        <input id="organization_name" name="organization_name"
+                                        <label for="organization"
+                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">organization:</label>
+                                        <input id="organization" name="organization" readonly
                                             class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                                     </div>
 
                                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                        <label for="organization_unit_name"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">organization_unit_name:</label>
-                                        <input id="organization_unit_name" name="organization_unit_name"
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-wrap -mx-3 mb-6 w-4/5">
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                        <label for="country_name"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">country_name:</label>
-                                        <input id="country_name" name="country_name"
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                                    </div>
-
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                        <label for="state_name"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">state_name:</label>
-                                        <input id="state_name" name="state_name"
+                                        <label for="organization_unit"
+                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">organization unit:</label>
+                                        <input id="organization_unit" name="organization_unit" readonly
                                             class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                                     </div>
                                 </div>
 
                                 <div class="flex flex-wrap -mx-3 mb-6 w-4/5">
                                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                        <label for="locality_name"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">locality_name:</label>
-                                        <input id="locality_name" name="locality_name"
+                                        <label for="country"
+                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">country:</label>
+                                        <input id="country" name="country" readonly
+                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                    </div>
+
+                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                        <label for="state"
+                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">state:</label>
+                                        <input id="state" name="state" readonly
+                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap -mx-3 mb-6 w-4/5">
+                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                        <label for="locality"
+                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">locality:</label>
+                                        <input id="locality" name="locality" readonly
                                             class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                                     </div>
                                 </div>
@@ -211,11 +216,30 @@
                 
                     <!-- Third Content -->
                     <div class="hidden stepper-content" id="stepper-content-3">
-                        <div class="p-4 h-256 bg-gray-50 items-center border border-dashed border-gray-300 rounded-md w-9/12">
-                            <h3 class="text-gray-500">
-                                Hoorah, the certificate is ready to download. 
-                            </h3>
-                        </div>
+                        <!-- <div class="p-4 h-256 bg-gray-50 items-center border border-dashed border-gray-300 rounded-md w-9/12"> -->
+                            <!-- <h3 class="text-gray-700 font-bold text-lg mb-4">
+                                ✓ Certificate Successfully Signed
+                            </h3> -->
+                            <div class="bg-white p-4 rounded border border-gray-200 mb-4">
+                                <p class="text-gray-600 mb-4">
+                                    Your certificate has been signed and is ready to download.
+                                </p>
+                                <div class="flex gap-x-2 mb-3">
+                                    <a id="download-certificate" href="#" download="certificate.crt" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                        Download Certificate
+                                    </a>
+                                    <a id="download-ca-chain" href="#" download="ca-chain.pem" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                        Download CA Chain
+                                    </a>
+                                </div>
+                                <div id="blob-storage-info" class="hidden mt-3 p-3 bg-green-50 border border-green-200 rounded">
+                                    <p class="text-sm text-green-800 font-semibold mb-1">✓ Uploaded to Azure Blob Storage</p>
+                                    <p class="text-xs text-green-700" id="blob-url-display"></p>
+                                </div>
+                            </div>
+                        <!-- </div> -->
                     </div>
                     <!-- End Third Content -->
                 
@@ -241,14 +265,14 @@
                             </svg>
                         </button>
                         <button id="nav-step-two-confirm" type="button" class="hidden nav-stepper py-2 px-3 inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                        Sign Info
+                        Sign Certificate Request
                         <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m9 18 6-6-6-6"></path>
                         </svg>
                         </button>
-                        <a id="nav-step-three-confirm" href="/" class="hidden nav-stepper py-2 px-3 inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                        Download Certificate
-                        </a>
+                        <button id="nav-step-three-confirm" type="button" class="hidden nav-stepper py-2 px-3 inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                        Start Over
+                        </button>
                     </div>
                     <!-- End Button Group -->
 
@@ -264,6 +288,263 @@
     </div>
 
   </body>
-  <script src="./dist/app-bundle.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            const DEFAULT_KEYVAULT_URL = "{{ default_vault_url }}";
+            let currentStep = 0;
+            let vaultUrl = '';
+
+            function qs(selector) { return document.querySelector(selector); }
+            function qsa(selector) { return Array.from(document.querySelectorAll(selector)); }
+
+            function showAlert(message) {
+                const alertBox = qs('.alert');
+                if (!alertBox) return;
+                alertBox.classList.remove('hidden');
+                const messageSpan = alertBox.querySelector('.message');
+                if (messageSpan) messageSpan.textContent = message;
+            }
+
+            function hideAlert() {
+                const alertBox = qs('.alert');
+                if (!alertBox) return;
+                alertBox.classList.add('hidden');
+            }
+
+            function setButtonLoading(isLoading) {
+                qsa('button').forEach(btn => {
+                    const loading = btn.querySelector('.loading');
+                    if (loading) {
+                        if (isLoading) loading.classList.remove('hidden');
+                        else loading.classList.add('hidden');
+                    }
+                    btn.disabled = isLoading;
+                });
+            }
+
+            function setStep(step) {
+                currentStep = step;
+                const contents = qsa('.stepper-content');
+                contents.forEach(el => el.classList.add('hidden'));
+                if (contents[step]) contents[step].classList.remove('hidden');
+
+                const navs = qsa('.nav-stepper');
+                navs.forEach(el => el.classList.add('hidden'));
+                if (navs[step]) navs[step].classList.remove('hidden');
+
+                const backBtn = document.getElementById('nav-step-back');
+                if (backBtn) backBtn.disabled = (step === 0);
+
+                const items = qsa('ul#stepper-overview > li');
+                items.forEach((item, idx) => {
+                    const inner = item.querySelector('span.inner-circle');
+                    const text = item.querySelector('span.text');
+                    const number = item.querySelector('span.number');
+                    const check = item.querySelector('svg');
+                    if (inner) {
+                        inner.classList.remove('bg-blue-200','bg-green-300');
+                        inner.classList.add('bg-gray-100');
+                    }
+                    if (text) {
+                        text.classList.remove('text-blue-500');
+                        text.classList.add('text-gray-800');
+                    }
+                    if (number) number.classList.remove('hidden');
+                    if (check) check.classList.add('hidden');
+                });
+                // Active step styling
+                if (items[step]) {
+                    const inner = items[step].querySelector('span.inner-circle');
+                    const text = items[step].querySelector('span.text');
+                    if (inner) { inner.classList.remove('bg-gray-100'); inner.classList.add('bg-blue-200'); }
+                    if (text) { text.classList.remove('text-gray-800'); text.classList.add('text-blue-500'); }
+                }
+                // Completed steps styling
+                for (let i = 0; i < step; i++) {
+                    if (items[i]) {
+                        const inner = items[i].querySelector('span.inner-circle');
+                        const number = items[i].querySelector('span.number');
+                        const check = items[i].querySelector('svg');
+                        if (inner) { inner.classList.remove('bg-gray-100','bg-blue-200'); inner.classList.add('bg-green-300'); }
+                        if (number) number.classList.add('hidden');
+                        if (check) check.classList.remove('hidden');
+                    }
+                }
+            }
+
+            function getInputValue(id) {
+                const el = document.getElementById(id);
+                return el ? el.value : '';
+            }
+
+            function setInputValue(id, value) {
+                const el = document.getElementById(id);
+                if (el) el.value = value || '';
+            }
+
+            async function validateCSR() {
+                hideAlert();
+                setButtonLoading(true);
+                try {
+                    const csrEl = document.getElementById('csr');
+                    const csrText = csrEl ? csrEl.value.trim() : '';
+                    if (!csrText) throw new Error('Please enter a CSR');
+                    const fd = new FormData();
+                    fd.append('csr_text', csrText);
+                    const resp = await fetch('/decode-csr', { method: 'POST', body: fd });
+                    if (!resp.ok) {
+                        let msg = `Failed to validate CSR (${resp.status})`;
+                        try { const j = await resp.json(); msg = j.error || msg; } catch {}
+                        throw new Error(msg);
+                    }
+                    const data = await resp.json();
+                    const s = data.subject || {};
+                    setInputValue('common_name', s.commonName);
+                    setInputValue('email_address', s.emailAddress);
+                    setInputValue('organization', s.organization);
+                    setInputValue('organization_unit', s.organizationalUnitName);
+                    setInputValue('country', s.countryName);
+                    setInputValue('state', s.stateOrProvinceName);
+                    setInputValue('locality', s.localityName);
+                    setStep(1);
+                    await loadAKVCertificates();
+                } catch (e) {
+                    showAlert(e.message || String(e));
+                } finally {
+                    setButtonLoading(false);
+                }
+            }
+
+            async function loadAKVCertificates() {
+                // Use DEFAULT_KEYVAULT_URL provided by server
+                if (!vaultUrl) {
+                    vaultUrl = DEFAULT_KEYVAULT_URL;
+                }
+                if (!vaultUrl) {
+                    showAlert('DEFAULT_KEYVAULT_URL is not configured');
+                    return;
+                }
+                setButtonLoading(true);
+                try {
+                    const resp = await fetch('/list-akv-certificates', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ vault_url: vaultUrl })
+                    });
+                    if (!resp.ok) {
+                        let msg = `Failed to load certificates (${resp.status})`;
+                        try { const j = await resp.json(); msg = j.error || msg; } catch {}
+                        throw new Error(msg);
+                    }
+                    const data = await resp.json();
+                    const select = document.getElementById('sign_with_ca');
+                    if (select) {
+                        select.innerHTML = '';
+                        const certs = (data.certificates || []).filter(c => c.enabled !== false);
+                        certs.forEach(c => {
+                            const opt = new Option(c.name, c.name);
+                            select.options.add(opt);
+                        });
+                        if (certs.length === 0) showAlert('No certificates found in the Key Vault');
+                    }
+                } catch (e) {
+                    showAlert(e.message || String(e));
+                } finally {
+                    setButtonLoading(false);
+                }
+            }
+
+            async function signCSR() {
+                hideAlert();
+                setButtonLoading(true);
+                try {
+                    const csrEl = document.getElementById('csr');
+                    const csrText = csrEl ? csrEl.value.trim() : '';
+                    if (!csrText) throw new Error('CSR is missing');
+                    if (!vaultUrl) throw new Error('Azure Key Vault URL is missing');
+                    const certName = getInputValue('sign_with_ca');
+                    if (!certName) throw new Error('Please select a CA certificate');
+                    const validityDays = getInputValue('validity_days') || '365';
+
+                    const fd = new FormData();
+                    fd.append('csr_text', csrText);
+                    fd.append('vault_url', vaultUrl);
+                    fd.append('certificate_name', certName);
+                    fd.append('validity_days', validityDays);
+
+                    const resp = await fetch('/sign-csr-akv', { method: 'POST', body: fd });
+                    if (!resp.ok) {
+                        let msg = `Failed to sign CSR (${resp.status})`;
+                        try { const j = await resp.json(); msg = j.error || msg; } catch {}
+                        throw new Error(msg);
+                    }
+                    const data = await resp.json();
+                    
+                    // Create download link for certificate
+                    const certPem = data.certificate || '';
+                    const certBlob = new Blob([certPem], { type: 'application/x-pem-file' });
+                    const certUrl = window.URL.createObjectURL(certBlob);
+                    const certDl = document.getElementById('download-certificate');
+                    if (certDl) { certDl.href = certUrl; }
+                    
+                    // Create download link for CA chain
+                    const caChainPem = data.ca_chain || '';
+                    const caChainBlob = new Blob([caChainPem], { type: 'application/x-pem-file' });
+                    const caChainUrl = window.URL.createObjectURL(caChainBlob);
+                    const caChainDl = document.getElementById('download-ca-chain');
+                    if (caChainDl) { caChainDl.href = caChainUrl; }
+                    
+                    // Display blob storage URL if available
+                    if (data.blob_url) {
+                        const blobInfo = document.getElementById('blob-storage-info');
+                        const blobUrlDisplay = document.getElementById('blob-url-display');
+                        if (blobInfo && blobUrlDisplay) {
+                            blobInfo.classList.remove('hidden');
+                            blobUrlDisplay.textContent = data.blob_url;
+                        }
+                    }
+                    
+                    setStep(2);
+                } catch (e) {
+                    showAlert(e.message || String(e));
+                } finally {
+                    setButtonLoading(false);
+                }
+            }
+
+            function bindEvents() {
+                const btn1 = document.getElementById('nav-step-one-confirm');
+                const btn2 = document.getElementById('nav-step-two-confirm');
+                const btn3 = document.getElementById('nav-step-three-confirm');
+                const back = document.getElementById('nav-step-back');
+                if (btn1) btn1.addEventListener('click', (ev) => { ev.preventDefault(); validateCSR(); });
+                if (btn2) btn2.addEventListener('click', (ev) => { ev.preventDefault(); signCSR(); });
+                if (btn3) btn3.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    // Clear the form and start over
+                    const csrEl = document.getElementById('csr');
+                    if (csrEl) csrEl.value = '';
+                    setStep(0);
+                });
+                if (back) back.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    if (currentStep > 0) setStep(currentStep - 1);
+                });
+            }
+
+            function init() {
+                setStep(0);
+                bindEvents();
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
   </html>
   
