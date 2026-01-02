@@ -399,7 +399,7 @@ def decode_csr():
         # Extract subject information in structured format
         subject_info = {
             'commonName': None,
-            'organization': None,
+            'organizationName': None,
             'organizationalUnitName': None,
             'countryName': None,
             'stateOrProvinceName': None,
@@ -411,6 +411,9 @@ def decode_csr():
             oid_name = attribute.oid._name
             if oid_name in subject_info:
                 subject_info[oid_name] = attribute.value
+        
+        # Map organizationName to organization for frontend compatibility
+        subject_info['organization'] = subject_info.get('organizationName')
         
         # Extract public key information
         public_key = csr.public_key()
