@@ -6,16 +6,16 @@
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
 </head>
-<body class="bg-white min-h-screen flex">
+<body class="bg-neutral-900 min-h-screen flex">
     {% set active_page = 'csr-generator' %}
     {% include 'sidebar.html' %}
     
     <div class="flex-1 p-6 md:p-10">
-        <div class="max-w-4xl bg-white p-8 md:p-12">
+        <div class="max-w-4xl bg-white shadow-2xl p-8 md:p-12">
             <h1 class="text-4xl font-bold text-gray-800 mb-4">🔐 CSR Generator</h1>
             <p class="text-xl text-gray-600 mb-8">Generate a CSR and private key for an mTLS certificate.</p>
             
-            <div class="bg-white border-l-4 border-blue-500 p-4 mb-8">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
                 <span class="text-blue-700">ℹ️ Fill in the form below to generate a CSR and private key.</span>
             </div>
             

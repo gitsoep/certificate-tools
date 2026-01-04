@@ -6,15 +6,15 @@
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
 </head>
-<body class="bg-white flex items-start">
+<body class="bg-neutral-900 flex items-start">
     {% include 'sidebar.html' %}
     
     <div class="flex-1 p-6 md:p-10">
-        <div class="max-w-5xl bg-white p-8 md:p-12">
+        <div class="max-w-5xl bg-white shadow-2xl p-8 md:p-12">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">🔐 Understanding Digital Certificates</h1>
             <p class="text-xl text-gray-600 mb-8">A comprehensive guide to SSL/TLS certificates, CSRs, and certificate management</p>
             
-            <div class="bg-white border-l-4 border-blue-500 p-4 mb-8 ">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 ">
                 <strong class="text-blue-800">📚 Welcome!</strong> <span class="text-blue-700">This guide will help you understand digital certificates, how they work, and how to use the tools provided in this application.</span>
             </div>
             
@@ -34,7 +34,7 @@
             <h2 class="text-3xl font-bold text-gray-800 mt-10 mb-4">🔐 What is a CSR (Certificate Signing Request)?</h2>
             <p class="text-gray-700 mb-6 leading-relaxed">A CSR is a block of encoded text that you give to a Certificate Authority when applying for an SSL/TLS certificate. It contains information about your organization and the public key that will be included in your certificate.</p>
             
-            <div class="flex flex-wrap items-center justify-center gap-4 my-8 bg-white p-6">
+            <div class="flex flex-wrap items-center justify-center gap-4 my-8 bg-gradient-to-r from-orange-50 to-yellow-50 p-6">
                 <div class="bg-white px-6 py-3 shadow-md font-semibold text-gray-800">Generate Private Key</div>
                 <span class="text-2xl text-orange-600 font-bold">→</span>
                 <div class="bg-white px-6 py-3 shadow-md font-semibold text-gray-800">Create CSR</div>
@@ -66,7 +66,7 @@
                 <li><strong class="text-gray-900">Certificate Policy:</strong> Rules governing certificate usage</li>
             </ul>
             
-            <div class="bg-white border-l-4 border-yellow-500 p-4 mb-8">
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8">
                 <strong class="text-yellow-800">⚠️ Important:</strong> <span class="text-yellow-700">Your private key must be kept secret and secure. Never share it or transmit it over insecure channels. If compromised, your entire security is at risk.</span>
             </div>
             
@@ -129,7 +129,7 @@
             <h3 class="text-2xl font-semibold text-gray-800 mt-6 mb-3">Convert Formats</h3>
             <p class="text-gray-700 mb-6 leading-relaxed">Convert between PEM and PFX formats depending on your deployment requirements. PEM is ideal for Linux servers, while PFX is preferred for Windows environments.</p>
             
-            <div class="bg-white border-l-4 border-blue-500 p-4 mb-8 ">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 ">
                 <strong class="text-blue-800">💡 Tip:</strong> <span class="text-blue-700">For production environments, always use certificates from trusted public CAs. Self-signed certificates should only be used for testing or internal applications.</span>
             </div>
             
@@ -142,7 +142,7 @@
                 <a href="/pfx-converter" class="inline-block bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-4 px-8 shadow-lg transform hover:scale-105 transition-all duration-200">🔄 Convert to PFX</a>
             </div>
             
-            <div class="bg-white border-l-4 border-yellow-500 p-6 mt-10">
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 mt-10">
                 <strong class="text-yellow-800 text-lg">⚠️ Security Reminder:</strong>
                 <ul class="list-disc list-inside space-y-2 text-yellow-700 mt-3 ml-4">
                     <li>Always keep your private keys secure and never share them</li>
