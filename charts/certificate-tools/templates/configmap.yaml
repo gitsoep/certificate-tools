@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "certificate-tools.fullname" . }}
+  labels:
+    {{- include "certificate-tools.labels" . | nindent 4 }}
+data:
+  APP_TITLE: {{ .Values.config.appTitle | quote }}
+  EXTERNAL_URL: {{ .Values.config.externalUrl | quote }}
+  AZURE_CLIENT_ID: {{ .Values.config.azure.clientId | quote }}
+  AZURE_TENANT_ID: {{ .Values.config.azure.tenantId | quote }}
+  AZURE_BLOB_STORAGE_URL: {{ .Values.config.blobStorage.url | quote }}
+  AZURE_BLOB_STORAGE_CONTAINER: {{ .Values.config.blobStorage.container | quote }}
+  DEFAULT_KEYVAULT_URL: {{ .Values.config.keyVault.url | quote }}
+  DEFAULT_COUNTRY: {{ .Values.config.csrDefaults.country | quote }}
+  DEFAULT_STATE: {{ .Values.config.csrDefaults.state | quote }}
+  DEFAULT_LOCALITY: {{ .Values.config.csrDefaults.locality | quote }}
+  DEFAULT_ORGANIZATION: {{ .Values.config.csrDefaults.organization | quote }}
+  DEFAULT_OU: {{ .Values.config.csrDefaults.organizationalUnit | quote }}
+  DEFAULT_CN: {{ .Values.config.csrDefaults.commonName | quote }}
+  DEFAULT_EMAIL: {{ .Values.config.csrDefaults.email | quote }}
+  DEFAULT_KEY_SIZE: {{ .Values.config.csrDefaults.keySize | quote }}

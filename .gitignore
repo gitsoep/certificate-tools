@@ -152,3 +152,6 @@ Thumbs.db
 # Application specific
 *.conf.local
 cacert/
+
+# Custom chart values with secrets
+custom-values.yaml

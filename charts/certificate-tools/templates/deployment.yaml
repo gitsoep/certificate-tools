@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "certificate-tools.fullname" . }}
+  labels:
+    {{- include "certificate-tools.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "certificate-tools.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "certificate-tools.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "certificate-tools.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.targetPort }}
+          protocol: TCP
+        env:
+        - name: FLASK_APP
+          value: "app.py"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: APP_TITLE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: APP_TITLE
+        - name: EXTERNAL_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: EXTERNAL_URL
+        - name: AZURE_CLIENT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: AZURE_CLIENT_ID
+        - name: AZURE_TENANT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: AZURE_TENANT_ID
+        - name: AZURE_BLOB_STORAGE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: AZURE_BLOB_STORAGE_URL
+        - name: AZURE_BLOB_STORAGE_CONTAINER
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: AZURE_BLOB_STORAGE_CONTAINER
+        - name: DEFAULT_KEYVAULT_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_KEYVAULT_URL
+        - name: DEFAULT_COUNTRY
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_COUNTRY
+        - name: DEFAULT_STATE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_STATE
+        - name: DEFAULT_LOCALITY
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_LOCALITY
+        - name: DEFAULT_ORGANIZATION
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_ORGANIZATION
+        - name: DEFAULT_OU
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_OU
+        - name: DEFAULT_CN
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_CN
+        - name: DEFAULT_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_EMAIL
+        - name: DEFAULT_KEY_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_KEY_SIZE
+        - name: AZURE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "certificate-tools.secretName" . }}
+              key: AZURE_CLIENT_SECRET
+        - name: FLASK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "certificate-tools.secretName" . }}
+              key: FLASK_SECRET_KEY
+        {{- if .Values.livenessProbe }}
+        livenessProbe:
+          {{- toYaml .Values.livenessProbe | nindent 12 }}
+        {{- end }}
+        {{- if .Values.readinessProbe }}
+        readinessProbe:
+          {{- toYaml .Values.readinessProbe | nindent 12 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        {{- with .Values.volumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

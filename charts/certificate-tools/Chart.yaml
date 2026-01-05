@@ -1,0 +1,13 @@
+apiVersion: v2
+name: certificate-tools
+description: A Helm chart for Certificate Tools - PKI and certificate management web application
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - certificate
+  - pki
+  - csr
+  - x509
+maintainers:
+  - name: gitsoep
