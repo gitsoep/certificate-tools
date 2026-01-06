@@ -21,7 +21,7 @@ COPY templates/ templates/
 COPY static/ static/
 
 # Create a non-root user
-RUN useradd -m -u 1000 appuser && \
+RUN adduser -D -u 1000 appuser && \
     chown -R appuser:appuser /app
 
 # Switch to non-root user
