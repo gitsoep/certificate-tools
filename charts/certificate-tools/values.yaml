@@ -137,8 +137,9 @@ config:
   
   # Azure Key Vault Configuration
   keyVault:
-    # Default Key Vault URL
-    url: ""
+    # Key Vault URLs (can be a single URL or comma-separated list)
+    # Example: "https://vault1.vault.azure.net/,https://vault2.vault.azure.net/"
+    urls: ""
   
   # CSR Generator Defaults
   csrDefaults:

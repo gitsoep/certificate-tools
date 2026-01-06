@@ -47,6 +47,11 @@ APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
 AZURE_BLOB_STORAGE_URL = os.environ.get('AZURE_BLOB_STORAGE_URL', '').rstrip('/')
 AZURE_BLOB_STORAGE_CONTAINER = os.environ.get('AZURE_BLOB_STORAGE_CONTAINER', 'storage')
 
+# Azure Key Vault Configuration
+# Support both old (single) and new (multiple) configuration
+AZURE_KEYVAULT_URLS_STR = os.environ.get('AZURE_KEYVAULT_URLS', os.environ.get('DEFAULT_KEYVAULT_URL', ''))
+AZURE_KEYVAULT_URLS = [url.strip() for url in AZURE_KEYVAULT_URLS_STR.split(',') if url.strip()]
+
 def _build_msal_app(cache=None, authority=None):
     """Build a confidential client application for MSAL"""
     return msal.ConfidentialClientApplication(
@@ -343,8 +348,9 @@ def csr_signer():
 @login_required
 def csr_signer_akv():
     user = session.get("user")
-    default_vault_url = os.environ.get('DEFAULT_KEYVAULT_URL', '')
-    return render_template('csr_signer_akv.html', active_page='csr-signer-akv', user=user, default_vault_url=default_vault_url, app_title=APP_TITLE)
+    # Support both new and old configuration
+    vault_urls = AZURE_KEYVAULT_URLS
+    return render_template('csr_signer_akv.html', active_page='csr-signer-akv', user=user, vault_urls=vault_urls, app_title=APP_TITLE)
 
 @app.route('/pfx-to-pem')
 def pfx_to_pem():
@@ -366,12 +372,13 @@ def certificate_list():
 @login_required
 def pki():
     user = session.get("user")
-    default_vault_url = os.environ.get('DEFAULT_KEYVAULT_URL', '')
+    # Support both new and old configuration
+    vault_urls = AZURE_KEYVAULT_URLS
     return render_template(
         'pki.html',
         active_page='pki',
         user=user,
-        default_vault_url=default_vault_url,
+        vault_urls=vault_urls,
         app_title=APP_TITLE
     )
 
@@ -879,7 +886,7 @@ def convert_to_pfx():
 @app.route('/list-akv-certificates', methods=['POST'])
 @login_required
 def list_akv_certificates():
-    """List certificates from Azure Key Vault"""
+    """List certificates from Azure Key Vault(s)"""
     try:
         from azure.identity import ClientSecretCredential
         from azure.core.credentials import AccessToken
@@ -902,27 +909,52 @@ def list_akv_certificates():
         
         credential = UserCredential(token["access_token"])
         
-        # Get vault URL from request
-        vault_url = request.json.get('vault_url', '').strip()
+        # Get vault URLs from request (optional - if provided, only query those vaults)
+        # Otherwise use all configured vaults
+        request_vault_urls = request.json.get('vault_urls', [])
+        if request_vault_urls:
+            vault_urls = [url.strip() for url in request_vault_urls if url.strip()]
+        else:
+            # Use configured vault URLs
+            vault_urls = AZURE_KEYVAULT_URLS
         
-        if not vault_url:
-            return jsonify({'error': 'Key Vault URL is required'}), 400
+        if not vault_urls:
+            return jsonify({'error': 'No Key Vault URLs configured or provided'}), 400
         
-        # List certificates from Key Vault
-        try:
-            cert_client = CertificateClient(vault_url=vault_url, credential=credential)
-            certificates = []
-            
-            for cert_properties in cert_client.list_properties_of_certificates():
-                certificates.append({
-                    'name': cert_properties.name,
-                    'enabled': cert_properties.enabled
+        # List certificates from all Key Vaults
+        all_certificates = []
+        vault_errors = []
+        
+        for vault_url in vault_urls:
+            try:
+                cert_client = CertificateClient(vault_url=vault_url, credential=credential)
+                
+                # Extract vault name from URL for display
+                # URL format: https://vault-name.vault.azure.net/
+                vault_name = vault_url.split('//')[1].split('.')[0] if '//' in vault_url else vault_url
+                
+                for cert_properties in cert_client.list_properties_of_certificates():
+                    all_certificates.append({
+                        'name': cert_properties.name,
+                        'enabled': cert_properties.enabled,
+                        'vault_url': vault_url,
+                        'vault_name': vault_name
+                    })
+            except Exception as e:
+                vault_errors.append({
+                    'vault_url': vault_url,
+                    'error': str(e)
                 })
-            
-            return jsonify({'certificates': certificates})
-            
-        except Exception as e:
-            return jsonify({'error': f'Failed to list certificates from Key Vault: {str(e)}'}), 400
+        
+        response = {
+            'certificates': all_certificates
+        }
+        
+        # Include errors if any vaults failed
+        if vault_errors:
+            response['vault_errors'] = vault_errors
+        
+        return jsonify(response)
         
     except ImportError as e:
         return jsonify({'error': f'Azure SDK not installed: {str(e)}'}), 500

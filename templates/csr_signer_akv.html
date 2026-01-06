@@ -74,20 +74,30 @@
             <!-- Azure Key Vault Configuration -->
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Azure Key Vault Configuration</h2>
             
-            <div>
-                <label for="vault_url" class="block text-sm font-semibold text-gray-700 mb-2">Key Vault URL <span class="text-red-500">*</span></label>
-                <input type="text" id="vault_url" name="vault_url" value="{{ default_vault_url }}" placeholder="https://your-keyvault.vault.azure.net/" required
-                       class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
-                <p class="text-sm text-gray-500 mt-1">Example: https://my-keyvault.vault.azure.net/</p>
+            {% if vault_urls %}
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                <p class="text-blue-700 text-sm font-semibold mb-2">📦 Configured Key Vaults ({{ vault_urls|length }}):</p>
+                <ul class="list-disc list-inside text-blue-600 text-sm">
+                    {% for vault_url in vault_urls %}
+                    <li>{{ vault_url }}</li>
+                    {% endfor %}
+                </ul>
             </div>
+            {% else %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4">
+                <p class="text-yellow-700 text-sm">⚠️ No Key Vaults configured. Set AZURE_KEYVAULT_URLS in your environment.</p>
+            </div>
+            {% endif %}
             
             <div>
-                <label for="certificate_name" class="block text-sm font-semibold text-gray-700 mb-2">CA Certificate Name <span class="text-red-500">*</span></label>
-                <select id="certificate_name" name="certificate_name" required disabled
+                <label for="certificate_name" class="block text-sm font-semibold text-gray-700 mb-2">CA Certificate <span class="text-red-500">*</span></label>
+                <select id="certificate_name" name="certificate_name" required {% if not vault_urls %}disabled{% endif %}
                        class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition bg-white">
-                    <option value="">Enter Key Vault URL first...</option>
+                    <option value="">{% if vault_urls %}Loading certificates...{% else %}No Key Vaults configured{% endif %}</option>
                 </select>
-                <p class="text-sm text-gray-500 mt-1" id="cert_help_text">Enter a Key Vault URL to load available certificates</p>
+                <p class="text-sm text-gray-500 mt-1" id="cert_help_text">{% if vault_urls %}Loading certificates from all configured Key Vaults...{% else %}Configure Key Vaults to load certificates{% endif %}</p>
+                <!-- Hidden field to store vault URL -->
+                <input type="hidden" id="vault_url" name="vault_url">
             </div>
             
             <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
@@ -150,6 +160,9 @@
     </div>
     
     <script>
+        // Store configured vault URLs from server
+        const CONFIGURED_VAULT_URLS = {{ vault_urls|tojson|safe }};
+        
         function toggleInputMethod(type) {
             const fileInput = document.getElementById(type + '_file_input');
             const textInput = document.getElementById(type + '_text_input');
@@ -197,40 +210,20 @@
         
         let certificateData = '';
         let caChainData = '';
-        let loadCertificatesTimeout = null;
         
-        // Load certificates when vault URL is entered
-        document.getElementById('vault_url').addEventListener('input', function() {
-            clearTimeout(loadCertificatesTimeout);
-            const vaultUrl = this.value.trim();
-            
-            if (!vaultUrl) {
-                resetCertificateDropdown();
+        // Load certificates from all configured vaults on page load
+        async function loadAllCertificates() {
+            if (!CONFIGURED_VAULT_URLS || CONFIGURED_VAULT_URLS.length === 0) {
                 return;
             }
             
-            // Debounce the request
-            loadCertificatesTimeout = setTimeout(() => {
-                loadCertificates(vaultUrl);
-            }, 800);
-        });
-        
-        function resetCertificateDropdown() {
-            const select = document.getElementById('certificate_name');
-            select.disabled = true;
-            select.innerHTML = '<option value="">Enter Key Vault URL first...</option>';
-            document.getElementById('cert_help_text').textContent = 'Enter a Key Vault URL to load available certificates';
-            document.getElementById('cert_help_text').className = 'text-sm text-gray-500 mt-1';
-        }
-        
-        async function loadCertificates(vaultUrl) {
             const select = document.getElementById('certificate_name');
             const helpText = document.getElementById('cert_help_text');
             
             // Show loading state
             select.disabled = true;
-            select.innerHTML = '<option value="">Loading certificates...</option>';
-            helpText.textContent = '⏳ Loading certificates from Key Vault...';
+            select.innerHTML = '<option value="">Loading certificates from all Key Vaults...</option>';
+            helpText.textContent = '⏳ Loading certificates from ' + CONFIGURED_VAULT_URLS.length + ' Key Vault(s)...';
             helpText.className = 'text-sm text-blue-600 mt-1';
             
             try {
@@ -239,7 +232,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ vault_url: vaultUrl })
+                    body: JSON.stringify({ vault_urls: CONFIGURED_VAULT_URLS })
                 });
                 
                 if (response.ok) {
@@ -250,8 +243,8 @@
                         
                         result.certificates.forEach(cert => {
                             const option = document.createElement('option');
-                            option.value = cert.name;
-                            option.textContent = cert.name + (cert.enabled ? '' : ' (disabled)');
+                            option.value = JSON.stringify({ name: cert.name, vault_url: cert.vault_url });
+                            option.textContent = cert.name + ' (' + cert.vault_name + ')' + (cert.enabled ? '' : ' - disabled');
                             if (!cert.enabled) {
                                 option.disabled = true;
                             }
@@ -259,11 +252,18 @@
                         });
                         
                         select.disabled = false;
-                        helpText.textContent = `✅ Found ${result.certificates.length} certificate(s)`;
+                        helpText.textContent = `✅ Found ${result.certificates.length} certificate(s) across ${CONFIGURED_VAULT_URLS.length} Key Vault(s)`;
                         helpText.className = 'text-sm text-green-600 mt-1';
+                        
+                        // Show warnings if any vaults had errors
+                        if (result.vault_errors && result.vault_errors.length > 0) {
+                            let errorMsg = '⚠️ ' + result.vault_errors.length + ' vault(s) had errors. ';
+                            helpText.textContent += ' ' + errorMsg;
+                            helpText.className = 'text-sm text-yellow-600 mt-1';
+                        }
                     } else {
                         select.innerHTML = '<option value="">No certificates found</option>';
-                        helpText.textContent = '⚠️ No certificates found in this Key Vault';
+                        helpText.textContent = '⚠️ No certificates found in any configured Key Vault';
                         helpText.className = 'text-sm text-yellow-600 mt-1';
                     }
                 } else {
@@ -278,6 +278,19 @@
                 helpText.className = 'text-sm text-red-600 mt-1';
             }
         }
+        
+        // Update form submission to extract cert info from JSON value
+        document.getElementById('certificate_name').addEventListener('change', function() {
+            if (this.value) {
+                try {
+                    const certInfo = JSON.parse(this.value);
+                    document.getElementById('vault_url').value = certInfo.vault_url;
+                } catch (e) {
+                    // If not JSON, assume it's just the cert name (backwards compatibility)
+                    console.warn('Certificate value is not JSON:', e);
+                }
+            }
+        });
         
         function copyCertificate() {
             const textarea = document.getElementById('certificateOutput');
@@ -330,6 +343,19 @@
             document.getElementById('resultSection').classList.add('hidden');
             
             const formData = new FormData(this);
+            
+            // Extract certificate name and vault URL from the select value
+            const certSelectValue = document.getElementById('certificate_name').value;
+            if (certSelectValue) {
+                try {
+                    const certInfo = JSON.parse(certSelectValue);
+                    formData.set('certificate_name', certInfo.name);
+                    formData.set('vault_url', certInfo.vault_url);
+                } catch (e) {
+                    // Value is not JSON, use as-is (backwards compatibility)
+                    formData.set('certificate_name', certSelectValue);
+                }
+            }
             
             try {
                 const response = await fetch('/sign-csr-akv', {
@@ -389,12 +415,9 @@
             }
         });
         
-        // Load certificates on page load if vault URL is pre-filled
+        // Load certificates on page load
         window.addEventListener('DOMContentLoaded', function() {
-            const vaultUrl = document.getElementById('vault_url').value.trim();
-            if (vaultUrl) {
-                loadCertificates(vaultUrl);
-            }
+            loadAllCertificates();
         });
     </script>
 </body>

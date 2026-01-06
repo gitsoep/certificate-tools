@@ -264,7 +264,7 @@
         (function() {
             'use strict';
 
-            const DEFAULT_KEYVAULT_URL = "{{ default_vault_url }}";
+            const CONFIGURED_VAULT_URLS = {{ vault_urls|tojson|safe }};
             let currentStep = 0;
             let vaultUrl = '';
 
@@ -390,12 +390,9 @@
             }
 
             async function loadAKVCertificates() {
-                // Use DEFAULT_KEYVAULT_URL provided by server
-                if (!vaultUrl) {
-                    vaultUrl = DEFAULT_KEYVAULT_URL;
-                }
-                if (!vaultUrl) {
-                    showAlert('DEFAULT_KEYVAULT_URL is not configured');
+                // Load certificates from all configured Key Vaults
+                if (!CONFIGURED_VAULT_URLS || CONFIGURED_VAULT_URLS.length === 0) {
+                    showAlert('No Key Vaults configured. Set AZURE_KEYVAULT_URLS in your environment.');
                     return;
                 }
                 setButtonLoading(true);
@@ -403,7 +400,7 @@
                     const resp = await fetch('/list-akv-certificates', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ vault_url: vaultUrl })
+                        body: JSON.stringify({ vault_urls: CONFIGURED_VAULT_URLS })
                     });
                     if (!resp.ok) {
                         let msg = `Failed to load certificates (${resp.status})`;
@@ -416,10 +413,13 @@
                         select.innerHTML = '';
                         const certs = (data.certificates || []).filter(c => c.enabled !== false);
                         certs.forEach(c => {
-                            const opt = new Option(c.name, c.name);
+                            const opt = new Option(c.name + ' (' + c.vault_name + ')', JSON.stringify({ name: c.name, vault_url: c.vault_url }));
                             select.options.add(opt);
                         });
-                        if (certs.length === 0) showAlert('No certificates found in the Key Vault');
+                        if (certs.length === 0) showAlert('No certificates found in any configured Key Vault');
+                        if (data.vault_errors && data.vault_errors.length > 0) {
+                            console.warn('Some vaults had errors:', data.vault_errors);
+                        }
                     }
                 } catch (e) {
                     showAlert(e.message || String(e));
@@ -435,14 +435,27 @@
                     const csrEl = document.getElementById('csr');
                     const csrText = csrEl ? csrEl.value.trim() : '';
                     if (!csrText) throw new Error('CSR is missing');
-                    if (!vaultUrl) throw new Error('Azure Key Vault URL is missing');
-                    const certName = getInputValue('sign_with_ca');
-                    if (!certName) throw new Error('Please select a CA certificate');
+                    
+                    const certSelectValue = getInputValue('sign_with_ca');
+                    if (!certSelectValue) throw new Error('Please select a CA certificate');
+                    
+                    // Parse certificate info (name and vault URL)
+                    let certName, certVaultUrl;
+                    try {
+                        const certInfo = JSON.parse(certSelectValue);
+                        certName = certInfo.name;
+                        certVaultUrl = certInfo.vault_url;
+                    } catch (e) {
+                        // Backwards compatibility - if not JSON, use as cert name and first vault
+                        certName = certSelectValue;
+                        certVaultUrl = CONFIGURED_VAULT_URLS[0];
+                    }
+                    
                     const validityDays = getInputValue('validity_days') || '365';
 
                     const fd = new FormData();
                     fd.append('csr_text', csrText);
-                    fd.append('vault_url', vaultUrl);
+                    fd.append('vault_url', certVaultUrl);
                     fd.append('certificate_name', certName);
                     fd.append('validity_days', validityDays);
 

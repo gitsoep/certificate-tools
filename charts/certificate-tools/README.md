@@ -76,6 +76,7 @@ The following table lists the configurable parameters and their default values.
 | `config.azure.tenantId` | Azure AD Tenant ID | `common` |
 | `config.blobStorage.url` | Azure Blob Storage URL | `""` |
 | `config.blobStorage.container` | Azure Blob Storage Container | `storage` |
+| `config.keyVault.urls` | Azure Key Vault URLs (comma-separated for multiple) | `""` |
 
 ### Secrets Configuration
 

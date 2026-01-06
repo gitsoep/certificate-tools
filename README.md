@@ -190,21 +190,25 @@ The application will be available at `http://localhost:5001` (or your configured
 
 4. Set the validity period (in days)
 
-5. Configure Azure Key Vault:
-   - **Key Vault URL**: Your Azure Key Vault URL (e.g., https://my-keyvault.vault.azure.net/)
-   - **Certificate Name**: The name of the CA certificate stored in the Key Vault
+5. Select a CA certificate from the dropdown:
+   - The application automatically loads all CA certificates from **all configured Key Vaults**
+   - Each certificate shows its name and which Key Vault it comes from
+   - Example: "MyCA (vault1)" indicates the certificate "MyCA" is in the "vault1" Key Vault
 
 6. Click "Sign CSR with Azure Key Vault"
 
 7. Download the signed certificate
 
-**Note**: You must have appropriate permissions on the Azure Key Vault to access certificates and secrets. The application uses your Azure credentials to authenticate to Key Vault.
+**Configuration**: Set one or more Key Vault URLs in your environment:
+```bash
+# Single Key Vault
+AZURE_KEYVAULT_URLS=https://my-keyvault.vault.azure.net/
 
-6. Click "Sign CSR with Azure Key Vault"
+# Multiple Key Vaults (comma-separated)
+AZURE_KEYVAULT_URLS=https://vault1.vault.azure.net/,https://vault2.vault.azure.net/
+```
 
-7. Download the signed certificate
-
-**Note**: The certificate in Azure Key Vault must have an exportable private key for signing operations.
+**Note**: You must have appropriate permissions on all configured Key Vaults to access certificates and secrets. The application uses your Azure credentials to authenticate to each Key Vault. Certificates must have exportable private keys for signing operations.
 
 ### Convert PEM to PFX
 

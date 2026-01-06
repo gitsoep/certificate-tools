@@ -11,7 +11,7 @@ data:
   AZURE_TENANT_ID: {{ .Values.config.azure.tenantId | quote }}
   AZURE_BLOB_STORAGE_URL: {{ .Values.config.blobStorage.url | quote }}
   AZURE_BLOB_STORAGE_CONTAINER: {{ .Values.config.blobStorage.container | quote }}
-  DEFAULT_KEYVAULT_URL: {{ .Values.config.keyVault.url | quote }}
+  AZURE_KEYVAULT_URLS: {{ .Values.config.keyVault.urls | quote }}
   DEFAULT_COUNTRY: {{ .Values.config.csrDefaults.country | quote }}
   DEFAULT_STATE: {{ .Values.config.csrDefaults.state | quote }}
   DEFAULT_LOCALITY: {{ .Values.config.csrDefaults.locality | quote }}

@@ -77,11 +77,11 @@ spec:
             configMapKeyRef:
               name: {{ include "certificate-tools.fullname" . }}
               key: AZURE_BLOB_STORAGE_CONTAINER
-        - name: DEFAULT_KEYVAULT_URL
+        - name: AZURE_KEYVAULT_URLS
           valueFrom:
             configMapKeyRef:
               name: {{ include "certificate-tools.fullname" . }}
-              key: DEFAULT_KEYVAULT_URL
+              key: AZURE_KEYVAULT_URLS
         - name: DEFAULT_COUNTRY
           valueFrom:
             configMapKeyRef:
