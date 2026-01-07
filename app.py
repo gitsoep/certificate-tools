@@ -4,7 +4,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import rsa, ec, ed25519, ed448
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import configparser
@@ -197,6 +197,7 @@ def generate_csr():
         email = request.form.get('email', CONFIG_DEFAULTS['email'])
         key_option = request.form.get('key_option', 'generate')
         eku_selection = request.form.get('eku', 'clientAuth')  # Get single EKU selection
+        signature_algorithm = request.form.get('signature_algorithm', 'SHA256')  # Get signature algorithm
 
         # Validate required fields
         if not common_name:
@@ -238,13 +239,32 @@ def generate_csr():
                 except Exception as e:
                     return jsonify({'error': f'Invalid private key file: {str(e)}'}), 400
         else:
-            # Generate new private key
-            key_size = int(request.form.get('key_size', CONFIG_DEFAULTS['key_size']))
-            private_key = rsa.generate_private_key(
-                public_exponent=65537,
-                key_size=key_size,
-                backend=default_backend()
-            )
+            # Generate new private key based on signature algorithm
+            if signature_algorithm.startswith('ECDSA'):
+                # ECDSA key generation
+                if signature_algorithm == 'ECDSA_SHA256':
+                    curve = ec.SECP256R1()
+                elif signature_algorithm == 'ECDSA_SHA384':
+                    curve = ec.SECP384R1()
+                elif signature_algorithm == 'ECDSA_SHA512':
+                    curve = ec.SECP521R1()
+                else:
+                    curve = ec.SECP256R1()
+                private_key = ec.generate_private_key(curve, default_backend())
+            elif signature_algorithm == 'Ed25519':
+                # EdDSA Ed25519 key generation
+                private_key = ed25519.Ed25519PrivateKey.generate()
+            elif signature_algorithm == 'Ed448':
+                # EdDSA Ed448 key generation
+                private_key = ed448.Ed448PrivateKey.generate()
+            else:
+                # RSA key generation (default)
+                key_size = int(request.form.get('key_size', CONFIG_DEFAULTS['key_size']))
+                private_key = rsa.generate_private_key(
+                    public_exponent=65537,
+                    key_size=key_size,
+                    backend=default_backend()
+                )
 
         # Build subject attributes
         subject_attrs = [
@@ -302,8 +322,24 @@ def generate_csr():
                 critical=False
             )
         
+        # Determine the hash algorithm for signing
+        if signature_algorithm == 'Ed25519' or signature_algorithm == 'Ed448':
+            # EdDSA algorithms don't use a separate hash algorithm
+            hash_algorithm = None
+        elif signature_algorithm == 'SHA384' or signature_algorithm == 'ECDSA_SHA384':
+            hash_algorithm = hashes.SHA384()
+        elif signature_algorithm == 'SHA512' or signature_algorithm == 'ECDSA_SHA512':
+            hash_algorithm = hashes.SHA512()
+        else:
+            # Default to SHA256
+            hash_algorithm = hashes.SHA256()
+        
         # Generate CSR
-        csr = csr_builder.sign(private_key, hashes.SHA256(), default_backend())
+        if hash_algorithm:
+            csr = csr_builder.sign(private_key, hash_algorithm, default_backend())
+        else:
+            # EdDSA doesn't require hash algorithm parameter
+            csr = csr_builder.sign(private_key, None, default_backend())
 
         # Serialize CSR to PEM format
         csr_pem = csr.public_bytes(serialization.Encoding.PEM).decode('utf-8')
@@ -1116,9 +1152,12 @@ def sign_csr_akv():
         # Serialize certificate to PEM
         cert_pem = signed_certificate.public_bytes(serialization.Encoding.PEM).decode('utf-8')
         
-        # Upload certificate to Azure Blob Storage
+        # Check if upload to blob storage is requested (only for pki_mtls page)
+        upload_to_blob = request.form.get('upload_to_blob', 'false').lower() == 'true'
+        
+        # Upload certificate to Azure Blob Storage (only if requested)
         blob_url = None
-        if AZURE_BLOB_STORAGE_URL and AZURE_BLOB_STORAGE_CONTAINER:
+        if upload_to_blob and AZURE_BLOB_STORAGE_URL and AZURE_BLOB_STORAGE_CONTAINER:
             try:
                 from azure.storage.blob import BlobServiceClient
                 

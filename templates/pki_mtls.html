@@ -12,30 +12,29 @@
 <body class="bg-neutral-900 flex items-start">
     {% include 'sidebar.html' %}
 
-    <div class="flex-1 p-6 md:p-10 bg-white min-h-screen max-w-600px">
-        <div class="max-w-6xl bg-white p-8 md:p-12">
-            <div class="breadcrumbs font-bold text-xl w-full mb-6 -ml-10">
-                <span class="inline-flex flex-center items-center">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11.25 9.541l-2.25-2.182.929-.929 1.321 1.253 2.821-2.892.929.93-3.75 3.82zm7.676-3.819c-.482 1.41-.484 1.139 0 2.555.05.147.074.297.074.445 0 .449-.222.883-.615 1.156-1.256.87-1.09.651-1.562 2.067-.198.591-.77.99-1.415.99h-.003c-1.549-.005-1.28-.088-2.528.789-.262.184-.569.276-.877.276s-.615-.092-.876-.275c-1.249-.878-.98-.794-2.528-.789h-.004c-.645 0-1.216-.399-1.413-.99-.473-1.417-.311-1.198-1.562-2.067-.395-.274-.617-.708-.617-1.157 0-.148.024-.298.074-.444.483-1.411.484-1.139 0-2.555-.05-.147-.074-.297-.074-.445 0-.45.222-.883.616-1.157 1.251-.868 1.089-.648 1.562-2.067.197-.591.769-.99 1.413-.99h.004c1.545.005 1.271.095 2.528-.79.262-.183.569-.274.877-.274s.615.091.876.274c1.248.878.98.795 2.528.79h.003c.646 0 1.217.399 1.415.99.473 1.416.307 1.197 1.562 2.067.394.273.616.707.616 1.156 0 .148-.024.299-.074.445zm-2.176 1.278c0-2.623-2.127-4.75-4.75-4.75s-4.75 2.127-4.75 4.75 2.127 4.75 4.75 4.75 4.75-2.128 4.75-4.75zm-7.385 7.931c-.766 0-1.371-.074-1.873-.213-.308 3.068-1.359 5.37-3.492 7.592.854.107 1.95-.094 2.833-.56.317.636.65 1.43.767 2.25 2.009-2.299 3.266-5.054 3.734-8.071-.943-.181-1.234-.496-1.969-.998zm5.27 0c-.737.507-1.043.82-1.968.998.47 3.017 1.726 5.772 3.733 8.071.116-.82.449-1.614.767-2.25.883.465 1.979.667 2.833.56-2.13-2.219-3.168-4.531-3.479-7.595-.503.141-1.112.216-1.886.216z"/></svg>
-                    <span class="ml-2 tracking-wide truncate">Public Key Infrastructure </span>
-                </span>
-            </div>
-            </div>
+    <div class="flex-1 p-6 md:p-10">
+    <div class="max-w-4xl bg-white shadow-2xl p-8 md:p-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">🔒 Public Key Infrastructure</h1>
+        <p class="text-xl text-gray-600 mb-8">Sign CSR with CA from Azure Key Vault</p>
+        
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
+            <span class="text-blue-700">ℹ️ Sign a Certificate Signing Request using a CA certificate stored in Azure Key Vault. Requires Azure authentication.</span>
+        </div>
 
 
             <div class="stepper mt-10">
                 <!-- Stepper -->
                     <!-- Stepper overview -->
-                    <ul id="stepper-overview" class="relative flex flex-row gap-x-2 w-10/12">
+                    <ul id="stepper-overview" class="relative flex flex-row gap-x-2 w-10/12 mb-6">
                     <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group success">
                         <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
-                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-blue-200 font-medium text-gray-800 rounded-full">
+                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-orange-200 font-medium text-gray-800 rounded-full">
                                 <span class="number">1</span>
                                 <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
                             </span>
-                            <span class="text ms-2 text-sm font-medium text-blue-500">
+                            <span class="text ms-2 text-sm font-medium text-orange-500">
                                 Validate CSR
                             </span>
                         </span>
@@ -44,9 +43,9 @@
                 
                     <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group active">
                         <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
-                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-gray-100 font-medium text-gray-800 rounded-full group-focus:bg-gray-200 hs-stepper-active:bg-blue-600 hs-stepper-active:text-white hs-stepper-success:bg-blue-600 hs-stepper-success:text-white hs-stepper-completed:bg-teal-500 hs-stepper-completed:group-focus:bg-teal-600">
+                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-gray-100 font-medium text-gray-800 rounded-full group-focus:bg-gray-200">
                                 <span class="number">2</span>
-                                <svg class="hidden flex-shrink-0 size-3 hs-stepper-success:block" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
                             </span>
@@ -54,14 +53,14 @@
                             Signing Info
                         </span>
                         </span>
-                        <div class="w-full h-px flex-1 bg-gray-200 group-last:hidden hs-stepper-success:bg-blue-600 hs-stepper-completed:bg-teal-600"></div>
+                        <div class="w-full h-px flex-1 bg-gray-200 group-last:hidden"></div>
                     </li>
                 
                     <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group">
                         <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
-                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-gray-100 font-medium text-gray-800 rounded-full group-focus:bg-gray-200 hs-stepper-active:bg-blue-600 hs-stepper-active:text-white hs-stepper-success:bg-blue-600 hs-stepper-success:text-white hs-stepper-completed:bg-teal-500 hs-stepper-completed:group-focus:bg-teal-600">
+                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-gray-100 font-medium text-gray-800 rounded-full group-focus:bg-gray-200">
                                 <span class="number">3</span>
-                                <svg class="hidden flex-shrink-0 size-3 hs-stepper-success:block" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
                             </span>
@@ -69,30 +68,31 @@
                             Download Certificate
                         </span>
                         </span>
-                        <div class="w-full h-px flex-1 bg-gray-200 group-last:hidden hs-stepper-success:bg-blue-600 hs-stepper-completed:bg-teal-600"></div>
+                        <div class="w-full h-px flex-1 bg-gray-200 group-last:hidden"></div>
                     </li>
                     <!-- End Item -->
                     </ul>
                     <!-- End Stepper Nav -->
             </div>
+
             
             <div class="stepper-content-wrapper mt-10">
                 <!-- Stepper Content -->
                 <div class="mt-3">
                     <!-- First Content -->
                     <div class="stepper-content" id="stepper-content-1">
-                        <div class="p-4 h-256 bg-gray-50 items-center border border-dashed border-gray-300 rounded-md w-9/12">
+                        <div class="space-y-4">
                             
                             <form action="#" method="POST" id="CSRForm" class="">
                                 <div class="mt-2.5">
-                                    <legend></legend>
-                                    <textarea name="csr" id="csr" rows="8"
-                                        class="appearance-none w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">CSR <span class="text-red-500">*</span></label>
+                                    <textarea name="csr" id="csr" rows="10"
+                                        class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm" 
                                         placeholder="Enter your CSR with PEM format here..."></textarea>
                                 </div>
                 
-                                <div class="hidden p-2" id="responsebox">
-                                    <h5 id="CheckCSRresponse" name="CheckCSRresponse"> niet goed</h5>
+                                <div class="hidden p-2 mt-3 bg-red-50 border-l-4 border-red-500" id="responsebox">
+                                    <h5 id="CheckCSRresponse" name="CheckCSRresponse" class="text-red-700">niet goed</h5>
                                 </div>
                             </form>
 
@@ -102,189 +102,176 @@
                 
                     <!-- Second Content -->
                     <div class="hidden stepper-content" id="stepper-content-2">
-                        <div class="p-4 py-2 h-256 bg-gray-50 items-center border border-dashed border-gray-300 rounded-md w-9/12">
+                        <div class="space-y-6">
                             
-                            <form id="CRTForm" class="mt-5">
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            <form id="CRTForm" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="sign_with_ca">
                                         Sign with CA:
                                         </label>
-                                        <select name="sign_with_ca" id="sign_with_ca" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="grid-first-name" type="text" placeholder="Jane">
+                                        <select name="sign_with_ca" id="sign_with_ca" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition bg-white">
                                         </select>
-                                        <p class="text-red-500 text-xs italic hidden">Please fill out this field.</p>
                                     </div>
-                                    <div class="w-full md:w-1/2 px-3">
-                                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="validity_days">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="validity_days">
                                             Certificate Validity (Days)
                                         </label>
-                                        <input name="validity_days" id="validity_days" class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" type="number" value="365" min="1" max="3650">
+                                        <input name="validity_days" id="validity_days" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition" type="number" value="365" min="1" max="3650">
                                     </div>
                                 </div>
 
                                 <!-- CSR Details Section -->
-                                <div class="flex flex-wrap -mx-3 mb-4 w-full">
-                                    <div class="w-full px-3">
-                                        <div class="border-t border-gray-300 pt-4">
-                                            <h3 class="text-gray-700 font-bold text-base mb-3 flex items-center">
-                                                <span class="mr-2">📋</span> CSR Subject Information
-                                            </h3>
-                                        </div>
-                                    </div>
+                                <div class="border-t-2 border-gray-200 pt-4">
+                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
+                                        <span class="mr-2">📋</span> CSR Subject Information
+                                    </h3>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
                                         <label for="common_name"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">common name:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Common Name:</label>
                                         <input id="common_name" name="common_name" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
 
-
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                    <div>
                                         <label for="email_address"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">email address (optional):</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Email Address (optional):</label>
                                         <input id="email_address" name="email_address" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
                                         <label for="organization"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">organization:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Organization:</label>
                                         <input id="organization" name="organization" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
 
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                    <div>
                                         <label for="organization_unit"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">organization unit:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Organization Unit:</label>
                                         <input id="organization_unit" name="organization_unit" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
                                         <label for="country"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">country:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Country:</label>
                                         <input id="country" name="country" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
 
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                    <div>
                                         <label for="state"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">state:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">State:</label>
                                         <input id="state" name="state" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
                                         <label for="locality"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">locality:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Locality:</label>
                                         <input id="locality" name="locality" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
                                 </div>
 
                                 <!-- Key Information Section -->
-                                <div class="flex flex-wrap -mx-3 mb-4 w-full">
-                                    <div class="w-full px-3">
-                                        <h3 class="text-gray-700 font-bold text-base mb-3 flex items-center">
-                                            <span class="mr-2">🔑</span> Key Information
-                                        </h3>
-                                    </div>
+                                <div class="border-t-2 border-gray-200 pt-4">
+                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
+                                        <span class="mr-2">🔑</span> Key Information
+                                    </h3>
+                                </div>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
                                         <label for="key_algorithm"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Key Algorithm:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Key Algorithm:</label>
                                         <input id="key_algorithm" name="key_algorithm" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
 
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                    <div>
                                         <label for="key_size"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Key Size:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Key Size:</label>
                                         <input id="key_size" name="key_size" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
                                 </div>
 
                                 <!-- Signature Algorithm Section -->
-                                <div class="flex flex-wrap -mx-3 mb-4 w-full">
-                                    <div class="w-full px-3">
-                                        <h3 class="text-gray-700 font-bold text-base mb-3 flex items-center">
-                                            <span class="mr-2">🔒</span> Signature Algorithm
-                                        </h3>
-                                    </div>
+                                <div class="border-t-2 border-gray-200 pt-4">
+                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
+                                        <span class="mr-2">🔒</span> Signature Algorithm
+                                    </h3>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
                                         <label for="signature_algorithm"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Algorithm:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Algorithm:</label>
                                         <input id="signature_algorithm" name="signature_algorithm" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
                                 </div>
 
                                 <!-- Extended Key Usage Section -->
-                                <div class="flex flex-wrap -mx-3 mb-4 w-full">
-                                    <div class="w-full px-3">
-                                        <h3 class="text-gray-700 font-bold text-base mb-3 flex items-center">
-                                            <span class="mr-2">🔐</span> Extended Key Usage
-                                        </h3>
-                                    </div>
+                                <div class="border-t-2 border-gray-200 pt-4">
+                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
+                                        <span class="mr-2">🔐</span> Extended Key Usage
+                                    </h3>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 gap-6">
+                                    <div>
                                         <label for="extended_key_usage"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Extended Key Usage:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Extended Key Usage:</label>
                                         <textarea id="extended_key_usage" name="extended_key_usage" readonly rows="2"
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"></textarea>
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none resize-y"></textarea>
                                     </div>
                                 </div>
 
                                 <!-- Other Extensions Section -->
-                                <div class="flex flex-wrap -mx-3 mb-4 w-full">
-                                    <div class="w-full px-3">
-                                        <h3 class="text-gray-700 font-bold text-base mb-3 flex items-center">
-                                            <span class="mr-2">📝</span> Other Extensions
-                                        </h3>
-                                    </div>
+                                <div class="border-t-2 border-gray-200 pt-4">
+                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
+                                        <span class="mr-2">📝</span> Other Extensions
+                                    </h3>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 gap-6">
+                                    <div>
                                         <label for="subject_alternative_names"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Subject Alternative Names:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Subject Alternative Names:</label>
                                         <textarea id="subject_alternative_names" name="subject_alternative_names" readonly rows="2"
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"></textarea>
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none resize-y"></textarea>
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 gap-6">
+                                    <div>
                                         <label for="key_usage"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Key Usage:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Key Usage:</label>
                                         <textarea id="key_usage" name="key_usage" readonly rows="2"
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"></textarea>
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none resize-y"></textarea>
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap -mx-3 mb-6 w-full">
-                                    <div class="w-full px-3 mb-6 md:mb-0">
+                                <div class="grid grid-cols-1 gap-6">
+                                    <div>
                                         <label for="basic_constraints"
-                                            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Basic Constraints:</label>
+                                            class="block text-sm font-semibold text-gray-700 mb-2">Basic Constraints:</label>
                                         <input id="basic_constraints" name="basic_constraints" readonly
-                                            class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
                                     </div>
                                 </div>
                                                     
@@ -295,45 +282,45 @@
                 
                     <!-- Third Content -->
                     <div class="hidden stepper-content" id="stepper-content-3">
-                        <!-- <div class="p-4 h-256 bg-gray-50 items-center border border-dashed border-gray-300 rounded-md w-9/12"> -->
-                            <!-- <h3 class="text-gray-700 font-bold text-lg mb-4">
-                                ✓ Certificate Successfully Signed
-                            </h3> -->
-                            <div class="bg-white p-4 rounded border border-gray-200 mb-4">
-                                <p class="text-gray-600 mb-6 font-bold">
+                        <div class="space-y-4">
+                            <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                                <p class="text-green-800 font-semibold mb-2">
+                                    ✓ Certificate Successfully Signed
+                                </p>
+                                <p class="text-green-700">
                                     Your certificate has been signed and is ready to download!
                                 </p>
-                                <div class="flex gap-x-2 mb-3">
-                                    <a id="download-certificate" href="#" download="certificate.crt" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                        Download Certificate
-                                    </a>
-                                    <a id="download-ca-chain" href="#" download="ca-chain.pem" class="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                        Download CA Chain
-                                    </a>
-                                </div>
-                                <div id="blob-storage-info" class="hidden mt-3 p-3 bg-green-50 border border-green-200 rounded">
-                                    <p class="text-sm text-green-800 font-semibold mb-1">✓ Uploaded to Azure Blob Storage</p>
-                                    <p class="text-xs text-green-700" id="blob-url-display"></p>
-                                </div>
                             </div>
-                        <!-- </div> -->
+                            <div class="flex gap-x-2">
+                                <a id="download-certificate" href="#" download="certificate.crt" class="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Download Certificate
+                                </a>
+                                <a id="download-ca-chain" href="#" download="ca-chain.pem" class="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-lg transform hover:scale-105 transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Download CA Chain
+                                </a>
+                            </div>
+                            <div id="blob-storage-info" class="hidden mt-3 p-4 bg-blue-50 border-l-4 border-blue-500">
+                                <p class="text-sm text-blue-800 font-semibold mb-1">☁️ Uploaded to Azure Blob Storage</p>
+                                <p class="text-xs text-blue-700 break-all" id="blob-url-display"></p>
+                            </div>
+                        </div>
                     </div>
                     <!-- End Third Content -->
                 
                 
                     <!-- Button Group -->
-                    <div class="button-group mt-5 flex justify-start items-center gap-x-2">
+                    <div class="button-group mt-8 flex justify-start items-center gap-x-2">
 
-                        <button id="nav-step-back" type="button" disabled class="py-2 px-3 inline-flex items-center gap-x-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
+                        <button id="nav-step-back" type="button" disabled class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
                         <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m15 18-6-6 6-6"></path>
                         </svg>
                         Back
                         </button> 
 
-                        <button id="nav-step-one-confirm" type="button" class="nav-stepper py-2 px-3 inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                        <button id="nav-step-one-confirm" type="button" class="nav-stepper py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
                             <svg aria-hidden="true" role="status" class="hidden loading flex-shrink-0 size-4 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"></path>
                                 <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="#1C64F2"></path>
@@ -343,20 +330,20 @@
                                 <path d="m9 18 6-6-6-6"></path>
                             </svg>
                         </button>
-                        <button id="nav-step-two-confirm" type="button" class="hidden nav-stepper py-2 px-3 inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                        <button id="nav-step-two-confirm" type="button" class="hidden nav-stepper py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
                         Sign Certificate Request
                         <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m9 18 6-6-6-6"></path>
                         </svg>
                         </button>
-                        <button id="nav-step-three-confirm" type="button" class="hidden nav-stepper py-2 px-3 inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                        <button id="nav-step-three-confirm" type="button" class="hidden nav-stepper py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
                         Start Over
                         </button>
                     </div>
                     <!-- End Button Group -->
 
                     
-                    <div class="hidden alert mt-10 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
+                    <div class="hidden alert mt-10 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3" role="alert">
                         <strong class="font-bold">Oops, something is wrong!</strong>
                         <span class="message block sm:inline"></span>
                     </div>
@@ -364,6 +351,7 @@
                     <!-- End Stepper Content -->
             </div>
         </div>
+    </div>
     </div>
 
 </body>
@@ -423,11 +411,11 @@
                     const number = item.querySelector('span.number');
                     const check = item.querySelector('svg');
                     if (inner) {
-                        inner.classList.remove('bg-blue-200','bg-green-300');
+                        inner.classList.remove('bg-orange-200','bg-green-300');
                         inner.classList.add('bg-gray-100');
                     }
                     if (text) {
-                        text.classList.remove('text-blue-500');
+                        text.classList.remove('text-orange-500');
                         text.classList.add('text-gray-800');
                     }
                     if (number) number.classList.remove('hidden');
@@ -437,8 +425,8 @@
                 if (items[step]) {
                     const inner = items[step].querySelector('span.inner-circle');
                     const text = items[step].querySelector('span.text');
-                    if (inner) { inner.classList.remove('bg-gray-100'); inner.classList.add('bg-blue-200'); }
-                    if (text) { text.classList.remove('text-gray-800'); text.classList.add('text-blue-500'); }
+                    if (inner) { inner.classList.remove('bg-gray-100'); inner.classList.add('bg-orange-200'); }
+                    if (text) { text.classList.remove('text-gray-800'); text.classList.add('text-orange-500'); }
                 }
                 // Completed steps styling
                 for (let i = 0; i < step; i++) {
@@ -492,7 +480,38 @@
                     setInputValue('key_algorithm', data.key_algorithm || 'N/A');
                     setInputValue('key_size', data.key_size ? data.key_size + ' bits' : 'N/A');
                     
+                    // Highlight key size if RSA and less than 4096
+                    const keySizeEl = document.getElementById('key_size');
+                    const keyAlgoEl = document.getElementById('key_algorithm');
+                    const keyAlgo = data.key_algorithm || '';
+                    
+                    if (keySizeEl && keyAlgo.toUpperCase().includes('RSA') && data.key_size && data.key_size < 4096) {
+                        keySizeEl.classList.remove('bg-gray-50');
+                        keySizeEl.classList.add('bg-red-100');
+                    } else if (keySizeEl) {
+                        keySizeEl.classList.remove('bg-red-100');
+                        keySizeEl.classList.add('bg-gray-50');
+                    }
+                    
                     // Set signature algorithm
+                    setInputValue('signature_algorithm', data.signature_algorithm || 'N/A');
+                    
+                    // Highlight signature algorithm if weak/deprecated
+                    const sigAlgoEl = document.getElementById('signature_algorithm');
+                    const sigAlgo = (data.signature_algorithm || '').toUpperCase();
+                    // Check for weak algorithms - be specific to avoid false positives with SHA256, etc.
+                    const isWeak = sigAlgo.includes('MD5') || 
+                                   (sigAlgo.includes('SHA1') && !sigAlgo.includes('SHA12') && !sigAlgo.includes('SHA256') && !sigAlgo.includes('SHA384') && !sigAlgo.includes('SHA512')) ||
+                                   (sigAlgo.includes('SHA-1') && !sigAlgo.includes('SHA-256') && !sigAlgo.includes('SHA-384') && !sigAlgo.includes('SHA-512')) ||
+                                   (sigAlgo.includes('DSA') && !sigAlgo.includes('ECDSA'));
+                    
+                    if (sigAlgoEl && isWeak) {
+                        sigAlgoEl.classList.remove('bg-gray-50');
+                        sigAlgoEl.classList.add('bg-red-100');
+                    } else if (sigAlgoEl) {
+                        sigAlgoEl.classList.remove('bg-red-100');
+                        sigAlgoEl.classList.add('bg-gray-50');
+                    }
                     setInputValue('signature_algorithm', data.signature_algorithm || 'N/A');
                     
                     // Set extended key usage
@@ -588,6 +607,7 @@
                     fd.append('vault_url', certVaultUrl);
                     fd.append('certificate_name', certName);
                     fd.append('validity_days', validityDays);
+                    fd.append('upload_to_blob', 'true');
 
                     const resp = await fetch('/sign-csr-akv', { method: 'POST', body: fd });
                     if (!resp.ok) {
