@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
+    <script src="/static/theme.js"></script>
 </head>
 <body class="bg-neutral-900 flex items-start">
     {% include 'sidebar.html' %}
     
     <div class="flex-1 p-6 md:p-10">
-        <div class="max-w-5xl bg-white shadow-2xl p-8 md:p-12">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">🔐 Understanding Digital Certificates</h1>
-            <p class="text-xl text-gray-600 mb-8">A comprehensive guide to SSL/TLS certificates, CSRs, and certificate management</p>
+        <div class="max-w-5xl bg-white shadow-2xl p-8 md:p-12" id="main-container">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4" id="page-title">🔐 Understanding Digital Certificates</h1>
+            <p class="text-xl text-gray-600 mb-8" id="page-subtitle">A comprehensive guide to SSL/TLS certificates, CSRs, and certificate management</p>
             
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 ">
                 <strong class="text-blue-800">📚 Welcome!</strong> <span class="text-blue-700">This guide will help you understand digital certificates, how they work, and how to use the tools provided in this application.</span>

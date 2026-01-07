@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
+    <script src="/static/theme.js"></script>
 </head>
 <body class="bg-neutral-900 min-h-screen flex items-center justify-center">
     <div class="max-w-md w-full mx-4">
-        <div class="bg-white shadow-2xl rounded-lg p-8 md:p-12">
+        <div class="bg-white shadow-2xl rounded-lg p-8 md:p-12" id="main-container">
             <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-800 mb-2">🔐 Azure Login Required</h1>
-                <p class="text-gray-600">Sign in with your Azure account to access certificate tools</p>
+                <h1 class="text-4xl font-bold text-gray-800 mb-2" id="page-title">🔐 Azure Login Required</h1>
+                <p class="text-gray-600" id="page-subtitle">Sign in with your Azure account to access certificate tools</p>
             </div>
             
             {% if error %}

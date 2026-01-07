@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
+    <script src="/static/theme.js"></script>
 </head>
 <body class="bg-neutral-900 min-h-screen flex">
     {% set active_page = 'pfx-converter' %}
     {% include 'sidebar.html' %}
     
     <div class="flex-1 p-6 md:p-10">
-    <div class="max-w-4xl bg-white shadow-2xl p-8 md:p-12">
-        <h1 class="text-4xl font-bold text-gray-800 mb-4">🔄 PEM to PFX Converter</h1>
-        <p class="text-xl text-gray-600 mb-8">Combine Private Key and Certificate into PFX</p>
+    <div class="max-w-4xl bg-white shadow-2xl p-8 md:p-12" id="main-container">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4" id="page-title">🔄 PEM to PFX Converter</h1>
+        <p class="text-xl text-gray-600 mb-8" id="page-subtitle">Combine Private Key and Certificate into PFX</p>
         
             <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8">
             <span class="text-yellow-700">⚠️ Upload your private key and certificate files to create a password-protected PFX (PKCS#12) file.</span>

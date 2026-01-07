@@ -2,7 +2,9 @@
 
 <div class="fixed lg:sticky lg:top-0 inset-y-0 left-0 w-64 bg-neutral-900 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-40 shadow-2xl lg:h-screen" id="sidebar">
     <div class="p-6 border-b border-neutral-800">
-        <h2 class="text-xl font-bold text-orange-500">🔐 Certificate Tools</h2>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-orange-500">🔐 Certificate Tools</h2>
+        </div>
     </div>
     
     <!-- User Info Section -->
@@ -88,15 +90,155 @@
 
     {% endif %}
 
+    <div class="p-6 border-b border-neutral-800">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-300">Set theme: </h2>
+            <button onclick="toggleGlobalTheme()" class="p-2 hover:bg-neutral-800 rounded-lg transition-colors" id="theme-toggle-btn" title="Toggle theme">
+                <span id="theme-icon-sidebar" class="text-xl">🌙</span>
+            </button>
+        </div>
+    </div>
+
 </div>
 
 <!-- Overlay for mobile -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden" onclick="toggleMenu()"></div>
 
 <script>
+    // Global theme management
+    let isGlobalDarkMode = localStorage.getItem('globalTheme') === 'dark';
+
+    function toggleGlobalTheme() {
+        isGlobalDarkMode = !isGlobalDarkMode;
+        localStorage.setItem('globalTheme', isGlobalDarkMode ? 'dark' : 'light');
+        applyGlobalTheme();
+        
+        // Trigger custom event for pages to listen to
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: isGlobalDarkMode } }));
+    }
+
+    function applyGlobalTheme() {
+        const mainContainer = document.querySelector('.flex-1 > div');
+        const icon = document.getElementById('theme-icon-sidebar');
+        
+        if (isGlobalDarkMode) {
+            // Dark mode
+            if (icon) icon.textContent = '☀️';
+            if (mainContainer) {
+                mainContainer.classList.remove('bg-white', 'shadow-2xl');
+                mainContainer.classList.add('bg-neutral-900');
+                
+                // Update all headings
+                document.querySelectorAll('h1').forEach(h => {
+                    h.classList.remove('text-gray-800');
+                    h.classList.add('text-orange-500');
+                });
+                
+                // Update all paragraphs and text
+                document.querySelectorAll('p').forEach(p => {
+                    if (p.classList.contains('text-gray-600')) {
+                        p.classList.remove('text-gray-600');
+                        p.classList.add('text-gray-400');
+                    }
+                });
+                
+                // Update info banners
+                document.querySelectorAll('.bg-blue-50').forEach(el => {
+                    el.classList.remove('bg-blue-50');
+                    el.classList.add('bg-blue-900');
+                    el.querySelectorAll('.text-blue-700').forEach(span => {
+                        span.classList.remove('text-blue-700');
+                        span.classList.add('text-blue-200');
+                    });
+                });
+                
+                // Update form inputs
+                document.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.type !== 'file' && input.type !== 'radio' && input.type !== 'checkbox') {
+                        input.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                        input.classList.add('bg-neutral-800', 'text-white', 'border-neutral-700');
+                    }
+                });
+                
+                // Update labels
+                document.querySelectorAll('label').forEach(label => {
+                    if (label.classList.contains('text-gray-700')) {
+                        label.classList.remove('text-gray-700');
+                        label.classList.add('text-gray-400');
+                    }
+                });
+                
+                // Update readonly inputs
+                document.querySelectorAll('input[readonly], textarea[readonly]').forEach(input => {
+                    input.classList.remove('bg-gray-50');
+                    input.classList.add('bg-neutral-800');
+                });
+            }
+        } else {
+            // Light mode
+            if (icon) icon.textContent = '🌙';
+            if (mainContainer) {
+                mainContainer.classList.remove('bg-neutral-900');
+                mainContainer.classList.add('bg-white', 'shadow-2xl');
+                
+                // Update all headings
+                document.querySelectorAll('h1').forEach(h => {
+                    h.classList.remove('text-orange-500');
+                    h.classList.add('text-gray-800');
+                });
+                
+                // Update all paragraphs and text
+                document.querySelectorAll('p').forEach(p => {
+                    if (p.classList.contains('text-gray-400')) {
+                        p.classList.remove('text-gray-400');
+                        p.classList.add('text-gray-600');
+                    }
+                });
+                
+                // Update info banners
+                document.querySelectorAll('.bg-blue-900').forEach(el => {
+                    el.classList.remove('bg-blue-900');
+                    el.classList.add('bg-blue-50');
+                    el.querySelectorAll('.text-blue-200').forEach(span => {
+                        span.classList.remove('text-blue-200');
+                        span.classList.add('text-blue-700');
+                    });
+                });
+                
+                // Update form inputs
+                document.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.type !== 'file' && input.type !== 'radio' && input.type !== 'checkbox') {
+                        input.classList.remove('bg-neutral-800', 'text-white', 'border-neutral-700');
+                        input.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+                    }
+                });
+                
+                // Update labels
+                document.querySelectorAll('label').forEach(label => {
+                    if (label.classList.contains('text-gray-400')) {
+                        label.classList.remove('text-gray-400');
+                        label.classList.add('text-gray-700');
+                    }
+                });
+                
+                // Update readonly inputs
+                document.querySelectorAll('input[readonly], textarea[readonly]').forEach(input => {
+                    input.classList.remove('bg-neutral-800');
+                    input.classList.add('bg-gray-50');
+                });
+            }
+        }
+    }
+
+    // Apply theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        applyGlobalTheme();
+    });
+
     function toggleMenu() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('-translate-x-full');
         sidebar.classList.toggle('-translate-x-full');
         overlay.classList.toggle('hidden');
     }
