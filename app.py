@@ -368,15 +368,15 @@ def certificate_list():
     user = session.get("user")
     return render_template('certificate_list.html', active_page='certificate-list', user=user, app_title=APP_TITLE)
 
-@app.route('/pki')
+@app.route('/pki-mtls')
 @login_required
 def pki():
     user = session.get("user")
     # Support both new and old configuration
     vault_urls = AZURE_KEYVAULT_URLS
     return render_template(
-        'pki.html',
-        active_page='pki',
+        'pki_mtls.html',
+        active_page='pki-mtls',
         user=user,
         vault_urls=vault_urls,
         app_title=APP_TITLE
@@ -437,6 +437,9 @@ def decode_csr():
         # Extract extensions with special handling for Extended Key Usage
         extensions_info = []
         extended_key_usage = None
+        subject_alternative_names = None
+        key_usage = None
+        basic_constraints = None
         
         for extension in csr.extensions:
             ext_name = extension.oid._name
@@ -454,6 +457,7 @@ def decode_csr():
                 if extension.value.key_cert_sign: usage_list.append('Key Cert Sign')
                 if extension.value.crl_sign: usage_list.append('CRL Sign')
                 ext_value = ', '.join(usage_list)
+                key_usage = ext_value  # Store for separate display
             elif isinstance(extension.value, x509.ExtendedKeyUsage):
                 eku_list = []
                 eku_display_list = []
@@ -477,6 +481,14 @@ def decode_csr():
                 for name in extension.value:
                     san_list.append(str(name.value))
                 ext_value = ', '.join(san_list)
+                subject_alternative_names = ext_value  # Store for separate display
+            elif isinstance(extension.value, x509.BasicConstraints):
+                bc_parts = []
+                bc_parts.append(f"CA: {extension.value.ca}")
+                if extension.value.path_length is not None:
+                    bc_parts.append(f"Path Length: {extension.value.path_length}")
+                ext_value = ', '.join(bc_parts)
+                basic_constraints = ext_value  # Store for separate display
             
             extensions_info.append({
                 'name': ext_name,
@@ -493,7 +505,12 @@ def decode_csr():
             'public_key': key_info,
             'extensions': extensions_info,
             'signature_algorithm': signature_algorithm,
-            'extended_key_usage': extended_key_usage
+            'key_algorithm': key_type,
+            'key_size': key_info['size'],
+            'extended_key_usage': extended_key_usage,
+            'subject_alternative_names': subject_alternative_names,
+            'key_usage': key_usage,
+            'basic_constraints': basic_constraints
         })
         
     except Exception as e:

@@ -28,6 +28,14 @@
         </a>
     </div>
     {% endif %}
+
+    <div class="px-6 py-3 mt-6">
+        <div class="flex items-center">
+            <div class="flex-grow border-t border-neutral-700"></div>
+            <span class="flex-shrink mx-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Services</span>
+            <div class="flex-grow border-t border-neutral-700"></div>
+        </div>
+    </div>
     
     <nav class="mt-4">
         <ul class="space-y-1">
@@ -45,27 +53,39 @@
     <div class="px-6 py-3 mt-6">
         <div class="flex items-center">
             <div class="flex-grow border-t border-neutral-700"></div>
-            <span class="flex-shrink mx-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Azure Services</span>
+            <span class="flex-shrink mx-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Azure Cloud Services</span>
             <div class="flex-grow border-t border-neutral-700"></div>
         </div>
     </div>
     
     <nav class="mt-4">
         <ul class="space-y-1">
-            <li><a href="/csr-signer-akv" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-signer-akv' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}">
-                <span class="text-lg mr-3">✍️</span>Sign CSR
-                {% if not user %}<span class="ml-auto text-xs bg-blue-600 px-2 py-1 rounded">Login</span>{% endif %}
-            </a></li>
-            <li><a href="/pki" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'pki' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}">
-                <span class="text-lg mr-3">☁️</span>PKI Magix
-                {% if not user %}<span class="ml-auto text-xs bg-blue-600 px-2 py-1 rounded">Login</span>{% endif %}
+            <li><a href="/pki-mtls" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'pki-mtls' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}">
+                <span class="text-lg mr-3">☁️</span>PKI mTLS
             </a></li>
             <li><a href="/certificate-list" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'certificate-list' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}">
                 <span class="text-lg mr-3">📜</span>Certificate List
+            </a></li>
+        </ul>
+    </nav>
+
+    <div class="px-6 py-3 mt-6">
+        <div class="flex items-center">
+            <div class="flex-grow border-t border-neutral-700"></div>
+            <span class="flex-shrink mx-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Testing Services</span>
+            <div class="flex-grow border-t border-neutral-700"></div>
+        </div>
+    </div>
+
+    <nav class="mt-4">
+        <ul class="space-y-1">
+            <li><a href="/csr-signer-akv" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border-l-4 {% if active_page == 'csr-signer-akv' %}bg-gray-700 text-orange-500 border-orange-500{% else %}border-transparent{% endif %}">
+                <span class="text-lg mr-3">✍️</span>Test Sign CSR
                 {% if not user %}<span class="ml-auto text-xs bg-blue-600 px-2 py-1 rounded">Login</span>{% endif %}
             </a></li>
         </ul>
     </nav>
+
     {% endif %}
 
 </div>
