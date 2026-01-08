@@ -1251,4 +1251,4 @@ if __name__ == '__main__':
         print(f"✓ OAuth redirect URI will be: {EXTERNAL_URL}{REDIRECT_PATH}")
         print()
     
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=false, host='0.0.0.0', port=5001)
