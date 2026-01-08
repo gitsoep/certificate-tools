@@ -895,13 +895,13 @@ def convert_to_pfx():
             try:
                 # Try to load multiple certificates from the chain data
                 chain_certs = []
-                # Split on BEGIN CERTIFICATE to handle multiple certs in one file
-                import re
-                cert_pattern = rb'-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----'
-                cert_matches = re.findall(cert_pattern, chain_data, re.DOTALL)
+                # Split on BEGIN CERTIFICATE marker safely without regex
+                parts = chain_data.split(b'-----BEGIN CERTIFICATE-----')
                 
-                for cert_data in cert_matches:
-                    chain_certs.append(x509.load_pem_x509_certificate(cert_data, default_backend()))
+                for part in parts[1:]:  # Skip first empty part
+                    if b'-----END CERTIFICATE-----' in part:
+                        cert_pem = b'-----BEGIN CERTIFICATE-----' + part.split(b'-----END CERTIFICATE-----')[0] + b'-----END CERTIFICATE-----'
+                        chain_certs.append(x509.load_pem_x509_certificate(cert_pem, default_backend()))
                 
                 if not chain_certs:
                     # Try as single certificate
