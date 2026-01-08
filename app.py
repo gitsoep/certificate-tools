@@ -481,7 +481,7 @@ def decode_csr():
         try:
             csr = x509.load_pem_x509_csr(csr_data, default_backend())
         except Exception as e:
-            return jsonify({'error': f'Invalid CSR format: {str(e)}'}), 400
+            return jsonify({'error': 'Invalid CSR format'}), 400
         
         # Extract subject information in structured format
         subject_info = {
@@ -1114,7 +1114,7 @@ def sign_csr_akv():
         try:
             csr = x509.load_pem_x509_csr(csr_data, default_backend())
         except Exception as e:
-            return jsonify({'error': f'Invalid CSR format: {str(e)}'}), 400
+            return jsonify({'error': 'Invalid CSR format'}), 400
         
         # Get Azure Key Vault parameters
         vault_url = request.form.get('vault_url', '').strip()
