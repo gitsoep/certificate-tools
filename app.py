@@ -13,9 +13,14 @@ import msal
 import uuid
 from dotenv import load_dotenv
 from functools import wraps
+import logging
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', os.urandom(24).hex())
@@ -122,6 +127,42 @@ def load_config_defaults():
 
 CONFIG_DEFAULTS = load_config_defaults()
 
+# Global error handlers
+@app.errorhandler(400)
+def bad_request(e):
+    """Handle 400 errors"""
+    logger.error(f'Bad request: {str(e)}')
+    return jsonify({'error': 'Bad request. Please check your input.'}), 400
+
+@app.errorhandler(401)
+def unauthorized(e):
+    """Handle 401 errors"""
+    logger.error(f'Unauthorized: {str(e)}')
+    return jsonify({'error': 'Unauthorized. Please log in.'}), 401
+
+@app.errorhandler(403)
+def forbidden(e):
+    """Handle 403 errors"""
+    logger.error(f'Forbidden: {str(e)}')
+    return jsonify({'error': 'Forbidden. You do not have permission to access this resource.'}), 403
+
+@app.errorhandler(404)
+def not_found(e):
+    """Handle 404 errors"""
+    return jsonify({'error': 'Resource not found.'}), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    """Handle 500 errors"""
+    logger.error(f'Internal server error: {str(e)}')
+    return jsonify({'error': 'An internal server error occurred. Please try again later.'}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Handle all uncaught exceptions"""
+    logger.exception(f'Unhandled exception: {str(e)}')
+    return jsonify({'error': 'An unexpected error occurred. Please try again.'}), 500
+
 @app.route('/')
 def index():
     user = session.get("user")
@@ -222,7 +263,8 @@ def generate_csr():
                         backend=default_backend()
                     )
                 except Exception as e:
-                    return jsonify({'error': f'Invalid private key: {str(e)}'}), 400
+                    logger.error(f'Invalid private key text: {str(e)}')
+                    return jsonify({'error': 'Invalid private key format. Please check your input.'}), 400
             else:
                 # Get private key from file upload
                 private_key_file = request.files.get('private_key_file')
@@ -237,7 +279,8 @@ def generate_csr():
                         backend=default_backend()
                     )
                 except Exception as e:
-                    return jsonify({'error': f'Invalid private key file: {str(e)}'}), 400
+                    logger.error(f'Invalid private key file: {str(e)}')
+                    return jsonify({'error': 'Invalid private key file format. Please check your file.'}), 400
         else:
             # Generate new private key based on signature algorithm
             if signature_algorithm.startswith('ECDSA'):
@@ -368,7 +411,8 @@ def generate_csr():
                                  app_title=APP_TITLE)
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error generating CSR: {str(e)}')
+        return jsonify({'error': 'An error occurred while generating the CSR. Please check your inputs and try again.'}), 500
 
 @app.route('/pfx-converter')
 def pfx_converter():
@@ -550,7 +594,8 @@ def decode_csr():
         })
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error decoding CSR: {str(e)}')
+        return jsonify({'error': 'An error occurred while decoding the CSR. Please check your input.'}), 500
 
 @app.route('/list-certificates', methods=['POST'])
 @login_required
@@ -666,7 +711,8 @@ def list_certificates():
         })
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error listing certificates: {str(e)}')
+        return jsonify({'error': 'An error occurred while listing certificates. Please try again.'}), 500
 
 @app.route('/convert-pfx-to-pem', methods=['POST'])
 def convert_pfx_to_pem():
@@ -693,7 +739,8 @@ def convert_pfx_to_pem():
                 backend=default_backend()
             )
         except Exception as e:
-            return jsonify({'error': f'Failed to load PFX file. Check password: {str(e)}'}), 400
+            logger.error(f'Failed to load PFX file: {str(e)}')
+            return jsonify({'error': 'Failed to load PFX file. Please check the file format and password.'}), 400
         
         # Serialize private key to PEM
         private_key_pem = ''
@@ -723,7 +770,8 @@ def convert_pfx_to_pem():
         })
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error converting PFX to PEM: {str(e)}')
+        return jsonify({'error': 'An error occurred while converting the PFX file. Please try again.'}), 500
 
 @app.route('/sign-csr', methods=['POST'])
 def sign_csr():
@@ -743,7 +791,8 @@ def sign_csr():
             csr_data = csr_file.read()
             csr = x509.load_pem_x509_csr(csr_data, default_backend())
         except Exception as e:
-            return jsonify({'error': f'Invalid CSR file: {str(e)}'}), 400
+            logger.error(f'Invalid CSR file: {str(e)}')
+            return jsonify({'error': 'Invalid CSR file format. Please provide a valid PEM-encoded CSR.'}), 400
         
         # If CA cert and key provided, sign with them; otherwise create self-signed
         if ca_cert_file and ca_key_file:
@@ -752,7 +801,8 @@ def sign_csr():
                 ca_cert_data = ca_cert_file.read()
                 ca_cert = x509.load_pem_x509_certificate(ca_cert_data, default_backend())
             except Exception as e:
-                return jsonify({'error': f'Invalid CA certificate: {str(e)}'}), 400
+                logger.error(f'Invalid CA certificate: {str(e)}')
+                return jsonify({'error': 'Invalid CA certificate format. Please provide a valid certificate.'}), 400
             
             # Load CA private key
             try:
@@ -764,7 +814,8 @@ def sign_csr():
                     backend=default_backend()
                 )
             except Exception as e:
-                return jsonify({'error': f'Invalid CA private key: {str(e)}'}), 400
+                logger.error(f'Invalid CA private key: {str(e)}')
+                return jsonify({'error': 'Invalid CA private key or incorrect password. Please check your inputs.'}), 400
             
             issuer = ca_cert.subject
             signing_key = ca_private_key
@@ -831,7 +882,8 @@ def sign_csr():
         )
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error signing CSR: {str(e)}')
+        return jsonify({'error': 'An error occurred while signing the CSR. Please try again.'}), 500
 
 @app.route('/convert-to-pfx', methods=['POST'])
 def convert_to_pfx():
@@ -881,13 +933,15 @@ def convert_to_pfx():
                 backend=default_backend()
             )
         except Exception as e:
-            return jsonify({'error': f'Invalid private key or wrong password: {str(e)}'}), 400
+            logger.error(f'Invalid private key: {str(e)}')
+            return jsonify({'error': 'Invalid private key format or incorrect password. Please check your inputs.'}), 400
         
         # Load the certificate
         try:
             certificate = x509.load_pem_x509_certificate(certificate_data, default_backend())
         except Exception as e:
-            return jsonify({'error': f'Invalid certificate: {str(e)}'}), 400
+            logger.error(f'Invalid certificate: {str(e)}')
+            return jsonify({'error': 'Invalid certificate format. Please provide a valid PEM-encoded certificate.'}), 400
         
         # Load chain certificates if provided
         chain_certs = None
@@ -907,7 +961,8 @@ def convert_to_pfx():
                     # Try as single certificate
                     chain_certs = [x509.load_pem_x509_certificate(chain_data, default_backend())]
             except Exception as e:
-                return jsonify({'error': f'Invalid chain certificate: {str(e)}'}), 400
+                logger.error(f'Invalid chain certificate: {str(e)}')
+                return jsonify({'error': 'Invalid chain certificate format. Please check your certificate chain.'}), 400
         
         # Create PFX (PKCS12)
         pfx_password = password.encode('utf-8') if password else b''
@@ -934,7 +989,8 @@ def convert_to_pfx():
         )
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error converting to PFX: {str(e)}')
+        return jsonify({'error': 'An error occurred while creating the PFX file. Please try again.'}), 500
 
 @app.route('/list-akv-certificates', methods=['POST'])
 @login_required
@@ -1010,9 +1066,11 @@ def list_akv_certificates():
         return jsonify(response)
         
     except ImportError as e:
-        return jsonify({'error': f'Azure SDK not installed: {str(e)}'}), 500
+        logger.error(f'Azure SDK not installed: {str(e)}')
+        return jsonify({'error': 'Azure SDK is not installed. Please contact the administrator.'}), 500
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error listing Key Vault certificates: {str(e)}')
+        return jsonify({'error': 'An error occurred while listing certificates from Key Vault. Please try again.'}), 500
 
 @app.route('/sign-csr-akv', methods=['POST'])
 @login_required
@@ -1076,7 +1134,8 @@ def sign_csr_akv():
             # Get the certificate in PEM format
             ca_cert = x509.load_der_x509_certificate(certificate.cer, default_backend())
         except Exception as e:
-            return jsonify({'error': f'Failed to retrieve certificate from Key Vault: {str(e)}'}), 400
+            logger.error(f'Failed to retrieve certificate from Key Vault: {str(e)}')
+            return jsonify({'error': 'Failed to retrieve certificate from Key Vault. Please check the certificate name and permissions.'}), 400
         
         # Get the private key from Key Vault (stored as secret)
         try:
@@ -1100,7 +1159,8 @@ def sign_csr_akv():
                 backend=default_backend()
             )
         except Exception as e:
-            return jsonify({'error': f'Failed to retrieve private key from Key Vault: {str(e)}. Make sure the certificate has an exportable private key.'}), 400
+            logger.error(f'Failed to retrieve private key from Key Vault: {str(e)}')
+            return jsonify({'error': 'Failed to retrieve private key from Key Vault. Make sure the certificate has an exportable private key.'}), 400
         
         # Build CA chain (including the CA cert itself)
         ca_chain_pem = ca_cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
@@ -1233,9 +1293,11 @@ def sign_csr_akv():
         return jsonify(response_data)
         
     except ImportError as e:
-        return jsonify({'error': f'Azure SDK not installed: {str(e)}. Please install: pip install azure-identity azure-keyvault-certificates azure-keyvault-secrets'}), 500
+        logger.error(f'Azure SDK not installed: {str(e)}')
+        return jsonify({'error': 'Azure SDK is not installed. Please contact the administrator.'}), 500
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f'Error signing CSR with Key Vault: {str(e)}')
+        return jsonify({'error': 'An error occurred while signing the CSR with Key Vault. Please try again.'}), 500
 
 if __name__ == '__main__':
     # Startup checks
@@ -1251,4 +1313,11 @@ if __name__ == '__main__':
         print(f"✓ OAuth redirect URI will be: {EXTERNAL_URL}{REDIRECT_PATH}")
         print()
     
-    app.run(debug=false, host='0.0.0.0', port=5001)
+    # Get debug mode from environment (default to False for security)
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes')
+    
+    if debug_mode:
+        print("⚠️  WARNING: Debug mode is enabled. Do not use in production!")
+        print()
+    
+    app.run(debug=debug_mode, host='0.0.0.0', port=5001)
