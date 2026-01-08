@@ -216,48 +216,80 @@
         function updateStatsCardsDark() {
             const statsDiv = document.getElementById('cert-stats');
             if (statsDiv && !statsDiv.classList.contains('hidden')) {
-                statsDiv.innerHTML = `
-                    <div class="bg-neutral-800 border border-neutral-700 p-4 rounded">
-                        <div class="text-gray-400 text-sm font-semibold">Total Certificates</div>
-                        <div class="text-3xl font-bold text-white" id="stat-total">${document.getElementById('stat-total').textContent}</div>
-                    </div>
-                    <div class="bg-neutral-800 border border-neutral-700 p-4 rounded">
-                        <div class="text-gray-400 text-sm font-semibold">Active</div>
-                        <div class="text-3xl font-bold text-green-500" id="stat-active">${document.getElementById('stat-active').textContent}</div>
-                    </div>
-                    <div class="bg-neutral-800 border border-neutral-700 p-4 rounded">
-                        <div class="text-gray-400 text-sm font-semibold">Expiring Soon (30d)</div>
-                        <div class="text-3xl font-bold text-yellow-500" id="stat-expiring">${document.getElementById('stat-expiring').textContent}</div>
-                    </div>
-                    <div class="bg-neutral-800 border border-neutral-700 p-4 rounded">
-                        <div class="text-gray-400 text-sm font-semibold">Expired</div>
-                        <div class="text-3xl font-bold text-red-500" id="stat-expired">${document.getElementById('stat-expired').textContent}</div>
-                    </div>
-                `;
+                // Clear existing content
+                statsDiv.innerHTML = '';
+                
+                // Store current values
+                const totalValue = document.getElementById('stat-total')?.textContent || '0';
+                const activeValue = document.getElementById('stat-active')?.textContent || '0';
+                const expiringValue = document.getElementById('stat-expiring')?.textContent || '0';
+                const expiredValue = document.getElementById('stat-expired')?.textContent || '0';
+                
+                // Create stat cards
+                const statsConfig = [
+                    { label: 'Total Certificates', value: totalValue, id: 'stat-total', textColor: 'text-white' },
+                    { label: 'Active', value: activeValue, id: 'stat-active', textColor: 'text-green-500' },
+                    { label: 'Expiring Soon (30d)', value: expiringValue, id: 'stat-expiring', textColor: 'text-yellow-500' },
+                    { label: 'Expired', value: expiredValue, id: 'stat-expired', textColor: 'text-red-500' }
+                ];
+                
+                statsConfig.forEach(config => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'bg-neutral-800 border border-neutral-700 p-4 rounded';
+                    
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'text-gray-400 text-sm font-semibold';
+                    labelDiv.textContent = config.label;
+                    
+                    const valueDiv = document.createElement('div');
+                    valueDiv.className = `text-3xl font-bold ${config.textColor}`;
+                    valueDiv.id = config.id;
+                    valueDiv.textContent = config.value;
+                    
+                    cardDiv.appendChild(labelDiv);
+                    cardDiv.appendChild(valueDiv);
+                    statsDiv.appendChild(cardDiv);
+                });
             }
         }
 
         function updateStatsCardsLight() {
             const statsDiv = document.getElementById('cert-stats');
             if (statsDiv && !statsDiv.classList.contains('hidden')) {
-                statsDiv.innerHTML = `
-                    <div class="bg-gray-50 border border-gray-200 p-4 rounded">
-                        <div class="text-gray-600 text-sm font-semibold">Total Certificates</div>
-                        <div class="text-3xl font-bold text-gray-800" id="stat-total">${document.getElementById('stat-total').textContent}</div>
-                    </div>
-                    <div class="bg-green-50 border border-green-200 p-4 rounded">
-                        <div class="text-green-600 text-sm font-semibold">Active</div>
-                        <div class="text-3xl font-bold text-green-600" id="stat-active">${document.getElementById('stat-active').textContent}</div>
-                    </div>
-                    <div class="bg-yellow-50 border border-yellow-200 p-4 rounded">
-                        <div class="text-yellow-600 text-sm font-semibold">Expiring Soon (30d)</div>
-                        <div class="text-3xl font-bold text-yellow-600" id="stat-expiring">${document.getElementById('stat-expiring').textContent}</div>
-                    </div>
-                    <div class="bg-red-50 border border-red-200 p-4 rounded">
-                        <div class="text-red-600 text-sm font-semibold">Expired</div>
-                        <div class="text-3xl font-bold text-red-600" id="stat-expired">${document.getElementById('stat-expired').textContent}</div>
-                    </div>
-                `;
+                // Clear existing content
+                statsDiv.innerHTML = '';
+                
+                // Store current values
+                const totalValue = document.getElementById('stat-total')?.textContent || '0';
+                const activeValue = document.getElementById('stat-active')?.textContent || '0';
+                const expiringValue = document.getElementById('stat-expiring')?.textContent || '0';
+                const expiredValue = document.getElementById('stat-expired')?.textContent || '0';
+                
+                // Create stat cards
+                const statsConfig = [
+                    { label: 'Total Certificates', value: totalValue, id: 'stat-total', bgColor: 'bg-gray-50', borderColor: 'border-gray-200', labelColor: 'text-gray-600', textColor: 'text-gray-800' },
+                    { label: 'Active', value: activeValue, id: 'stat-active', bgColor: 'bg-green-50', borderColor: 'border-green-200', labelColor: 'text-green-600', textColor: 'text-green-600' },
+                    { label: 'Expiring Soon (30d)', value: expiringValue, id: 'stat-expiring', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200', labelColor: 'text-yellow-600', textColor: 'text-yellow-600' },
+                    { label: 'Expired', value: expiredValue, id: 'stat-expired', bgColor: 'bg-red-50', borderColor: 'border-red-200', labelColor: 'text-red-600', textColor: 'text-red-600' }
+                ];
+                
+                statsConfig.forEach(config => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = `${config.bgColor} border ${config.borderColor} p-4 rounded`;
+                    
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = `${config.labelColor} text-sm font-semibold`;
+                    labelDiv.textContent = config.label;
+                    
+                    const valueDiv = document.createElement('div');
+                    valueDiv.className = `text-3xl font-bold ${config.textColor}`;
+                    valueDiv.id = config.id;
+                    valueDiv.textContent = config.value;
+                    
+                    cardDiv.appendChild(labelDiv);
+                    cardDiv.appendChild(valueDiv);
+                    statsDiv.appendChild(cardDiv);
+                });
             }
         }
 
@@ -441,25 +473,85 @@
                               daysLeft < 30 ? (isDark ? 'text-yellow-500' : 'text-yellow-600') : 
                               (isDark ? 'text-green-500' : 'text-green-600');
 
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="${statusClass} text-white text-xs font-semibold px-2 py-1 rounded">${statusText}</span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm ${caClass} font-semibold">${escapeHtml(cert.ca_directory)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${cnClass}">${escapeHtml(cert.common_name)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm ${textClass}">${escapeHtml(cert.issuer)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm ${textClass}">${formatDate(validFromDate)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm ${textClass}">${formatDate(expiryDate)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm ${daysColor} font-semibold">
-                    ${daysLeft < 0 ? 'Expired' : `${daysLeft} days`}
-                </td>
-                <td class="px-6 py-4 text-sm ${textClass} font-mono text-xs max-w-xs truncate" title="${escapeHtml(cert.name)}">${escapeHtml(cert.name)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <a href="${escapeHtml(cert.url)}" target="_blank" class="${linkClass} font-semibold" title="Download">
-                        ⬇️ Download
-                    </a>
-                </td>
-            `;
+            // Create table cells using safe DOM construction
+            const cells = [
+                // Status cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = 'px-6 py-4 whitespace-nowrap';
+                    const span = document.createElement('span');
+                    span.className = `${statusClass} text-white text-xs font-semibold px-2 py-1 rounded`;
+                    span.textContent = statusText;
+                    td.appendChild(span);
+                    return td;
+                })(),
+                // CA Directory cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = `px-6 py-4 whitespace-nowrap text-sm ${caClass} font-semibold`;
+                    td.textContent = cert.ca_directory;
+                    return td;
+                })(),
+                // Common Name cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = `px-6 py-4 whitespace-nowrap text-sm font-semibold ${cnClass}`;
+                    td.textContent = cert.common_name;
+                    return td;
+                })(),
+                // Issuer cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = `px-6 py-4 whitespace-nowrap text-sm ${textClass}`;
+                    td.textContent = cert.issuer;
+                    return td;
+                })(),
+                // Valid From cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = `px-6 py-4 whitespace-nowrap text-sm ${textClass}`;
+                    td.textContent = formatDate(validFromDate);
+                    return td;
+                })(),
+                // Expires cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = `px-6 py-4 whitespace-nowrap text-sm ${textClass}`;
+                    td.textContent = formatDate(expiryDate);
+                    return td;
+                })(),
+                // Days Left cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = `px-6 py-4 whitespace-nowrap text-sm ${daysColor} font-semibold`;
+                    td.textContent = daysLeft < 0 ? 'Expired' : `${daysLeft} days`;
+                    return td;
+                })(),
+                // File Name cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = `px-6 py-4 text-sm ${textClass} font-mono text-xs max-w-xs truncate`;
+                    td.title = cert.name;
+                    td.textContent = cert.name;
+                    return td;
+                })(),
+                // Actions cell
+                (() => {
+                    const td = document.createElement('td');
+                    td.className = 'px-6 py-4 whitespace-nowrap text-sm';
+                    const link = document.createElement('a');
+                    link.href = cert.url;
+                    link.target = '_blank';
+                    link.className = `${linkClass} font-semibold`;
+                    link.title = 'Download';
+                    link.textContent = '⬇️ Download';
+                    td.appendChild(link);
+                    return td;
+                })()
+            ];
+
+            // Append all cells to the row
+            cells.forEach(cell => row.appendChild(cell));
 
             return row;
         }
@@ -470,12 +562,6 @@
                 month: 'short',
                 day: 'numeric'
             });
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         function showError(message) {
