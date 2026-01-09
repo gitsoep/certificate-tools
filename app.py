@@ -18,8 +18,9 @@ import logging
 # Load environment variables
 load_dotenv()
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+log_level = os.environ.get('LOG_LEVEL', 'WARNING').upper()
+logging.basicConfig(level=getattr(logging, log_level, logging.WARNING))
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
