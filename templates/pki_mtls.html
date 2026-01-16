@@ -560,7 +560,7 @@
                         select.innerHTML = '';
                         const certs = (data.certificates || []).filter(c => c.enabled !== false);
                         certs.forEach(c => {
-                            const opt = new Option(c.name + ' (' + c.vault_name + ')', JSON.stringify({ name: c.name, vault_url: c.vault_url }));
+                            const opt = new Option(c.name, JSON.stringify({ name: c.name, vault_url: c.vault_url }));
                             select.options.add(opt);
                         });
                         if (certs.length === 0) showAlert('No certificates found in any configured Key Vault');
