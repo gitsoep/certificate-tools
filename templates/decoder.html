@@ -8,46 +8,66 @@
     <script src="/static/theme.js"></script>
 </head>
 <body class="bg-neutral-900 min-h-screen flex">
-    {% set active_page = 'csr-decoder' %}
+    {% set active_page = 'decoder' %}
     {% include 'sidebar.html' %}
     
     <div class="flex-1 p-6 md:p-10">
     <div class="max-w-4xl bg-white shadow-2xl p-8 md:p-12" id="main-container">
-        <h1 class="text-4xl font-bold text-gray-800 mb-4" id="page-title">🔍 CSR Decoder</h1>
-        <p class="text-xl text-gray-600 mb-8" id="page-subtitle">Decode and view the contents of a Certificate Signing Request (CSR).</p>
+        <h1 class="text-4xl font-bold text-gray-800 mb-4" id="page-title">🔍 CSR/Certificate Decoder</h1>
+        <p class="text-xl text-gray-600 mb-8" id="page-subtitle">Decode and view the contents of a Certificate Signing Request (CSR) or Certificate.</p>
         
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 ">
-            <span class="text-blue-700">ℹ️ Upload a CSR file or paste the CSR text to decode and view its contents.</span>
+            <span class="text-blue-700">ℹ️ Upload a CSR/Certificate file or paste the CSR/Certificate text to decode and view its contents.</span>
         </div>
         
         <form id="decoderForm" class="space-y-6">
             <div>
-                <label for="csr_file" class="block text-sm font-semibold text-gray-700 mb-2">Upload CSR File</label>
-                <input type="file" id="csr_file" name="csr_file" accept=".csr,.pem,.txt"
+                <label for="csr_file" class="block text-sm font-semibold text-gray-700 mb-2">Upload CSR/Certificate File</label>
+                <input type="file" id="csr_file" name="csr_file" accept=".csr,.pem,.txt,.crt,.cer"
                        class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
-                <small class="text-gray-500 text-sm">Upload a CSR file in PEM format</small>
+                <small class="text-gray-500 text-sm">Upload a CSR or Certificate file in PEM format</small>
             </div>
             
             <div>
-                <label for="csr_text" class="block text-sm font-semibold text-gray-700 mb-2">Or Paste CSR Text</label>
+                <label for="csr_text" class="block text-sm font-semibold text-gray-700 mb-2">Or Paste CSR/Certificate Text</label>
                 <textarea id="csr_text" name="csr_text" rows="10" 
                           placeholder="-----BEGIN CERTIFICATE REQUEST-----
 ...
------END CERTIFICATE REQUEST-----"
+-----END CERTIFICATE REQUEST-----
+
+or
+
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----"
                           class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm"></textarea>
-                <small class="text-gray-500 text-sm">Paste your CSR in PEM format</small>
+                <small class="text-gray-500 text-sm">Paste your CSR or Certificate in PEM format</small>
             </div>
             
             <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
-                🔍 Decode CSR
+                🔍 Decode
             </button>
         </form>
         
         <div id="result" class="hidden mt-8 space-y-6">
-            <h2 class="text-2xl font-bold text-gray-800">Decoded CSR Information</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Decoded Information</h2>
+            
+            <div id="type-section" class="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
+                <span class="text-green-700 font-semibold" id="document-type"></span>
+            </div>
+            
+            <div id="validity-section" class="hidden bg-gray-50 border border-gray-200  p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">📅 Validity Period</h3>
+                <div id="validity-info" class="space-y-2"></div>
+            </div>
+            
+            <div id="issuer-section" class="hidden bg-gray-50 border border-gray-200  p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">🏢 Issuer Information</h3>
+                <div id="issuer-info" class="space-y-2"></div>
+            </div>
             
             <div class="bg-gray-50 border border-gray-200  p-6">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 Certificate Subject Information</h3>
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 Subject Information</h3>
                 <div id="subject-info" class="space-y-2"></div>
             </div>
             
@@ -91,7 +111,7 @@
             const csrText = document.getElementById('csr_text').value.trim();
             
             if (!csrFile && !csrText) {
-                showError('Please upload a CSR file or paste CSR text');
+                showError('Please upload a CSR/Certificate file or paste CSR/Certificate text');
                 return;
             }
             
@@ -110,7 +130,7 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    showError(data.error || 'Failed to decode CSR');
+                    showError(data.error || 'Failed to decode input');
                     return;
                 }
                 
@@ -121,6 +141,47 @@
         });
         
         function displayResults(data) {
+            // Display document type
+            const typeText = data.is_certificate ? '📜 This is a Certificate' : '📝 This is a Certificate Signing Request (CSR)';
+            document.getElementById('document-type').textContent = typeText;
+            
+            // Display validity period for certificates
+            if (data.is_certificate && data.validity) {
+                const validityHtml = `
+                    <div class="py-2 border-b border-gray-200"><strong class="text-gray-700">Not Before:</strong> <span class="text-gray-600">${escapeHtml(data.validity.not_before)}</span></div>
+                    <div class="py-2"><strong class="text-gray-700">Not After:</strong> <span class="text-gray-600">${escapeHtml(data.validity.not_after)}</span></div>
+                `;
+                document.getElementById('validity-info').innerHTML = validityHtml;
+                document.getElementById('validity-section').classList.remove('hidden');
+            } else {
+                document.getElementById('validity-section').classList.add('hidden');
+            }
+            
+            // Display issuer information for certificates
+            if (data.is_certificate && data.issuer) {
+                const issuerFieldOrder = [
+                    { key: 'commonName', label: 'Common Name' },
+                    { key: 'organization', label: 'Organization' },
+                    { key: 'organizationalUnitName', label: 'Organizational Unit' },
+                    { key: 'countryName', label: 'Country' },
+                    { key: 'stateOrProvinceName', label: 'State/Province' },
+                    { key: 'localityName', label: 'City/Locality' }
+                ];
+                
+                const issuerHtml = issuerFieldOrder.map(field => {
+                    const value = data.issuer[field.key];
+                    if (value) {
+                        return `<div class="py-2 border-b border-gray-200 last:border-b-0"><strong class="text-gray-700">${field.label}:</strong> <span class="text-gray-600">${escapeHtml(value)}</span></div>`;
+                    }
+                    return '';
+                }).filter(row => row !== '').join('');
+                
+                document.getElementById('issuer-info').innerHTML = issuerHtml || '<div class="text-gray-500">No issuer information found</div>';
+                document.getElementById('issuer-section').classList.remove('hidden');
+            } else {
+                document.getElementById('issuer-section').classList.add('hidden');
+            }
+            
             // Display subject information in specific order
             const fieldOrder = [
                 { key: 'commonName', label: 'Common Name' },
