@@ -19,9 +19,11 @@ on:
     paths-ignore:
       - '**/*.md'
       - '**/*.txt'
-      - '**/tailwindcss.js'
   schedule:
     - cron: '16 8 * * 6'
+
+paths-ignore:
+  - '**/tailwindcss.js'
 
 jobs:
   analyze:
