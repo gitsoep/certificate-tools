@@ -536,8 +536,8 @@ def decode_csr():
             
             # Extract validity period
             validity_info = {
-                'not_before': cert_obj.not_valid_before.strftime('%Y-%m-%d %H:%M:%S UTC'),
-                'not_after': cert_obj.not_valid_after.strftime('%Y-%m-%d %H:%M:%S UTC')
+                'not_before': cert_obj.not_valid_before_utc.strftime('%Y-%m-%d %H:%M:%S UTC'),
+                'not_after': cert_obj.not_valid_after_utc.strftime('%Y-%m-%d %H:%M:%S UTC')
             }
             
             # Extract public key information
@@ -891,8 +891,8 @@ def list_certificates():
                         'common_name': cn or 'Unknown',
                         'issuer': issuer_cn or 'Unknown',
                         'email': email_addr or None,
-                        'not_before': cert.not_valid_before.isoformat() if hasattr(cert, 'not_valid_before') else cert.not_valid_before_utc.isoformat(),
-                        'not_after': cert.not_valid_after.isoformat() if hasattr(cert, 'not_valid_after') else cert.not_valid_after_utc.isoformat(),
+                        'not_before': cert.not_valid_before_utc.isoformat(),
+                        'not_after': cert.not_valid_after_utc.isoformat(),
                         'size': blob.size,
                         'last_modified': blob.last_modified.isoformat() if blob.last_modified else None,
                         'url': download_url
