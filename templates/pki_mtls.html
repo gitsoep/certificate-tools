@@ -615,19 +615,29 @@
                     }
                     const data = await resp.json();
                     
+                    // Extract CN from CSR for filename (use from the parsed data if available)
+                    const cn = getInputValue('common_name') || 'certificate';
+                    const safeFilename = cn.replace(/[^a-zA-Z0-9\-_.]/g, '_');
+                    
                     // Create download link for certificate
                     const certPem = data.certificate || '';
                     const certBlob = new Blob([certPem], { type: 'application/x-pem-file' });
                     const certUrl = window.URL.createObjectURL(certBlob);
                     const certDl = document.getElementById('download-certificate');
-                    if (certDl) { certDl.href = certUrl; }
+                    if (certDl) { 
+                        certDl.href = certUrl;
+                        certDl.download = `${safeFilename}.crt`;
+                    }
                     
                     // Create download link for CA chain
                     const caChainPem = data.ca_chain || '';
                     const caChainBlob = new Blob([caChainPem], { type: 'application/x-pem-file' });
                     const caChainUrl = window.URL.createObjectURL(caChainBlob);
                     const caChainDl = document.getElementById('download-ca-chain');
-                    if (caChainDl) { caChainDl.href = caChainUrl; }
+                    if (caChainDl) { 
+                        caChainDl.href = caChainUrl;
+                        caChainDl.download = `${certName}-ca-chain.pem`;
+                    }
                     
                     // Display blob storage URL if available
                     if (data.blob_url) {

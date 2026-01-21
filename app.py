@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
 from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
 from cryptography import x509
@@ -9,6 +9,8 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import configparser
 import os
+import io
+import urllib.parse
 import msal
 import uuid
 from dotenv import load_dotenv
@@ -855,17 +857,45 @@ def list_certificates():
                         if attr.oid == NameOID.COMMON_NAME:
                             issuer_cn = attr.value
                             break
+
+                    # Extract email address from subject or SAN (RFC822Name)
+                    email_addr = None
+                    try:
+                        for attr in cert.subject:
+                            if attr.oid == NameOID.EMAIL_ADDRESS:
+                                email_addr = attr.value
+                                break
+                        if not email_addr:
+                            try:
+                                san = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName).value
+                                rfc_emails = san.get_values_for_type(x509.RFC822Name)
+                                if rfc_emails:
+                                    email_addr = rfc_emails[0]
+                            except Exception:
+                                pass
+                    except Exception:
+                        email_addr = None
                     
+                    # Build download URL (prefer EXTERNAL_URL when provided)
+                    try:
+                        if EXTERNAL_URL:
+                            download_url = f"{EXTERNAL_URL}/download?blob=" + urllib.parse.quote(blob.name)
+                        else:
+                            download_url = url_for('download', blob=blob.name)
+                    except Exception:
+                        download_url = f"/download?blob=" + urllib.parse.quote(blob.name)
+
                     certificates.append({
                         'name': blob.name,
                         'ca_directory': ca_name or 'root',
                         'common_name': cn or 'Unknown',
                         'issuer': issuer_cn or 'Unknown',
+                        'email': email_addr or None,
                         'not_before': cert.not_valid_before.isoformat() if hasattr(cert, 'not_valid_before') else cert.not_valid_before_utc.isoformat(),
                         'not_after': cert.not_valid_after.isoformat() if hasattr(cert, 'not_valid_after') else cert.not_valid_after_utc.isoformat(),
                         'size': blob.size,
                         'last_modified': blob.last_modified.isoformat() if blob.last_modified else None,
-                        'url': f"{AZURE_BLOB_STORAGE_URL}/{AZURE_BLOB_STORAGE_CONTAINER}/{blob.name}"
+                        'url': download_url
                     })
                 except Exception as e:
                     # Skip files that can't be parsed as certificates
@@ -883,6 +913,72 @@ def list_certificates():
     except Exception as e:
         logger.error(f'Error listing certificates: {str(e)}')
         return jsonify({'error': 'An error occurred while listing certificates. Please try again.'}), 500
+
+@app.route('/download')
+@login_required
+def download():
+    """Download a certificate blob via proxy endpoint."""
+    try:
+        from azure.storage.blob import BlobServiceClient
+        from azure.core.credentials import AccessToken
+        import datetime
+
+        blob_path = request.args.get('blob') or request.args.get('name')
+        if not blob_path:
+            return jsonify({'error': 'Missing blob parameter'}), 400
+
+        if not AZURE_BLOB_STORAGE_URL or not AZURE_BLOB_STORAGE_CONTAINER:
+            return jsonify({'error': 'Azure Blob Storage is not configured'}), 400
+
+        # Acquire storage token
+        storage_scope = ["https://storage.azure.com/.default"]
+        storage_token = _get_token_from_cache(storage_scope)
+        if not storage_token or "access_token" not in storage_token:
+            cache = _load_cache()
+            cca = _build_msal_app(cache=cache)
+            accounts = cca.get_accounts()
+            if accounts:
+                storage_token = cca.acquire_token_silent(storage_scope, account=accounts[0])
+                _save_cache(cache)
+        if not storage_token or "access_token" not in storage_token:
+            return jsonify({'error': 'Failed to acquire storage token. Please log out and log in again.'}), 401
+
+        class StorageCredential:
+            def __init__(self, access_token):
+                self.token = access_token
+            def get_token(self, *scopes, **kwargs):
+                return AccessToken(self.token, int(datetime.datetime.now().timestamp()) + 3600)
+
+        storage_credential = StorageCredential(storage_token["access_token"])
+
+        blob_service_client = BlobServiceClient(
+            account_url=AZURE_BLOB_STORAGE_URL,
+            credential=storage_credential
+        )
+        container_client = blob_service_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
+        blob_client = container_client.get_blob_client(blob_path)
+
+        # Download blob content
+        data = blob_client.download_blob().readall()
+
+        # Determine filename and mimetype
+        basename = os.path.basename(blob_path)
+        mimetype = 'application/octet-stream'
+        if basename.endswith('.pem'):
+            mimetype = 'application/x-pem-file'
+        elif basename.endswith('.crt'):
+            mimetype = 'application/x-x509-ca-cert'
+
+        return send_file(
+            io.BytesIO(data),
+            mimetype=mimetype,
+            as_attachment=True,
+            download_name=basename
+        )
+
+    except Exception as e:
+        logger.error(f'Download error for blob {request.args.get("blob")}: {str(e)}')
+        return jsonify({'error': 'Failed to download the certificate.'}), 500
 
 @app.route('/convert-pfx-to-pem', methods=['POST'])
 def convert_pfx_to_pem():
@@ -1444,8 +1540,11 @@ def sign_csr_akv():
                 blob_client = container_client.get_blob_client(blob_name)
                 blob_client.upload_blob(cert_pem, overwrite=True)
                 
-                # Generate the blob URL
-                blob_url = f"{AZURE_BLOB_STORAGE_URL}/{AZURE_BLOB_STORAGE_CONTAINER}/{blob_name}"
+                # Generate the download proxy URL
+                if EXTERNAL_URL:
+                    blob_url = f"{EXTERNAL_URL}/download?blob={urllib.parse.quote(blob_name)}"
+                else:
+                    blob_url = url_for('download', blob=blob_name, _external=True)
                 
             except Exception as e:
                 # Don't fail the request if blob upload fails, just log it
