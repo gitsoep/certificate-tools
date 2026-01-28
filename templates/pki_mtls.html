@@ -400,7 +400,14 @@
                 if (navs[step]) navs[step].classList.remove('hidden');
 
                 const backBtn = document.getElementById('nav-step-back');
-                if (backBtn) backBtn.disabled = (step === 0);
+                if (backBtn) {
+                    backBtn.disabled = (step === 0);
+                    if (step === 2) {
+                        backBtn.classList.add('hidden');
+                    } else {
+                        backBtn.classList.remove('hidden');
+                    }
+                }
 
                 const items = qsa('ul#stepper-overview > li');
                 items.forEach((item, idx) => {
