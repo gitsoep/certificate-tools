@@ -62,6 +62,11 @@ AZURE_KEYVAULT_URLS = [url.strip() for url in AZURE_KEYVAULT_URLS_STR.split(',')
 
 def _build_msal_app(cache=None, authority=None):
     """Build a confidential client application for MSAL"""
+    if not CLIENT_ID:
+        raise ValueError("AZURE_CLIENT_ID environment variable is not set")
+    if not CLIENT_SECRET:
+        raise ValueError("AZURE_CLIENT_SECRET environment variable is not set")
+    
     return msal.ConfidentialClientApplication(
         CLIENT_ID,
         authority=authority or AUTHORITY,
@@ -174,11 +179,21 @@ def index():
 @app.route('/login')
 def login():
     """Redirect user to Azure AD login page"""
+    # Check if Azure authentication is configured
+    if not CLIENT_ID or not CLIENT_SECRET:
+        error_msg = "Azure authentication is not configured. Please set AZURE_CLIENT_ID and AZURE_CLIENT_SECRET environment variables."
+        logger.error(error_msg)
+        return render_template('login.html', error=error_msg, app_title=APP_TITLE)
+    
     # Clear any existing session
     session.clear()
     # Build authentication URL
-    auth_url = _build_auth_url(scopes=SCOPE)
-    return redirect(auth_url)
+    try:
+        auth_url = _build_auth_url(scopes=SCOPE)
+        return redirect(auth_url)
+    except Exception as e:
+        logger.error(f"Error building auth URL: {str(e)}")
+        return render_template('login.html', error=str(e), app_title=APP_TITLE)
 
 @app.route('/auth/callback')
 def authorized():
