@@ -6,6 +6,7 @@ services:
     container_name: csr-generator
     ports:
       - "5001:5001"
+    env_file: .env
     environment:
       - FLASK_APP=app.py
       - PYTHONUNBUFFERED=1
