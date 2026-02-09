@@ -43,15 +43,34 @@ A comprehensive certificate management web application built with Flask that han
 - 📋 One-click copy to clipboard
 - 💾 Download generated files
 
+### Certificate/CSR Decoder
+- 🔍 Decode and inspect CSR contents
+- 📜 View certificate details and attributes
+- 📋 Display subject, issuer, validity, extensions
+
+### Certificate List
+- 📑 List all certificates from Azure Key Vault
+- 🔎 View certificate details and metadata
+- ⬇️ Download certificates from Key Vault
+
+### PKI mTLS Certificate Generation
+- 🔐 Generate client certificates for mTLS authentication
+- ☁️ Sign with CA from Azure Key Vault
+
 ## Requirements
 
 - Python 3.11+
-- Flask 3.0.0
-- cryptography 41.0.7
-- Gunicorn 21.2.0 (for production deployment)
+- Flask 3.1.2
+- cryptography 46.0.4
+- Werkzeug 3.1.5
+- Gunicorn 25.0.1 (for production deployment)
 - azure-identity 1.15.0+ (for Azure Key Vault integration)
 - azure-keyvault-certificates 4.8.0+ (for Azure Key Vault integration)
 - azure-keyvault-secrets 4.8.0+ (for Azure Key Vault integration)
+- azure-storage-blob 12.19.0+ (for Azure Blob Storage integration)
+- msal 1.26.0+ (for Microsoft authentication)
+- flask-session 0.5.0+ (for server-side sessions)
+- python-dotenv 1.0.0+ (for environment configuration)
 
 ## Installation
 
@@ -113,14 +132,14 @@ pip install -r requirements.txt
 
 1. Start the Flask development server:
 ```bash
-python app.py
+python run.py
 ```
 
 ### Production Mode
 
 1. Using Gunicorn (recommended):
 ```bash
-gunicorn --bind 0.0.0.0:5001 --workers 4 app:app
+gunicorn --bind 0.0.0.0:5001 --workers 4 run:app
 ```
 
 Or use the startup script:
@@ -236,6 +255,32 @@ AZURE_KEYVAULT_URLS=https://vault1.vault.azure.net/,https://vault2.vault.azure.n
 
 5. Download the extracted private key, certificate, and chain (if present)
 
+### Decode CSR or Certificate
+
+1. Navigate to "Decoder" from the menu
+
+2. Paste or upload your CSR or certificate in PEM format
+
+3. Click "Decode"
+
+4. View the decoded information including:
+   - Subject details (CN, O, OU, etc.)
+   - Public key information
+   - Extensions and key usage
+   - Validity period (for certificates)
+
+### List Azure Key Vault Certificates
+
+**Note**: Requires Azure authentication.
+
+1. Navigate to "Certificate List" from the menu
+
+2. The application loads certificates from all configured Key Vaults
+
+3. View certificate details including name, vault, and expiration
+
+4. Download certificates as needed
+
 ## Security Notes
 
 ⚠️ **Important**: 
@@ -251,20 +296,57 @@ AZURE_KEYVAULT_URLS=https://vault1.vault.azure.net/,https://vault2.vault.azure.n
 
 ```
 certificate-tools/
-├── app.py                      # Main Flask application
-├── csr.conf                    # Default configuration values
+├── run.py                      # Application entry point
 ├── requirements.txt            # Python dependencies
 ├── Dockerfile                  # Docker container configuration
 ├── docker-compose.yml          # Docker Compose orchestration
+├── start.sh                    # Production startup script
+├── app/                        # Main application module
+│   ├── __init__.py             # Flask application factory
+│   ├── config.py               # Configuration settings
+│   ├── routes/                 # Route blueprints
+│   │   ├── main.py             # Home page routes
+│   │   ├── auth.py             # Authentication routes
+│   │   ├── csr.py              # CSR generation/signing routes
+│   │   ├── decoder.py          # Certificate/CSR decoder routes
+│   │   ├── converter.py        # Format conversion routes
+│   │   └── azure.py            # Azure Key Vault routes
+│   ├── services/               # Business logic services
+│   │   ├── auth.py             # Authentication service
+│   │   └── certificate.py      # Certificate operations
+│   └── utils/                  # Utility modules
+│       ├── credentials.py      # Azure credential handling
+│       ├── decorators.py       # Route decorators
+│       └── errors.py           # Error handlers
+├── templates/                  # Jinja2 HTML templates
+│   ├── index.html              # Home page
+│   ├── login.html              # Azure login page
+│   ├── sidebar.html            # Navigation sidebar
+│   ├── csr_generator.html      # CSR generation form
+│   ├── csr-generator-result.html  # CSR/Key results
+│   ├── csr_signer.html         # CSR signing page
+│   ├── csr_signer_akv.html     # Azure Key Vault CSR signing
+│   ├── decoder.html            # CSR/Certificate decoder
+│   ├── certificate_list.html   # Certificate list view
+│   ├── pki_mtls.html           # mTLS certificate generation
+│   ├── pfx_converter.html      # PEM to PFX converter
+│   └── pfx_to_pem.html         # PFX to PEM converter
+├── static/                     # Static assets
+│   ├── tailwindcss.js          # CSS framework
+│   ├── theme.js                # Theme handling
+│   └── images/                 # Image assets
+├── charts/                     # Helm charts for Kubernetes
+│   └── certificate-tools/
+│       ├── Chart.yaml
+│       ├── values.yaml
+│       └── templates/
 ├── .github/
-│   └── workflows/
-│       └── docker-publish.yml  # CI/CD pipeline for GHCR
-├── README.md                   # This file
-└── templates/    ├── csr_signer_akv.html     # Azure Key Vault CSR signing page    ├── index.html              # CSR generation form
-    ├── csr-generator-result.html  # CSR/Key results display
-    ├── csr_signer.html         # CSR signing page
-    ├── pfx_converter.html      # PEM to PFX converter
-    └── pfx_to_pem.html         # PFX to PEM converter
+│   ├── workflows/
+│   │   ├── docker-publish.yml  # CI/CD pipeline for GHCR
+│   │   └── codeql.yml          # Code security analysis
+│   ├── dependabot.yml          # Dependency updates
+│   └── codeql/
+└── README.md                   # This file
 ```
 
 ## Docker Deployment
@@ -291,20 +373,58 @@ docker pull ghcr.io/gitsoep/certificate-tools:main
 docker run -d -p 5001:5001 ghcr.io/gitsoep/certificate-tools:main
 ```
 
+### Kubernetes Deployment with Helm
+
+The application includes Helm charts for Kubernetes deployment:
+
+```bash
+# Install from local charts
+helm install certificate-tools ./charts/certificate-tools
+
+# Install with custom values
+helm install certificate-tools ./charts/certificate-tools -f custom-values.yaml
+
+# Upgrade existing deployment
+helm upgrade certificate-tools ./charts/certificate-tools
+```
+
+See [charts/certificate-tools/README.md](charts/certificate-tools/README.md) for detailed Helm configuration options.
+
 ## Configuration
 
-Default values for CSR generation can be customized in `csr.conf`:
+Configuration is managed through environment variables. Create a `.env` file in the project root:
 
-```ini
-[req]
-default_bits = 4096
-distinguished_name = req_distinguished_name
+```bash
+# Flask settings
+FLASK_SECRET_KEY=your-secret-key-here
 
-[req_distinguished_name]
-C = NL
-ST = Gelderland
-L = Nijmegen
-O = Mosadex Services B.V.
+# Azure AD Configuration (required for Azure features)
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+AZURE_TENANT_ID=common
+
+# External URL (required when behind reverse proxy)
+EXTERNAL_URL=https://your-domain.com
+
+# Azure Key Vault URLs (comma-separated for multiple vaults)
+AZURE_KEYVAULT_URLS=https://your-vault.vault.azure.net/
+
+# Azure Blob Storage (optional)
+AZURE_BLOB_STORAGE_URL=https://your-storage.blob.core.windows.net/
+AZURE_BLOB_STORAGE_CONTAINER=storage
+
+# CSR Generation Defaults
+DEFAULT_COUNTRY=NL
+DEFAULT_STATE=Gelderland
+DEFAULT_LOCALITY=Nijmegen
+DEFAULT_ORGANIZATION=Your Organization
+DEFAULT_OU=Your Unit
+DEFAULT_CN=example.com
+DEFAULT_EMAIL=admin@example.com
+DEFAULT_KEY_SIZE=4096
+
+# Logging
+LOG_LEVEL=WARNING
 ```
 
 ## How It Works
@@ -322,6 +442,12 @@ O = Mosadex Services B.V.
 3. If CA signing is selected, the certificate is signed with the CA's private key
 4. If self-signing is selected, the certificate is signed with the CSR's private key
 5. The signed certificate is returned in PEM format
+
+### CSR/Certificate Decoding
+1. The CSR or certificate PEM content is parsed
+2. Subject, issuer, validity, and extensions are extracted
+3. Details are formatted and displayed in a readable format
+4. Useful for inspecting certificate contents before deployment
 
 ### PEM to PFX Conversion
 1. Private key and certificate files are parsed
