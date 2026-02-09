@@ -1,7 +1,7 @@
 <button class="lg:hidden fixed top-4 left-4 z-50 bg-orange-600 hover:bg-orange-700 text-white p-3 shadow-lg transition-colors" onclick="toggleMenu()">☰</button>
 
 <div class="fixed lg:sticky lg:top-0 inset-y-0 left-0 w-64 bg-neutral-900 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-40 shadow-2xl lg:h-screen flex flex-col" id="sidebar">
-    <div class="p-6 border-b border-neutral-800">
+    <div class="p-6 border-neutral-800">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold text-orange-500">🔐 Certificate Tools</h2>
         </div>
@@ -77,7 +77,7 @@
     </div>
     
 
-    <div class="p-6 border-b border-neutral-800">
+    <div class="p-6 border-neutral-800">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold text-gray-300">Set theme: </h2>
             <button onclick="toggleGlobalTheme()" class="p-2 hover:bg-neutral-800 rounded-lg transition-colors" id="theme-toggle-btn" title="Toggle theme">
@@ -90,7 +90,7 @@
     <div class="mt-auto">
     <!-- User Info Section -->
     {% if user %}
-    <div class="p-4 border-b border-neutral-800 bg-neutral-800">
+    <div class="p-4 border-neutral-800 bg-neutral-800">
         <div class="flex items-center mb-2">
             <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-2">
                 {{ user.name[0] if user.name else 'U' }}
@@ -105,7 +105,7 @@
         </a>
     </div>
     {% else %}
-    <div class="p-4 border-b border-neutral-800 bg-neutral-800">
+    <div class="p-4 border-neutral-800 bg-neutral-800">
         <a href="/login" class="block w-full text-center text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors">
             🔐 Sign in with Azure
         </a>
