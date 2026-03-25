@@ -316,14 +316,35 @@ def list_akv_certificates():
         
         credential = UserCredential(token["access_token"])
         
+        configured_vault_urls = current_app.config.get('AZURE_KEYVAULT_URLS', []) or []
         request_vault_urls = request.json.get('vault_urls', []) if request.is_json else []
-        vault_urls = request_vault_urls if request_vault_urls else current_app.config.get('AZURE_KEYVAULT_URLS', [])
+        
+        # Only allow user to select from configured vault URLs; do not allow arbitrary URLs.
+        if request_vault_urls:
+            # Normalize both lists to strings and intersect with the configured allowlist.
+            configured_set = set(str(u) for u in configured_vault_urls)
+            filtered_vault_urls = []
+            disallowed_vault_urls = []
+            for u in request_vault_urls:
+                u_str = str(u)
+                if u_str in configured_set:
+                    filtered_vault_urls.append(u_str)
+                else:
+                    disallowed_vault_urls.append(u_str)
+            vault_urls = filtered_vault_urls
+        else:
+            vault_urls = [str(u) for u in configured_vault_urls]
         
         if not vault_urls:
-            return jsonify({'error': 'No Key Vault URLs configured or provided'}), 400
+            return jsonify({'error': 'No valid Key Vault URLs configured or provided'}), 400
         
         all_certificates = []
         vault_errors = []
+        
+        # Report any user-provided vault URLs that were not in the configured allowlist.
+        if request_vault_urls:
+            for invalid_url in disallowed_vault_urls:
+                vault_errors.append({'vault_url': invalid_url, 'error': 'Vault URL not in allowlist'})
         
         for vault_url in vault_urls:
             if not _validate_vault_url(vault_url):
