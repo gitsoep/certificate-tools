@@ -22,6 +22,19 @@ from ..services.certificate import CertificateService
 bp = Blueprint('azure', __name__)
 logger = logging.getLogger(__name__)
 
+# Regex for valid Azure Key Vault URLs (including sovereign clouds)
+_VAULT_URL_PATTERN = re.compile(
+    r'^https://[a-zA-Z0-9-]+\.vault\.(azure\.net|azure\.cn|usgovcloudapi\.net|microsoftazure\.de)/?$'
+)
+
+
+def _validate_vault_url(vault_url):
+    """Validate that a vault URL matches the Azure Key Vault format and is in the configured allowlist."""
+    if not _VAULT_URL_PATTERN.match(vault_url):
+        return False
+    allowed = current_app.config.get('AZURE_KEYVAULT_URLS', [])
+    return vault_url.rstrip('/') in [u.rstrip('/') for u in allowed]
+
 
 @bp.route('/csr-signer-akv')
 @login_required
@@ -258,6 +271,9 @@ def list_akv_certificates():
         vault_errors = []
         
         for vault_url in vault_urls:
+            if not _validate_vault_url(vault_url):
+                vault_errors.append({'vault_url': vault_url, 'error': 'Vault URL not in allowlist or invalid format'})
+                continue
             try:
                 cert_client = CertificateClient(vault_url=vault_url, credential=credential)
                 vault_name = vault_url.split('//')[1].split('.')[0] if '//' in vault_url else vault_url
@@ -323,6 +339,8 @@ def sign_csr_akv():
         
         if not vault_url:
             return jsonify({'error': 'Key Vault URL is required'}), 400
+        if not _validate_vault_url(vault_url):
+            return jsonify({'error': 'Key Vault URL is not allowed or has an invalid format'}), 400
         if not certificate_name:
             return jsonify({'error': 'Certificate name is required'}), 400
         
