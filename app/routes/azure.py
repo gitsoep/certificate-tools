@@ -317,20 +317,33 @@ def list_akv_certificates():
         credential = UserCredential(token["access_token"])
         
         configured_vault_urls = current_app.config.get('AZURE_KEYVAULT_URLS', []) or []
-        request_vault_urls = request.json.get('vault_urls', []) if request.is_json else []
+        request_vault_ids = request.json.get('vault_urls', []) if request.is_json else []
         
-        # Only allow user to select from configured vault URLs; do not allow arbitrary URLs.
-        if request_vault_urls:
-            # Normalize both lists to strings and intersect with the configured allowlist.
-            configured_set = set(str(u) for u in configured_vault_urls)
+        # Build a mapping from a stable identifier (vault name) to the configured vault URL.
+        configured_vault_map = {}
+        for cfg_url in configured_vault_urls:
+            cfg_url_str = str(cfg_url)
+            # Derive vault identifier from URL host portion, e.g., https://{vault_name}.vault.azure.net/...
+            try:
+                parsed = urllib.parse.urlparse(cfg_url_str)
+                host = parsed.hostname or ''
+                vault_id = host.split('.')[0] if host else cfg_url_str
+            except Exception:
+                vault_id = cfg_url_str
+            if vault_id and vault_id not in configured_vault_map:
+                configured_vault_map[vault_id] = cfg_url_str
+        
+        # Only allow user to select from configured vaults by identifier; do not allow arbitrary URLs.
+        if request_vault_ids:
             filtered_vault_urls = []
-            disallowed_vault_urls = []
-            for u in request_vault_urls:
-                u_str = str(u)
-                if u_str in configured_set:
-                    filtered_vault_urls.append(u_str)
+            disallowed_vault_ids = []
+            for requested_id in request_vault_ids:
+                requested_id_str = str(requested_id)
+                cfg_url = configured_vault_map.get(requested_id_str)
+                if cfg_url is not None:
+                    filtered_vault_urls.append(cfg_url)
                 else:
-                    disallowed_vault_urls.append(u_str)
+                    disallowed_vault_ids.append(requested_id_str)
             vault_urls = filtered_vault_urls
         else:
             vault_urls = [str(u) for u in configured_vault_urls]
@@ -341,10 +354,10 @@ def list_akv_certificates():
         all_certificates = []
         vault_errors = []
         
-        # Report any user-provided vault URLs that were not in the configured allowlist.
-        if request_vault_urls:
-            for invalid_url in disallowed_vault_urls:
-                vault_errors.append({'vault_url': invalid_url, 'error': 'Vault URL not in allowlist'})
+        # Report any user-provided vault identifiers that were not in the configured allowlist.
+        if request_vault_ids:
+            for invalid_id in disallowed_vault_ids:
+                vault_errors.append({'vault_url': invalid_id, 'error': 'Vault identifier not in allowlist'})
         
         for vault_url in vault_urls:
             if not _validate_vault_url(vault_url):
