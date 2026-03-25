@@ -22,6 +22,61 @@ from ..services.certificate import CertificateService
 bp = Blueprint('azure', __name__)
 logger = logging.getLogger(__name__)
 
+
+def _normalize_and_validate_vault_url(vault_url: str) -> str:
+    """
+    Parse and validate a Key Vault URL, returning a normalized, safe URL.
+
+    Enforces HTTPS scheme and restricts the hostname to known-good Key Vault domains.
+    Raises ValueError if the URL is invalid or not allowed.
+    """
+    if not vault_url:
+        raise ValueError("Empty Key Vault URL")
+
+    parsed = urllib.parse.urlparse(vault_url.strip())
+
+    # Require an explicit scheme and netloc.
+    if not parsed.scheme or not parsed.netloc:
+        raise ValueError("Key Vault URL must include scheme and host")
+
+    if parsed.scheme.lower() != "https":
+        raise ValueError("Key Vault URL must use HTTPS")
+
+    hostname = parsed.hostname or ""
+
+    # Basic allowlist: restrict to Azure Key Vault public endpoints.
+    # Adjust or extend this as needed for your deployment.
+    allowed_suffixes = (".vault.azure.net",)
+    if not any(hostname.endswith(suffix) for suffix in allowed_suffixes):
+        raise ValueError("Key Vault host is not allowed")
+
+    # Reject embedded credentials in the URL for safety.
+    if parsed.username or parsed.password:
+        raise ValueError("Key Vault URL must not contain credentials")
+
+    # Normalize: keep scheme, host (and port if present); drop query/fragment.
+    netloc = parsed.hostname
+    if parsed.port:
+        netloc = f"{netloc}:{parsed.port}"
+
+   # Use root path for Key Vault operations.
+    normalized = urllib.parse.urlunparse(
+        ("https", netloc, "/", "", "", "")
+    )
+    return normalized
+
+
+def _validate_vault_url(vault_url: str) -> bool:
+    """
+    Backwards-compatible boolean validator that uses the normalized validator
+    under the hood.
+    """
+    try:
+        _normalize_and_validate_vault_url(vault_url)
+        return True
+    except Exception:
+        return False
+
 # Regex for valid Azure Key Vault URLs (including sovereign clouds)
 _VAULT_URL_PATTERN = re.compile(
     r'^https://[a-zA-Z0-9-]+\.vault\.(azure\.net|azure\.cn|usgovcloudapi\.net|microsoftazure\.de)/?$'
@@ -343,10 +398,16 @@ def sign_csr_akv():
             return jsonify({'error': 'Key Vault URL is not allowed or has an invalid format'}), 400
         if not certificate_name:
             return jsonify({'error': 'Certificate name is required'}), 400
+
+        # Normalize and re-validate the Key Vault URL to prevent SSRF.
+        try:
+            safe_vault_url = _normalize_and_validate_vault_url(vault_url)
+        except Exception:
+            return jsonify({'error': 'Key Vault URL is not allowed or has an invalid format'}), 400
         
         # Get CA certificate from Key Vault
         try:
-            cert_client = CertificateClient(vault_url=vault_url, credential=credential)
+            cert_client = CertificateClient(vault_url=safe_vault_url, credential=credential)
             certificate = cert_client.get_certificate(certificate_name)
             ca_cert = CertificateService.load_der_certificate(certificate.cer)
         except Exception as e:
@@ -355,7 +416,7 @@ def sign_csr_akv():
         
         # Get private key from Key Vault
         try:
-            secret_client = SecretClient(vault_url=vault_url, credential=credential)
+            secret_client = SecretClient(vault_url=safe_vault_url, credential=credential)
             secret = secret_client.get_secret(certificate_name)
             pfx_data = base64.b64decode(secret.value)
             private_key, cert_from_pfx, additional_certs = pkcs12.load_key_and_certificates(
