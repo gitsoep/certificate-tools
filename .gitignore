@@ -155,3 +155,4 @@ cacert/
 
 # Custom chart values with secrets
 custom-values.yaml
+docker-compose.yaml
