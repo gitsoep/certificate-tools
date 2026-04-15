@@ -365,10 +365,31 @@ def sign_csr_akv():
         )
         
         for extension in csr.extensions:
+            # Skip AKI and SKI from CSR - they must be derived from the actual signing CA
+            if isinstance(extension.value, (x509.AuthorityKeyIdentifier, x509.SubjectKeyIdentifier)):
+                continue
             try:
                 cert_builder = cert_builder.add_extension(extension.value, critical=extension.critical)
             except ValueError:
                 pass
+        
+        # Add correct Subject Key Identifier derived from the new certificate's public key
+        try:
+            cert_builder = cert_builder.add_extension(
+                x509.SubjectKeyIdentifier.from_public_key(csr.public_key()),
+                critical=False
+            )
+        except ValueError:
+            pass
+        
+        # Add correct Authority Key Identifier derived from the CA certificate
+        try:
+            cert_builder = cert_builder.add_extension(
+                x509.AuthorityKeyIdentifier.from_issuer_public_key(ca_cert.public_key()),
+                critical=False
+            )
+        except ValueError:
+            pass
         
         try:
             cert_builder = cert_builder.add_extension(
