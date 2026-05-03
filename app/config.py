@@ -13,6 +13,9 @@ class Config:
     # Flask settings
     SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', os.urandom(24).hex())
     SESSION_TYPE = 'filesystem'
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
     
     # Application settings
     APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
@@ -25,7 +28,10 @@ class Config:
     AZURE_REDIRECT_PATH = "/auth/callback"
     AZURE_SCOPE = ["https://vault.azure.net/.default"]
     
-    # External URL for OAuth callbacks (when behind reverse proxy)
+    # Reverse proxy support
+    BEHIND_PROXY = os.environ.get('BEHIND_PROXY', 'false').lower() in ('true', '1', 'yes')
+    
+    # External URL for OAuth callbacks (required when Azure auth is enabled)
     EXTERNAL_URL = os.environ.get('EXTERNAL_URL', '').rstrip('/')
     
     # Azure Blob Storage Configuration

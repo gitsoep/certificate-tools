@@ -186,6 +186,12 @@ def download():
         if not blob_path:
             return jsonify({'error': 'Missing blob parameter'}), 400
         
+        # Sanitize blob path to prevent path traversal (CWE-22)
+        import posixpath
+        blob_path = posixpath.normpath(blob_path)
+        if blob_path.startswith('/') or blob_path.startswith('..') or '/../' in blob_path:
+            return jsonify({'error': 'Invalid blob path'}), 400
+        
         blob_url = current_app.config.get('AZURE_BLOB_STORAGE_URL')
         container = current_app.config.get('AZURE_BLOB_STORAGE_CONTAINER')
         
@@ -248,8 +254,18 @@ def list_akv_certificates():
         
         credential = UserCredential(token["access_token"])
         
+        configured_vault_urls = current_app.config.get('AZURE_KEYVAULT_URLS', [])
         request_vault_urls = request.json.get('vault_urls', []) if request.is_json else []
-        vault_urls = request_vault_urls if request_vault_urls else current_app.config.get('AZURE_KEYVAULT_URLS', [])
+        
+        if request_vault_urls:
+            # Validate requested URLs against the configured allowlist
+            allowed = {u.rstrip('/').lower() for u in configured_vault_urls}
+            for url in request_vault_urls:
+                if url.rstrip('/').lower() not in allowed:
+                    return jsonify({'error': f'Vault URL not in allowed list: {url}'}), 403
+            vault_urls = request_vault_urls
+        else:
+            vault_urls = configured_vault_urls
         
         if not vault_urls:
             return jsonify({'error': 'No Key Vault URLs configured or provided'}), 400
@@ -323,6 +339,12 @@ def sign_csr_akv():
         
         if not vault_url:
             return jsonify({'error': 'Key Vault URL is required'}), 400
+        
+        # Validate vault URL against configured allowlist to prevent SSRF
+        configured_vault_urls = current_app.config.get('AZURE_KEYVAULT_URLS', [])
+        allowed = {u.rstrip('/').lower() for u in configured_vault_urls}
+        if vault_url.rstrip('/').lower() not in allowed:
+            return jsonify({'error': 'Vault URL not in allowed list'}), 403
         if not certificate_name:
             return jsonify({'error': 'Certificate name is required'}), 400
         

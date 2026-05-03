@@ -6,6 +6,7 @@
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
     <script src="/static/theme.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="bg-neutral-900 flex items-start">
     {% include 'sidebar.html' %}

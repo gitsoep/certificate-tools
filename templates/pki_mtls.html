@@ -5,6 +5,7 @@
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
     <script src="/static/theme.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- inter font (suggested by tailwindcss) -->
 </head>
 
@@ -87,6 +88,7 @@
                         <div class="space-y-4">
                             
                             <form action="#" method="POST" id="CSRForm" class="">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <div class="mt-2.5">
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">CSR <span class="text-red-500">*</span></label>
                                     <textarea name="csr" id="csr" rows="10"
@@ -465,7 +467,7 @@
                     if (!csrText) throw new Error('Please enter a CSR');
                     const fd = new FormData();
                     fd.append('csr_text', csrText);
-                    const resp = await fetch('/decode-csr', { method: 'POST', body: fd });
+                    const resp = await fetch('/decode-csr', { method: 'POST', headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}, body: fd });
                     if (!resp.ok) {
                         let msg = `Failed to validate CSR (${resp.status})`;
                         try { const j = await resp.json(); msg = j.error || msg; } catch {}
@@ -553,7 +555,7 @@
                 try {
                     const resp = await fetch('/list-akv-certificates', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
                         body: JSON.stringify({ vault_urls: CONFIGURED_VAULT_URLS })
                     });
                     if (!resp.ok) {
@@ -614,7 +616,7 @@
                     fd.append('validity_days', validityDays);
                     fd.append('upload_to_blob', 'true');
 
-                    const resp = await fetch('/sign-csr-akv', { method: 'POST', body: fd });
+                    const resp = await fetch('/sign-csr-akv', { method: 'POST', headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}, body: fd });
                     if (!resp.ok) {
                         let msg = `Failed to sign CSR (${resp.status})`;
                         try { const j = await resp.json(); msg = j.error || msg; } catch {}
