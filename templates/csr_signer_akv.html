@@ -6,6 +6,7 @@
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
     <script src="/static/theme.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="bg-neutral-900 min-h-screen flex">
     {% set active_page = 'csr-signer-akv' %}
@@ -231,7 +232,8 @@
                 const response = await fetch('/list-akv-certificates', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({ vault_urls: CONFIGURED_VAULT_URLS })
                 });
@@ -361,6 +363,9 @@
             try {
                 const response = await fetch('/sign-csr-akv', {
                     method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
                     body: formData
                 });
                 

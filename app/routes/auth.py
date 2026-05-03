@@ -35,10 +35,9 @@ def authorized():
         external_url = current_app.config.get('EXTERNAL_URL')
         redirect_path = current_app.config.get('AZURE_REDIRECT_PATH')
         
-        if external_url:
-            redirect_uri = f"{external_url}{redirect_path}"
-        else:
-            redirect_uri = url_for('auth.authorized', _external=True)
+        if not external_url:
+            raise ValueError("EXTERNAL_URL must be configured for OAuth authentication")
+        redirect_uri = f"{external_url}{redirect_path}"
         
         result = AuthService.build_msal_app(cache=cache).acquire_token_by_authorization_code(
             request.args['code'],
@@ -65,9 +64,8 @@ def logout():
     external_url = current_app.config.get('EXTERNAL_URL')
     authority = current_app.config.get('AZURE_AUTHORITY')
     
-    if external_url:
-        post_logout_uri = external_url
-    else:
-        post_logout_uri = url_for("main.index", _external=True)
+    if not external_url:
+        raise ValueError("EXTERNAL_URL must be configured for OAuth authentication")
+    post_logout_uri = external_url
     
     return redirect(f"{authority}/oauth2/v2.0/logout?post_logout_redirect_uri={post_logout_uri}")

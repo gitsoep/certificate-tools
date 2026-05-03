@@ -6,6 +6,7 @@
     <title>{{ app_title }}</title>
     <script src="/static/tailwindcss.js"></script>
     <script src="/static/theme.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="bg-neutral-900 min-h-screen flex">
     {% set active_page = 'pfx-converter' %}
@@ -173,6 +174,9 @@
             try {
                 const response = await fetch('/convert-to-pfx', {
                     method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
                     body: formData
                 });
                 

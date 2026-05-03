@@ -34,10 +34,9 @@ class AuthService:
         external_url = current_app.config.get('EXTERNAL_URL')
         redirect_path = current_app.config.get('AZURE_REDIRECT_PATH')
         
-        if external_url:
-            redirect_uri = f"{external_url}{redirect_path}"
-        else:
-            redirect_uri = url_for("auth.authorized", _external=True)
+        if not external_url:
+            raise ValueError("EXTERNAL_URL must be configured for OAuth authentication")
+        redirect_uri = f"{external_url}{redirect_path}"
         
         return AuthService.build_msal_app(authority=authority).get_authorization_request_url(
             scopes or [],
