@@ -336,6 +336,8 @@ def sign_csr_akv():
         vault_url = request.form.get('vault_url', '').strip()
         certificate_name = request.form.get('certificate_name', '').strip()
         validity_days = int(request.form.get('validity_days', 365))
+        if not 1 <= validity_days <= 3650:
+            return jsonify({'error': 'validity_days must be between 1 and 3650'}), 400
         
         if not vault_url:
             return jsonify({'error': 'Key Vault URL is required'}), 400
@@ -460,8 +462,9 @@ def sign_csr_akv():
                             break
                     
                     safe_cn = re.sub(r'[^\w\-\.]', '_', cn) if cn else 'certificate'
+                    safe_cert_name = re.sub(r'[^\w\-\.]', '_', certificate_name)
                     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                    blob_name = f"{certificate_name}/{safe_cn}_{timestamp}.crt"
+                    blob_name = f"{safe_cert_name}/{safe_cn}_{timestamp}.crt"
                     
                     blob_client = container_client.get_blob_client(blob_name)
                     blob_client.upload_blob(cert_pem, overwrite=True)
