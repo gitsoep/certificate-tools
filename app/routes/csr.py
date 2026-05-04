@@ -65,7 +65,10 @@ def generate_csr():
                     logger.error(f'Invalid private key file: {str(e)}')
                     return jsonify({'error': 'Invalid private key file format.'}), 400
         else:
+            ALLOWED_KEY_SIZES = {2048, 3072, 4096, 8192}
             key_size = int(request.form.get('key_size', defaults['key_size']))
+            if key_size not in ALLOWED_KEY_SIZES:
+                return jsonify({'error': f'Invalid key size. Allowed values: {sorted(ALLOWED_KEY_SIZES)}'}), 400
             private_key = CertificateService.generate_private_key(signature_algorithm, key_size)
         
         # Build subject name
@@ -129,6 +132,8 @@ def sign_csr():
         ca_key_file = request.files.get('ca_key')
         ca_key_password = request.form.get('ca_key_password', '')
         validity_days = int(request.form.get('validity_days', 365))
+        if not 1 <= validity_days <= 3650:
+            return jsonify({'error': 'validity_days must be between 1 and 3650'}), 400
         
         if not csr_file:
             return jsonify({'error': 'CSR file is required'}), 400
