@@ -1,46 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ app_title }}</title>
-    <script src="/static/tailwindcss.js"></script>
-    <script src="/static/theme.js"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
-<body class="bg-neutral-900 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full mx-4">
-        <div class="bg-white shadow-2xl rounded-lg p-8 md:p-12" id="main-container">
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="cyber-grid-bg min-h-screen flex items-center justify-center p-4">
+    <!-- Floating particles effect via subtle radial gradients -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative max-w-md w-full">
+        <!-- Login Card -->
+        <div class="glass-panel neon-glow p-8 md:p-10 page-enter">
             <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-800 mb-2" id="page-title">🔐 Azure Login Required</h1>
-                <p class="text-gray-600" id="page-subtitle">Sign in with your Azure account to access certificate tools</p>
+                <!-- Lock Icon -->
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center neon-glow-pulse">
+                    <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold neon-text mb-2">Authentication Required</h1>
+                <p class="text-slate-400 text-sm">Sign in with your Azure account to access certificate tools</p>
             </div>
-            
+
             {% if error %}
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                <p class="text-red-700">{{ error }}</p>
+            <div class="alert-danger p-4 mb-6 rounded-lg">
+                <p class="text-red-300 text-sm">{{ error }}</p>
             </div>
             {% endif %}
-            
+
             <div class="space-y-4">
-                <a href="{{ url_for('login') }}" 
-                   class="block w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg text-center transform hover:scale-105 transition-all duration-200">
-                    Sign in with Microsoft
+                <a href="{{ url_for('login') }}"
+                   class="btn-neon-solid block w-full text-center font-bold py-4 px-6 rounded-lg text-lg transition-all hover:scale-[1.02]">
+                    <span class="flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                        Sign in with Microsoft
+                    </span>
                 </a>
-                
-                <a href="{{ url_for('index') }}" 
-                   class="block w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-4 px-6 rounded-lg text-center transition-colors">
+
+                <a href="{{ url_for('index') }}"
+                   class="btn-neon block w-full text-center font-semibold py-3 px-6 rounded-lg transition-all">
                     Back to Home
                 </a>
             </div>
-            
-            <div class="mt-8 p-4 bg-blue-50 rounded-lg">
-                <p class="text-sm text-blue-800">
-                    <strong>ℹ️ Why login?</strong><br>
+
+            <div class="mt-8 alert-cyber p-4 rounded-lg">
+                <p class="text-xs text-slate-400">
+                    <strong class="text-cyan-400">Why login?</strong><br class="mb-1">
                     Azure login is required to access your Azure Key Vault resources securely using your own credentials.
                 </p>
             </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

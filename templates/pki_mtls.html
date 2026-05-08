@@ -1,702 +1,486 @@
-<!DOCTYPE html>
-<html class="">
+{% extends 'base.html' %}
+{% set active_page = 'pki-mtls' %}
 
-<head>
-    <title>{{ app_title }}</title>
-    <script src="/static/tailwindcss.js"></script>
-    <script src="/static/theme.js"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- inter font (suggested by tailwindcss) -->
-</head>
+{% block content %}
+<div class="glass-panel p-8 md:p-12">
+    <h1 class="text-3xl font-bold neon-text mb-3">Public Key Infrastructure</h1>
+    <p class="text-lg text-slate-400 mb-8">Sign CSR with CA from Azure Key Vault</p>
 
-<body class="bg-neutral-900 flex items-start">
-    {% include 'sidebar.html' %}
+    <div class="alert-cyber p-4 mb-8 rounded-lg">
+        <span class="text-slate-300">Sign a Certificate Signing Request using a CA certificate stored in Azure Key Vault. Requires Azure authentication.</span>
+    </div>
 
-    <div class="flex-1 p-6 md:p-10">
-    <div class="max-w-4xl bg-white shadow-2xl p-8 md:p-12" id="main-container">
-        <h1 class="text-4xl font-bold text-gray-800 mb-4" id="page-title">🔒 Public Key Infrastructure</h1>
-        <p class="text-xl text-gray-600 mb-8" id="page-subtitle">Sign CSR with CA from Azure Key Vault</p>
-        
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
-            <span class="text-blue-700">ℹ️ Sign a Certificate Signing Request using a CA certificate stored in Azure Key Vault. Requires Azure authentication.</span>
-        </div>
+    <div class="hidden alert-danger p-4 mb-6 rounded-lg" role="alert">
+        <strong class="font-bold text-red-400">Error:</strong>
+        <span class="message text-red-300 ml-1"></span>
+    </div>
 
-        <div class="hidden alert mt-10 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3" role="alert">
-            <strong class="font-bold">Oops, something is wrong!</strong>
-            <span class="message block sm:inline"></span>
-        </div>
+    <!-- Stepper -->
+    <div class="stepper mt-6">
+        <ul id="stepper-overview" class="relative flex flex-row gap-x-2 w-full md:w-10/12 mb-8">
+            <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group success">
+                <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
+                    <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-cyan-500/20 border border-cyan-500/50 font-medium text-cyan-400 rounded-full">
+                        <span class="number text-xs">1</span>
+                        <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                    <span class="text ms-2 text-sm font-medium text-cyan-400">Validate CSR</span>
+                </span>
+                <div class="w-full h-px flex-1 bg-cyan-900/30 group-last:hidden"></div>
+            </li>
+            <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group active">
+                <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
+                    <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-slate-700 font-medium text-slate-300 rounded-full">
+                        <span class="number text-xs">2</span>
+                        <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                    <span class="text ms-2 text-sm font-medium text-slate-400">Signing Info</span>
+                </span>
+                <div class="w-full h-px flex-1 bg-cyan-900/30 group-last:hidden"></div>
+            </li>
+            <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group">
+                <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
+                    <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-slate-700 font-medium text-slate-300 rounded-full">
+                        <span class="number text-xs">3</span>
+                        <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                    <span class="text ms-2 text-sm font-medium text-slate-400">Download Certificate</span>
+                </span>
+                <div class="w-full h-px flex-1 bg-cyan-900/30 group-last:hidden"></div>
+            </li>
+        </ul>
+    </div>
 
-            <div class="stepper mt-10">
-                <!-- Stepper -->
-                    <!-- Stepper overview -->
-                    <ul id="stepper-overview" class="relative flex flex-row gap-x-2 w-10/12 mb-6">
-                    <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group success">
-                        <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
-                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-orange-200 font-medium text-gray-800 rounded-full">
-                                <span class="number">1</span>
-                                <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            </span>
-                            <span class="text ms-2 text-sm font-medium text-orange-500">
-                                Validate CSR
-                            </span>
-                        </span>
-                        <div class="w-full h-px flex-1 bg-gray-200 group-last:hidden"></div>
-                    </li>
-                
-                    <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group active">
-                        <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
-                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-gray-100 font-medium text-gray-800 rounded-full group-focus:bg-gray-200">
-                                <span class="number">2</span>
-                                <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            </span>
-                        <span class="text ms-2 text-sm font-medium text-gray-800">
-                            Signing Info
-                        </span>
-                        </span>
-                        <div class="w-full h-px flex-1 bg-gray-200 group-last:hidden"></div>
-                    </li>
-                
-                    <li class="flex items-center gap-x-2 shrink basis-0 flex-1 group">
-                        <span class="min-w-7 min-h-7 group inline-flex items-center text-xs align-middle">
-                            <span class="inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-gray-100 font-medium text-gray-800 rounded-full group-focus:bg-gray-200">
-                                <span class="number">3</span>
-                                <svg class="hidden flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            </span>
-                        <span class="text ms-2 text-sm font-medium text-gray-800">
-                            Download Certificate
-                        </span>
-                        </span>
-                        <div class="w-full h-px flex-1 bg-gray-200 group-last:hidden"></div>
-                    </li>
-                    <!-- End Item -->
-                    </ul>
-                    <!-- End Stepper Nav -->
-            </div>
-
-            
-            <div class="stepper-content-wrapper mt-10">
-                <!-- Stepper Content -->
-                <div class="mt-3">
-                    <!-- First Content -->
-                    <div class="stepper-content" id="stepper-content-1">
-                        <div class="space-y-4">
-                            
-                            <form action="#" method="POST" id="CSRForm" class="">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <div class="mt-2.5">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">CSR <span class="text-red-500">*</span></label>
-                                    <textarea name="csr" id="csr" rows="10"
-                                        class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm" 
-                                        placeholder="Enter your CSR with PEM format here..."></textarea>
-                                </div>
-                
-                                <div class="hidden p-2 mt-3 bg-red-50 border-l-4 border-red-500" id="responsebox">
-                                    <h5 id="CheckCSRresponse" name="CheckCSRresponse" class="text-red-700">niet goed</h5>
-                                </div>
-                            </form>
-
+    <div class="stepper-content-wrapper mt-6">
+        <div class="mt-3">
+            <!-- Step 1: Validate CSR -->
+            <div class="stepper-content" id="stepper-content-1">
+                <div class="space-y-4">
+                    <form action="#" method="POST" id="CSRForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mt-2.5">
+                            <label class="block text-sm font-semibold text-slate-300 mb-2">CSR <span class="text-red-400">*</span></label>
+                            <textarea name="csr" id="csr" rows="10"
+                                class="input-cyber w-full px-4 py-3 rounded-lg font-mono text-sm"
+                                placeholder="Enter your CSR with PEM format here..."></textarea>
                         </div>
-                    </div>
-                    <!-- End First Content -->
-                
-                    <!-- Second Content -->
-                    <div class="hidden stepper-content" id="stepper-content-2">
-                        <div class="space-y-6">
-                            
-                            <form id="CRTForm" class="space-y-6">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="sign_with_ca">
-                                        Sign with CA:
-                                        </label>
-                                        <select name="sign_with_ca" id="sign_with_ca" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition bg-white">
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="validity_days">
-                                            Certificate Validity (Days)
-                                        </label>
-                                        <input name="validity_days" id="validity_days" class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition" type="number" value="365" min="1" max="3650">
-                                    </div>
-                                </div>
-
-                                <!-- CSR Details Section -->
-                                <div class="border-t-2 border-gray-200 pt-4">
-                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
-                                        <span class="mr-2">📋</span> CSR Subject Information
-                                    </h3>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="common_name"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Common Name:</label>
-                                        <input id="common_name" name="common_name" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-
-                                    <div>
-                                        <label for="email_address"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Email Address (optional):</label>
-                                        <input id="email_address" name="email_address" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="organization"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Organization:</label>
-                                        <input id="organization" name="organization" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-
-                                    <div>
-                                        <label for="organization_unit"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Organization Unit:</label>
-                                        <input id="organization_unit" name="organization_unit" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="country"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Country:</label>
-                                        <input id="country" name="country" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-
-                                    <div>
-                                        <label for="state"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">State:</label>
-                                        <input id="state" name="state" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="locality"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Locality:</label>
-                                        <input id="locality" name="locality" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-                                </div>
-
-                                <!-- Key Information Section -->
-                                <div class="border-t-2 border-gray-200 pt-4">
-                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
-                                        <span class="mr-2">🔑</span> Key Information
-                                    </h3>
-                                </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="key_algorithm"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Key Algorithm:</label>
-                                        <input id="key_algorithm" name="key_algorithm" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-
-                                    <div>
-                                        <label for="key_size"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Key Size:</label>
-                                        <input id="key_size" name="key_size" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-                                </div>
-
-                                <!-- Signature Algorithm Section -->
-                                <div class="border-t-2 border-gray-200 pt-4">
-                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
-                                        <span class="mr-2">🔒</span> Signature Algorithm
-                                    </h3>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label for="signature_algorithm"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Algorithm:</label>
-                                        <input id="signature_algorithm" name="signature_algorithm" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-                                </div>
-
-                                <!-- Extended Key Usage Section -->
-                                <div class="border-t-2 border-gray-200 pt-4">
-                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
-                                        <span class="mr-2">🔐</span> Extended Key Usage
-                                    </h3>
-                                </div>
-
-                                <div class="grid grid-cols-1 gap-6">
-                                    <div>
-                                        <label for="extended_key_usage"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Extended Key Usage:</label>
-                                        <textarea id="extended_key_usage" name="extended_key_usage" readonly rows="2"
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none resize-y"></textarea>
-                                    </div>
-                                </div>
-
-                                <!-- Other Extensions Section -->
-                                <div class="border-t-2 border-gray-200 pt-4">
-                                    <h3 class="text-gray-800 font-bold text-lg mb-4 flex items-center">
-                                        <span class="mr-2">📝</span> Other Extensions
-                                    </h3>
-                                </div>
-
-                                <div class="grid grid-cols-1 gap-6">
-                                    <div>
-                                        <label for="subject_alternative_names"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Subject Alternative Names:</label>
-                                        <textarea id="subject_alternative_names" name="subject_alternative_names" readonly rows="2"
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none resize-y"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 gap-6">
-                                    <div>
-                                        <label for="key_usage"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Key Usage:</label>
-                                        <textarea id="key_usage" name="key_usage" readonly rows="2"
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none resize-y"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 gap-6">
-                                    <div>
-                                        <label for="basic_constraints"
-                                            class="block text-sm font-semibold text-gray-700 mb-2">Basic Constraints:</label>
-                                        <input id="basic_constraints" name="basic_constraints" readonly
-                                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 outline-none">
-                                    </div>
-                                </div>
-                                                    
-                            </form>
+                        <div class="hidden p-3 mt-3 alert-danger rounded-lg" id="responsebox">
+                            <h5 id="CheckCSRresponse" name="CheckCSRresponse" class="text-red-300 text-sm"></h5>
                         </div>
-                    </div>
-                    <!-- End second Content -->
-                
-                    <!-- Third Content -->
-                    <div class="hidden stepper-content" id="stepper-content-3">
-                        <div class="space-y-4">
-                            <div class="bg-green-50 border-l-4 border-green-500 p-4">
-                                <p class="text-green-800 font-semibold mb-2">
-                                    ✓ Certificate Successfully Signed
-                                </p>
-                                <p class="text-green-700">
-                                    Your certificate has been signed and is ready to download!
-                                </p>
-                            </div>
-                            <div class="flex gap-x-2">
-                                <a id="download-certificate" href="#" download="certificate.crt" class="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                    Download Certificate
-                                </a>
-                                <a id="download-ca-chain" href="#" download="ca-chain.pem" class="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-lg transform hover:scale-105 transition-all duration-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                    Download CA Chain
-                                </a>
-                            </div>
-                            <div id="blob-storage-info" class="hidden mt-3 p-4 bg-blue-50 border-l-4 border-blue-500">
-                                <p class="text-sm text-blue-800 font-semibold mb-1">☁️ Uploaded to Azure Blob Storage</p>
-                                <p class="text-xs text-blue-700 break-all" id="blob-url-display"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Third Content -->
-                
-                
-                    <!-- Button Group -->
-                    <div class="button-group mt-8 flex justify-start items-center gap-x-2">
-
-                        <button id="nav-step-back" type="button" disabled class="py-3 px-4 inline-flex items-center gap-x-1 text-sm font-medium border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
-                        <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m15 18-6-6 6-6"></path>
-                        </svg>
-                        Back
-                        </button> 
-
-                        <button id="nav-step-one-confirm" type="button" class="nav-stepper py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
-                            <svg aria-hidden="true" role="status" class="hidden loading flex-shrink-0 size-4 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"></path>
-                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="#1C64F2"></path>
-                            </svg>
-                            Validate CSR
-                            <svg class="arrow flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m9 18 6-6-6-6"></path>
-                            </svg>
-                        </button>
-                        <button id="nav-step-two-confirm" type="button" class="hidden nav-stepper py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
-                        Sign Certificate Request
-                        <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m9 18 6-6-6-6"></path>
-                        </svg>
-                        </button>
-                        <button id="nav-step-three-confirm" type="button" class="hidden nav-stepper py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
-                        Start Over
-                        </button>
-                    </div>
-                    <!-- End Button Group -->
-
+                    </form>
                 </div>
-                    <!-- End Stepper Content -->
+            </div>
+
+            <!-- Step 2: Signing Info -->
+            <div class="hidden stepper-content" id="stepper-content-2">
+                <div class="space-y-6">
+                    <form id="CRTForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-300 mb-2" for="sign_with_ca">Sign with CA:</label>
+                                <select name="sign_with_ca" id="sign_with_ca" class="input-cyber w-full px-4 py-3 rounded-lg"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-300 mb-2" for="validity_days">Certificate Validity (Days)</label>
+                                <input name="validity_days" id="validity_days" class="input-cyber w-full px-4 py-3 rounded-lg" type="number" value="365" min="1" max="3650">
+                            </div>
+                        </div>
+
+                        <!-- CSR Details -->
+                        <div class="border-t border-cyan-900/30 pt-4">
+                            <h3 class="text-cyan-300 font-bold text-lg mb-4">CSR Subject Information</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="common_name" class="block text-xs font-semibold text-slate-400 mb-1">Common Name:</label>
+                                <input id="common_name" name="common_name" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                            <div>
+                                <label for="email_address" class="block text-xs font-semibold text-slate-400 mb-1">Email Address:</label>
+                                <input id="email_address" name="email_address" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="organization" class="block text-xs font-semibold text-slate-400 mb-1">Organization:</label>
+                                <input id="organization" name="organization" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                            <div>
+                                <label for="organization_unit" class="block text-xs font-semibold text-slate-400 mb-1">Organizational Unit:</label>
+                                <input id="organization_unit" name="organization_unit" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="country" class="block text-xs font-semibold text-slate-400 mb-1">Country:</label>
+                                <input id="country" name="country" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                            <div>
+                                <label for="state" class="block text-xs font-semibold text-slate-400 mb-1">State:</label>
+                                <input id="state" name="state" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="locality" class="block text-xs font-semibold text-slate-400 mb-1">Locality:</label>
+                                <input id="locality" name="locality" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                        </div>
+
+                        <!-- Key Information -->
+                        <div class="border-t border-cyan-900/30 pt-4">
+                            <h3 class="text-cyan-300 font-bold text-lg mb-4">Key Information</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="key_algorithm" class="block text-xs font-semibold text-slate-400 mb-1">Key Algorithm:</label>
+                                <input id="key_algorithm" name="key_algorithm" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                            <div>
+                                <label for="key_size" class="block text-xs font-semibold text-slate-400 mb-1">Key Size:</label>
+                                <input id="key_size" name="key_size" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                        </div>
+
+                        <!-- Signature Algorithm -->
+                        <div class="border-t border-cyan-900/30 pt-4">
+                            <h3 class="text-cyan-300 font-bold text-lg mb-4">Signature Algorithm</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="signature_algorithm" class="block text-xs font-semibold text-slate-400 mb-1">Algorithm:</label>
+                                <input id="signature_algorithm" name="signature_algorithm" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                        </div>
+
+                        <!-- Extended Key Usage -->
+                        <div class="border-t border-cyan-900/30 pt-4">
+                            <h3 class="text-cyan-300 font-bold text-lg mb-4">Extended Key Usage</h3>
+                        </div>
+
+                        <div>
+                            <textarea id="extended_key_usage" name="extended_key_usage" readonly rows="2"
+                                class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70 resize-y"></textarea>
+                        </div>
+
+                        <!-- Other Extensions -->
+                        <div class="border-t border-cyan-900/30 pt-4">
+                            <h3 class="text-cyan-300 font-bold text-lg mb-4">Other Extensions</h3>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label for="subject_alternative_names" class="block text-xs font-semibold text-slate-400 mb-1">Subject Alternative Names:</label>
+                                <textarea id="subject_alternative_names" name="subject_alternative_names" readonly rows="2"
+                                    class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70 resize-y"></textarea>
+                            </div>
+                            <div>
+                                <label for="key_usage" class="block text-xs font-semibold text-slate-400 mb-1">Key Usage:</label>
+                                <textarea id="key_usage" name="key_usage" readonly rows="2"
+                                    class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70 resize-y"></textarea>
+                            </div>
+                            <div>
+                                <label for="basic_constraints" class="block text-xs font-semibold text-slate-400 mb-1">Basic Constraints:</label>
+                                <input id="basic_constraints" name="basic_constraints" readonly class="input-cyber w-full px-3 py-2 rounded-lg text-sm opacity-70">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Step 3: Download -->
+            <div class="hidden stepper-content" id="stepper-content-3">
+                <div class="space-y-4">
+                    <div class="alert-success p-4 rounded-lg">
+                        <p class="text-green-300 font-semibold mb-1">Certificate Successfully Signed</p>
+                        <p class="text-green-200/70 text-sm">Your certificate has been signed and is ready to download!</p>
+                    </div>
+                    <div class="flex gap-3 flex-wrap">
+                        <a id="download-certificate" href="#" download="certificate.crt" class="btn-neon-solid py-3 px-5 rounded-lg text-sm font-semibold inline-flex items-center gap-2 transition-all hover:scale-105">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download Certificate
+                        </a>
+                        <a id="download-ca-chain" href="#" download="ca-chain.pem" class="btn-neon py-3 px-5 rounded-lg text-sm font-semibold inline-flex items-center gap-2 transition-all hover:scale-105">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download CA Chain
+                        </a>
+                    </div>
+                    <div id="blob-storage-info" class="hidden mt-3 alert-cyber p-4 rounded-lg">
+                        <p class="text-sm text-cyan-400 font-semibold mb-1">Uploaded to Azure Blob Storage</p>
+                        <p class="text-xs text-slate-400 break-all font-mono" id="blob-url-display"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Button Group -->
+            <div class="button-group mt-8 flex justify-start items-center gap-x-3">
+                <button id="nav-step-back" type="button" disabled class="btn-neon py-2.5 px-4 rounded-lg text-sm font-medium inline-flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none transition-all">
+                    <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+                    Back
+                </button>
+
+                <button id="nav-step-one-confirm" type="button" class="nav-stepper btn-neon-solid py-2.5 px-5 rounded-lg text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none transition-all hover:scale-105">
+                    <svg aria-hidden="true" role="status" class="hidden loading flex-shrink-0 size-4 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"></path>
+                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="#00f0ff"></path>
+                    </svg>
+                    Validate CSR
+                    <svg class="arrow flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+                <button id="nav-step-two-confirm" type="button" class="hidden nav-stepper btn-neon-solid py-2.5 px-5 rounded-lg text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none transition-all hover:scale-105">
+                    Sign Certificate Request
+                    <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+                <button id="nav-step-three-confirm" type="button" class="hidden nav-stepper btn-neon-solid py-2.5 px-5 rounded-lg text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none transition-all hover:scale-105">
+                    Start Over
+                </button>
             </div>
         </div>
     </div>
-    </div>
+</div>
+{% endblock %}
 
-</body>
-    <script>
-        (function() {
-            'use strict';
+{% block scripts %}
+<script>
+    (function() {
+        'use strict';
 
-            const CONFIGURED_VAULT_URLS = {{ vault_urls|tojson|safe }};
-            let currentStep = 0;
-            let vaultUrl = '';
+        const CONFIGURED_VAULT_URLS = {{ vault_urls|tojson|safe }};
+        let currentStep = 0;
 
-            function qs(selector) { return document.querySelector(selector); }
-            function qsa(selector) { return Array.from(document.querySelectorAll(selector)); }
+        function qs(selector) { return document.querySelector(selector); }
+        function qsa(selector) { return Array.from(document.querySelectorAll(selector)); }
 
-            function showAlert(message) {
-                const alertBox = qs('.alert');
-                if (!alertBox) return;
-                alertBox.classList.remove('hidden');
-                const messageSpan = alertBox.querySelector('.message');
-                if (messageSpan) messageSpan.textContent = message;
+        function showAlert(message) {
+            const alertBox = qs('.alert-danger[role="alert"]');
+            if (!alertBox) return;
+            alertBox.classList.remove('hidden');
+            const messageSpan = alertBox.querySelector('.message');
+            if (messageSpan) messageSpan.textContent = message;
+        }
+
+        function hideAlert() {
+            const alertBox = qs('.alert-danger[role="alert"]');
+            if (!alertBox) return;
+            alertBox.classList.add('hidden');
+        }
+
+        function setButtonLoading(isLoading) {
+            qsa('button').forEach(btn => {
+                const loading = btn.querySelector('.loading');
+                if (loading) {
+                    if (isLoading) loading.classList.remove('hidden');
+                    else loading.classList.add('hidden');
+                }
+                btn.disabled = isLoading;
+            });
+        }
+
+        function setStep(step) {
+            currentStep = step;
+            const contents = qsa('.stepper-content');
+            contents.forEach(el => el.classList.add('hidden'));
+            if (contents[step]) contents[step].classList.remove('hidden');
+
+            const navs = qsa('.nav-stepper');
+            navs.forEach(el => el.classList.add('hidden'));
+            if (navs[step]) navs[step].classList.remove('hidden');
+
+            const backBtn = document.getElementById('nav-step-back');
+            if (backBtn) {
+                backBtn.disabled = (step === 0);
+                if (step === 2) backBtn.classList.add('hidden');
+                else backBtn.classList.remove('hidden');
             }
 
-            function hideAlert() {
-                const alertBox = qs('.alert');
-                if (!alertBox) return;
-                alertBox.classList.add('hidden');
+            const items = qsa('ul#stepper-overview > li');
+            items.forEach((item, idx) => {
+                const inner = item.querySelector('span.inner-circle');
+                const text = item.querySelector('span.text');
+                const number = item.querySelector('span.number');
+                const check = item.querySelector('svg');
+                if (inner) { inner.className = 'inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-slate-700 font-medium text-slate-300 rounded-full'; }
+                if (text) { text.className = 'text ms-2 text-sm font-medium text-slate-400'; }
+                if (number) number.classList.remove('hidden');
+                if (check) check.classList.add('hidden');
+            });
+            if (items[step]) {
+                const inner = items[step].querySelector('span.inner-circle');
+                const text = items[step].querySelector('span.text');
+                if (inner) { inner.className = 'inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-cyan-500/20 border border-cyan-500/50 font-medium text-cyan-400 rounded-full'; }
+                if (text) { text.className = 'text ms-2 text-sm font-medium text-cyan-400'; }
             }
+            for (let i = 0; i < step; i++) {
+                if (items[i]) {
+                    const inner = items[i].querySelector('span.inner-circle');
+                    const number = items[i].querySelector('span.number');
+                    const check = items[i].querySelector('svg');
+                    if (inner) { inner.className = 'inner-circle size-7 flex justify-center items-center flex-shrink-0 bg-green-500/20 border border-green-500/50 font-medium text-green-400 rounded-full'; }
+                    if (number) number.classList.add('hidden');
+                    if (check) check.classList.remove('hidden');
+                }
+            }
+        }
 
-            function setButtonLoading(isLoading) {
-                qsa('button').forEach(btn => {
-                    const loading = btn.querySelector('.loading');
-                    if (loading) {
-                        if (isLoading) loading.classList.remove('hidden');
-                        else loading.classList.add('hidden');
-                    }
-                    btn.disabled = isLoading;
+        function getInputValue(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+        function setInputValue(id, value) { const el = document.getElementById(id); if (el) el.value = value || ''; }
+
+        async function validateCSR() {
+            hideAlert();
+            setButtonLoading(true);
+            try {
+                const csrEl = document.getElementById('csr');
+                const csrText = csrEl ? csrEl.value.trim() : '';
+                if (!csrText) throw new Error('Please enter a CSR');
+                const fd = new FormData();
+                fd.append('csr_text', csrText);
+                const resp = await fetch('/decode-csr', { method: 'POST', headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}, body: fd });
+                if (!resp.ok) {
+                    let msg = `Failed to validate CSR (${resp.status})`;
+                    try { const j = await resp.json(); msg = j.error || msg; } catch {}
+                    throw new Error(msg);
+                }
+                const data = await resp.json();
+                const s = data.subject || {};
+                setInputValue('common_name', s.commonName);
+                setInputValue('email_address', s.emailAddress);
+                setInputValue('organization', s.organization);
+                setInputValue('organization_unit', s.organizationalUnitName);
+                setInputValue('country', s.countryName);
+                setInputValue('state', s.stateOrProvinceName);
+                setInputValue('locality', s.localityName);
+                setInputValue('key_algorithm', data.key_algorithm || 'N/A');
+                setInputValue('key_size', data.key_size ? data.key_size + ' bits' : 'N/A');
+                setInputValue('signature_algorithm', data.signature_algorithm || 'N/A');
+                const eku = data.extended_key_usage || [];
+                setInputValue('extended_key_usage', Array.isArray(eku) ? eku.join(', ') : (eku || 'None'));
+                const san = data.subject_alternative_names || [];
+                setInputValue('subject_alternative_names', Array.isArray(san) ? san.join(', ') : (san || 'None'));
+                const ku = data.key_usage || [];
+                setInputValue('key_usage', Array.isArray(ku) ? ku.join(', ') : (ku || 'None'));
+                setInputValue('basic_constraints', data.basic_constraints || 'None');
+
+                setStep(1);
+                await loadAKVCertificates();
+            } catch (e) {
+                showAlert(e.message || String(e));
+            } finally {
+                setButtonLoading(false);
+            }
+        }
+
+        async function loadAKVCertificates() {
+            if (!CONFIGURED_VAULT_URLS || CONFIGURED_VAULT_URLS.length === 0) {
+                showAlert('No Key Vaults configured. Set AZURE_KEYVAULT_URLS in your environment.');
+                return;
+            }
+            setButtonLoading(true);
+            try {
+                const resp = await fetch('/list-akv-certificates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ vault_urls: CONFIGURED_VAULT_URLS })
                 });
-            }
-
-            function setStep(step) {
-                currentStep = step;
-                const contents = qsa('.stepper-content');
-                contents.forEach(el => el.classList.add('hidden'));
-                if (contents[step]) contents[step].classList.remove('hidden');
-
-                const navs = qsa('.nav-stepper');
-                navs.forEach(el => el.classList.add('hidden'));
-                if (navs[step]) navs[step].classList.remove('hidden');
-
-                const backBtn = document.getElementById('nav-step-back');
-                if (backBtn) {
-                    backBtn.disabled = (step === 0);
-                    if (step === 2) {
-                        backBtn.classList.add('hidden');
-                    } else {
-                        backBtn.classList.remove('hidden');
-                    }
+                if (!resp.ok) {
+                    let msg = `Failed to load certificates (${resp.status})`;
+                    try { const j = await resp.json(); msg = j.error || msg; } catch {}
+                    throw new Error(msg);
                 }
-
-                const items = qsa('ul#stepper-overview > li');
-                items.forEach((item, idx) => {
-                    const inner = item.querySelector('span.inner-circle');
-                    const text = item.querySelector('span.text');
-                    const number = item.querySelector('span.number');
-                    const check = item.querySelector('svg');
-                    if (inner) {
-                        inner.classList.remove('bg-orange-200','bg-green-300');
-                        inner.classList.add('bg-gray-100');
-                    }
-                    if (text) {
-                        text.classList.remove('text-orange-500');
-                        text.classList.add('text-gray-800');
-                    }
-                    if (number) number.classList.remove('hidden');
-                    if (check) check.classList.add('hidden');
-                });
-                // Active step styling
-                if (items[step]) {
-                    const inner = items[step].querySelector('span.inner-circle');
-                    const text = items[step].querySelector('span.text');
-                    if (inner) { inner.classList.remove('bg-gray-100'); inner.classList.add('bg-orange-200'); }
-                    if (text) { text.classList.remove('text-gray-800'); text.classList.add('text-orange-500'); }
-                }
-                // Completed steps styling
-                for (let i = 0; i < step; i++) {
-                    if (items[i]) {
-                        const inner = items[i].querySelector('span.inner-circle');
-                        const number = items[i].querySelector('span.number');
-                        const check = items[i].querySelector('svg');
-                        if (inner) { inner.classList.remove('bg-gray-100','bg-blue-200'); inner.classList.add('bg-green-300'); }
-                        if (number) number.classList.add('hidden');
-                        if (check) check.classList.remove('hidden');
-                    }
-                }
-            }
-
-            function getInputValue(id) {
-                const el = document.getElementById(id);
-                return el ? el.value : '';
-            }
-
-            function setInputValue(id, value) {
-                const el = document.getElementById(id);
-                if (el) el.value = value || '';
-            }
-
-            async function validateCSR() {
-                hideAlert();
-                setButtonLoading(true);
-                try {
-                    const csrEl = document.getElementById('csr');
-                    const csrText = csrEl ? csrEl.value.trim() : '';
-                    if (!csrText) throw new Error('Please enter a CSR');
-                    const fd = new FormData();
-                    fd.append('csr_text', csrText);
-                    const resp = await fetch('/decode-csr', { method: 'POST', headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}, body: fd });
-                    if (!resp.ok) {
-                        let msg = `Failed to validate CSR (${resp.status})`;
-                        try { const j = await resp.json(); msg = j.error || msg; } catch {}
-                        throw new Error(msg);
-                    }
-                    const data = await resp.json();
-                    const s = data.subject || {};
-                    setInputValue('common_name', s.commonName);
-                    setInputValue('email_address', s.emailAddress);
-                    setInputValue('organization', s.organization);
-                    setInputValue('organization_unit', s.organizationalUnitName);
-                    setInputValue('country', s.countryName);
-                    setInputValue('state', s.stateOrProvinceName);
-                    setInputValue('locality', s.localityName);
-                    
-                    // Set key information
-                    setInputValue('key_algorithm', data.key_algorithm || 'N/A');
-                    setInputValue('key_size', data.key_size ? data.key_size + ' bits' : 'N/A');
-                    
-                    // Highlight key size if RSA and less than 4096
-                    const keySizeEl = document.getElementById('key_size');
-                    const keyAlgoEl = document.getElementById('key_algorithm');
-                    const keyAlgo = data.key_algorithm || '';
-                    
-                    if (keySizeEl && keyAlgo.toUpperCase().includes('RSA') && data.key_size && data.key_size < 4096) {
-                        keySizeEl.classList.remove('bg-gray-50');
-                        keySizeEl.classList.add('bg-red-100');
-                    } else if (keySizeEl) {
-                        keySizeEl.classList.remove('bg-red-100');
-                        keySizeEl.classList.add('bg-gray-50');
-                    }
-                    
-                    // Set signature algorithm
-                    setInputValue('signature_algorithm', data.signature_algorithm || 'N/A');
-                    
-                    // Highlight signature algorithm if weak/deprecated
-                    const sigAlgoEl = document.getElementById('signature_algorithm');
-                    const sigAlgo = (data.signature_algorithm || '').toUpperCase();
-                    // Check for weak algorithms - be specific to avoid false positives with SHA256, etc.
-                    const isWeak = sigAlgo.includes('MD5') || 
-                                   (sigAlgo.includes('SHA1') && !sigAlgo.includes('SHA12') && !sigAlgo.includes('SHA256') && !sigAlgo.includes('SHA384') && !sigAlgo.includes('SHA512')) ||
-                                   (sigAlgo.includes('SHA-1') && !sigAlgo.includes('SHA-256') && !sigAlgo.includes('SHA-384') && !sigAlgo.includes('SHA-512')) ||
-                                   (sigAlgo.includes('DSA') && !sigAlgo.includes('ECDSA'));
-                    
-                    if (sigAlgoEl && isWeak) {
-                        sigAlgoEl.classList.remove('bg-gray-50');
-                        sigAlgoEl.classList.add('bg-red-100');
-                    } else if (sigAlgoEl) {
-                        sigAlgoEl.classList.remove('bg-red-100');
-                        sigAlgoEl.classList.add('bg-gray-50');
-                    }
-                    setInputValue('signature_algorithm', data.signature_algorithm || 'N/A');
-                    
-                    // Set extended key usage
-                    const eku = data.extended_key_usage || [];
-                    setInputValue('extended_key_usage', Array.isArray(eku) ? eku.join(', ') : (eku || 'None'));
-                    
-                    // Set subject alternative names
-                    const san = data.subject_alternative_names || [];
-                    setInputValue('subject_alternative_names', Array.isArray(san) ? san.join(', ') : (san || 'None'));
-                    
-                    // Set key usage
-                    const ku = data.key_usage || [];
-                    setInputValue('key_usage', Array.isArray(ku) ? ku.join(', ') : (ku || 'None'));
-                    
-                    // Set basic constraints
-                    setInputValue('basic_constraints', data.basic_constraints || 'None');
-                    
-                    setStep(1);
-                    await loadAKVCertificates();
-                } catch (e) {
-                    showAlert(e.message || String(e));
-                } finally {
-                    setButtonLoading(false);
-                }
-            }
-
-            async function loadAKVCertificates() {
-                // Load certificates from all configured Key Vaults
-                if (!CONFIGURED_VAULT_URLS || CONFIGURED_VAULT_URLS.length === 0) {
-                    showAlert('No Key Vaults configured. Set AZURE_KEYVAULT_URLS in your environment.');
-                    return;
-                }
-                setButtonLoading(true);
-                try {
-                    const resp = await fetch('/list-akv-certificates', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
-                        body: JSON.stringify({ vault_urls: CONFIGURED_VAULT_URLS })
+                const data = await resp.json();
+                const select = document.getElementById('sign_with_ca');
+                if (select) {
+                    select.innerHTML = '';
+                    const certs = (data.certificates || []).filter(c => c.enabled !== false);
+                    certs.forEach(c => {
+                        const opt = new Option(c.name, JSON.stringify({ name: c.name, vault_url: c.vault_url }));
+                        select.options.add(opt);
                     });
-                    if (!resp.ok) {
-                        let msg = `Failed to load certificates (${resp.status})`;
-                        try { const j = await resp.json(); msg = j.error || msg; } catch {}
-                        throw new Error(msg);
-                    }
-                    const data = await resp.json();
-                    const select = document.getElementById('sign_with_ca');
-                    if (select) {
-                        select.innerHTML = '';
-                        const certs = (data.certificates || []).filter(c => c.enabled !== false);
-                        certs.forEach(c => {
-                            const opt = new Option(c.name, JSON.stringify({ name: c.name, vault_url: c.vault_url }));
-                            select.options.add(opt);
-                        });
-                        if (certs.length === 0) showAlert('No certificates found in any configured Key Vault');
-                        if (data.vault_errors && data.vault_errors.length > 0) {
-                            console.warn('Some vaults had errors:', data.vault_errors);
-                        }
-                    }
-                } catch (e) {
-                    showAlert(e.message || String(e));
-                } finally {
-                    setButtonLoading(false);
+                    if (certs.length === 0) showAlert('No certificates found in any configured Key Vault');
                 }
+            } catch (e) {
+                showAlert(e.message || String(e));
+            } finally {
+                setButtonLoading(false);
             }
+        }
 
-            async function signCSR() {
-                hideAlert();
-                setButtonLoading(true);
+        async function signCSR() {
+            hideAlert();
+            setButtonLoading(true);
+            try {
+                const csrEl = document.getElementById('csr');
+                const csrText = csrEl ? csrEl.value.trim() : '';
+                if (!csrText) throw new Error('CSR is missing');
+                const certSelectValue = getInputValue('sign_with_ca');
+                if (!certSelectValue) throw new Error('Please select a CA certificate');
+                let certName, certVaultUrl;
                 try {
-                    const csrEl = document.getElementById('csr');
-                    const csrText = csrEl ? csrEl.value.trim() : '';
-                    if (!csrText) throw new Error('CSR is missing');
-                    
-                    const certSelectValue = getInputValue('sign_with_ca');
-                    if (!certSelectValue) throw new Error('Please select a CA certificate');
-                    
-                    // Parse certificate info (name and vault URL)
-                    let certName, certVaultUrl;
-                    try {
-                        const certInfo = JSON.parse(certSelectValue);
-                        certName = certInfo.name;
-                        certVaultUrl = certInfo.vault_url;
-                    } catch (e) {
-                        // Backwards compatibility - if not JSON, use as cert name and first vault
-                        certName = certSelectValue;
-                        certVaultUrl = CONFIGURED_VAULT_URLS[0];
-                    }
-                    
-                    const validityDays = getInputValue('validity_days') || '365';
-
-                    const fd = new FormData();
-                    fd.append('csr_text', csrText);
-                    fd.append('vault_url', certVaultUrl);
-                    fd.append('certificate_name', certName);
-                    fd.append('validity_days', validityDays);
-                    fd.append('upload_to_blob', 'true');
-
-                    const resp = await fetch('/sign-csr-akv', { method: 'POST', headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}, body: fd });
-                    if (!resp.ok) {
-                        let msg = `Failed to sign CSR (${resp.status})`;
-                        try { const j = await resp.json(); msg = j.error || msg; } catch {}
-                        throw new Error(msg);
-                    }
-                    const data = await resp.json();
-                    
-                    // Extract CN from CSR for filename (use from the parsed data if available)
-                    const cn = getInputValue('common_name') || 'certificate';
-                    const safeFilename = cn.replace(/[^a-zA-Z0-9\-_.]/g, '_');
-                    
-                    // Create download link for certificate
-                    const certPem = data.certificate || '';
-                    const certBlob = new Blob([certPem], { type: 'application/x-pem-file' });
-                    const certUrl = window.URL.createObjectURL(certBlob);
-                    const certDl = document.getElementById('download-certificate');
-                    if (certDl) { 
-                        certDl.href = certUrl;
-                        certDl.download = `${safeFilename}.crt`;
-                    }
-                    
-                    // Create download link for CA chain
-                    const caChainPem = data.ca_chain || '';
-                    const caChainBlob = new Blob([caChainPem], { type: 'application/x-pem-file' });
-                    const caChainUrl = window.URL.createObjectURL(caChainBlob);
-                    const caChainDl = document.getElementById('download-ca-chain');
-                    if (caChainDl) { 
-                        caChainDl.href = caChainUrl;
-                        caChainDl.download = `${certName}-ca-chain.pem`;
-                    }
-                    
-                    // Display blob storage URL if available
-                    if (data.blob_url) {
-                        const blobInfo = document.getElementById('blob-storage-info');
-                        const blobUrlDisplay = document.getElementById('blob-url-display');
-                        if (blobInfo && blobUrlDisplay) {
-                            blobInfo.classList.remove('hidden');
-                            blobUrlDisplay.textContent = data.blob_url;
-                        }
-                    }
-                    
-                    setStep(2);
+                    const certInfo = JSON.parse(certSelectValue);
+                    certName = certInfo.name;
+                    certVaultUrl = certInfo.vault_url;
                 } catch (e) {
-                    showAlert(e.message || String(e));
-                } finally {
-                    setButtonLoading(false);
+                    certName = certSelectValue;
+                    certVaultUrl = CONFIGURED_VAULT_URLS[0];
                 }
+                const validityDays = getInputValue('validity_days') || '365';
+                const fd = new FormData();
+                fd.append('csr_text', csrText);
+                fd.append('vault_url', certVaultUrl);
+                fd.append('certificate_name', certName);
+                fd.append('validity_days', validityDays);
+                fd.append('upload_to_blob', 'true');
+                const resp = await fetch('/sign-csr-akv', { method: 'POST', headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}, body: fd });
+                if (!resp.ok) {
+                    let msg = `Failed to sign CSR (${resp.status})`;
+                    try { const j = await resp.json(); msg = j.error || msg; } catch {}
+                    throw new Error(msg);
+                }
+                const data = await resp.json();
+                const cn = getInputValue('common_name') || 'certificate';
+                const safeFilename = cn.replace(/[^a-zA-Z0-9\-_.]/g, '_');
+                const certPem = data.certificate || '';
+                const certBlob = new Blob([certPem], { type: 'application/x-pem-file' });
+                const certUrl = window.URL.createObjectURL(certBlob);
+                const certDl = document.getElementById('download-certificate');
+                if (certDl) { certDl.href = certUrl; certDl.download = `${safeFilename}.crt`; }
+                const caChainPem = data.ca_chain || '';
+                const caChainBlob = new Blob([caChainPem], { type: 'application/x-pem-file' });
+                const caChainUrl = window.URL.createObjectURL(caChainBlob);
+                const caChainDl = document.getElementById('download-ca-chain');
+                if (caChainDl) { caChainDl.href = caChainUrl; caChainDl.download = `${certName}-ca-chain.pem`; }
+                if (data.blob_url) {
+                    const blobInfo = document.getElementById('blob-storage-info');
+                    const blobUrlDisplay = document.getElementById('blob-url-display');
+                    if (blobInfo && blobUrlDisplay) { blobInfo.classList.remove('hidden'); blobUrlDisplay.textContent = data.blob_url; }
+                }
+                setStep(2);
+            } catch (e) {
+                showAlert(e.message || String(e));
+            } finally {
+                setButtonLoading(false);
             }
+        }
 
-            function bindEvents() {
-                const btn1 = document.getElementById('nav-step-one-confirm');
-                const btn2 = document.getElementById('nav-step-two-confirm');
-                const btn3 = document.getElementById('nav-step-three-confirm');
-                const back = document.getElementById('nav-step-back');
-                if (btn1) btn1.addEventListener('click', (ev) => { ev.preventDefault(); validateCSR(); });
-                if (btn2) btn2.addEventListener('click', (ev) => { ev.preventDefault(); signCSR(); });
-                if (btn3) btn3.addEventListener('click', (ev) => {
-                    ev.preventDefault();
-                    // Clear the form and start over
-                    const csrEl = document.getElementById('csr');
-                    if (csrEl) csrEl.value = '';
-                    setStep(0);
-                });
-                if (back) back.addEventListener('click', (ev) => {
-                    ev.preventDefault();
-                    if (currentStep > 0) setStep(currentStep - 1);
-                });
-            }
+        function bindEvents() {
+            const btn1 = document.getElementById('nav-step-one-confirm');
+            const btn2 = document.getElementById('nav-step-two-confirm');
+            const btn3 = document.getElementById('nav-step-three-confirm');
+            const back = document.getElementById('nav-step-back');
+            if (btn1) btn1.addEventListener('click', (ev) => { ev.preventDefault(); validateCSR(); });
+            if (btn2) btn2.addEventListener('click', (ev) => { ev.preventDefault(); signCSR(); });
+            if (btn3) btn3.addEventListener('click', (ev) => { ev.preventDefault(); document.getElementById('csr').value = ''; setStep(0); });
+            if (back) back.addEventListener('click', (ev) => { ev.preventDefault(); if (currentStep > 0) setStep(currentStep - 1); });
+        }
 
-            function init() {
-                setStep(0);
-                bindEvents();
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-        })();
-    </script>
-  </html>
-  
+        function init() { setStep(0); bindEvents(); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+    })();
+</script>
+{% endblock %}
