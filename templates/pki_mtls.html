@@ -358,6 +358,31 @@
                 setInputValue('key_algorithm', data.key_algorithm || 'N/A');
                 setInputValue('key_size', data.key_size ? data.key_size + ' bits' : 'N/A');
                 setInputValue('signature_algorithm', data.signature_algorithm || 'N/A');
+
+                // Highlight weak key size (< 4096)
+                const keySizeEl = document.getElementById('key_size');
+                if (keySizeEl) {
+                    const ks = parseInt(data.key_size, 10);
+                    if (!isNaN(ks) && ks < 4096) {
+                        keySizeEl.classList.add('!text-red-500', '!font-bold', '!border-red-500');
+                        keySizeEl.value += ' ⚠ WEAK';
+                    } else {
+                        keySizeEl.classList.remove('!text-red-500', '!font-bold', '!border-red-500');
+                    }
+                }
+
+                // Highlight insecure signature algorithm (SHA-1, MD5)
+                const sigAlgoEl = document.getElementById('signature_algorithm');
+                if (sigAlgoEl) {
+                    const sigVal = data.signature_algorithm || '';
+                    if (/md5|sha-?1/i.test(sigVal)) {
+                        sigAlgoEl.classList.add('!text-red-500', '!font-bold', '!border-red-500');
+                        sigAlgoEl.value += ' ⚠ INSECURE';
+                    } else {
+                        sigAlgoEl.classList.remove('!text-red-500', '!font-bold', '!border-red-500');
+                    }
+                }
+
                 const eku = data.extended_key_usage || [];
                 setInputValue('extended_key_usage', Array.isArray(eku) ? eku.join(', ') : (eku || 'None'));
                 const san = data.subject_alternative_names || [];
