@@ -29,17 +29,17 @@
             <label class="block text-sm font-semibold text-slate-300 mb-2">CSR <span class="text-red-400">*</span></label>
             <div class="mb-3 flex gap-4">
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="radio" name="csr_input_method" value="file" onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-cyan-500 border-slate-600 bg-slate-800">
+                    <input type="radio" name="csr_input_method" value="file" onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-blue-500 border-slate-600 bg-slate-800">
                     <span class="ml-2 text-slate-300 text-sm">Upload File</span>
                 </label>
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="radio" name="csr_input_method" value="paste" checked onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-cyan-500 border-slate-600 bg-slate-800">
+                    <input type="radio" name="csr_input_method" value="paste" checked onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-blue-500 border-slate-600 bg-slate-800">
                     <span class="ml-2 text-slate-300 text-sm">Paste Text</span>
                 </label>
             </div>
             <div id="csr_file_input" class="hidden">
                 <div class="upload-zone p-6 rounded-lg text-center cursor-pointer" onclick="document.getElementById('csr_file').click()">
-                    <svg class="w-8 h-8 mx-auto mb-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    <svg class="w-8 h-8 mx-auto mb-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                     <p class="text-slate-400 text-sm">Choose CSR File (.csr, .pem)</p>
                     <span class="text-xs text-slate-500 mt-1 block" id="csrFileName">No file chosen</span>
                 </div>
@@ -58,14 +58,14 @@
                 class="input-cyber w-full px-4 py-3 rounded-lg">
         </div>
 
-        <div class="border-t border-cyan-900/30 pt-6"></div>
+        <div class="border-t border-gray-700 pt-6"></div>
 
         <!-- Azure Key Vault Configuration -->
-        <h2 class="text-xl font-bold text-cyan-300 mb-4">Azure Key Vault Configuration</h2>
+        <h2 class="text-xl font-bold text-white mb-4">Azure Key Vault Configuration</h2>
 
         {% if vault_urls %}
         <div class="alert-cyber p-4 mb-4 rounded-lg">
-            <p class="text-cyan-400 text-sm font-semibold mb-2">Configured Key Vaults ({{ vault_urls|length }}):</p>
+            <p class="text-blue-400 text-sm font-semibold mb-2">Configured Key Vaults ({{ vault_urls|length }}):</p>
             <ul class="list-disc list-inside text-slate-400 text-sm">
                 {% for vault_url in vault_urls %}
                 <li class="font-mono text-xs">{{ vault_url }}</li>
@@ -90,18 +90,18 @@
 
         <div class="alert-cyber p-4 rounded-lg">
             <p class="text-slate-400 text-sm">
-                <strong class="text-cyan-400">How it works:</strong> Your Azure credentials are used to access the Key Vault. You must have appropriate permissions to retrieve certificates and secrets.
+                <strong class="text-blue-400">How it works:</strong> Your Azure credentials are used to access the Key Vault. You must have appropriate permissions to retrieve certificates and secrets.
             </p>
         </div>
 
-        <button type="submit" id="submitBtn" class="btn-neon-solid w-full py-4 px-6 rounded-lg text-sm font-bold transition-all hover:scale-105">
+        <button type="submit" id="submitBtn" class="btn-neon-solid w-full py-4 px-6 rounded-lg text-sm font-bold transition-all ">
             Sign CSR with Azure Key Vault
         </button>
     </form>
 
     <!-- Result Section -->
-    <div id="resultSection" class="hidden mt-8 space-y-4 border-t border-cyan-900/30 pt-6">
-        <h2 class="text-2xl font-bold text-cyan-300 mb-4">Signed Certificate</h2>
+    <div id="resultSection" class="hidden mt-8 space-y-4 border-t border-gray-700 pt-6">
+        <h2 class="text-2xl font-bold text-white mb-4">Signed Certificate</h2>
 
         <div class="space-y-4">
             <div>
@@ -112,25 +112,25 @@
                 <textarea id="certificateOutput" readonly rows="12" class="code-cyber w-full px-4 py-3 rounded-lg font-mono text-sm resize-y"></textarea>
             </div>
 
-            <button type="button" onclick="downloadCertificate()" class="btn-neon-solid w-full py-3 px-6 rounded-lg text-sm font-bold transition-all hover:scale-105">
+            <button type="button" onclick="downloadCertificate()" class="btn-neon-solid w-full py-3 px-6 rounded-lg text-sm font-bold transition-all ">
                 Download Certificate
             </button>
 
             <!-- Blob Storage URL -->
             <div id="blobUrlSection" class="hidden mt-4 alert-cyber p-4 rounded-lg">
-                <p class="text-sm font-semibold text-cyan-400 mb-2">Uploaded to Azure Blob Storage:</p>
-                <a id="blobUrlLink" href="#" target="_blank" class="text-cyan-300 hover:text-cyan-200 underline break-all text-sm font-mono"></a>
+                <p class="text-sm font-semibold text-blue-400 mb-2">Uploaded to Azure Blob Storage:</p>
+                <a id="blobUrlLink" href="#" target="_blank" class="text-blue-300 hover:text-gray-200 underline break-all text-sm font-mono"></a>
             </div>
 
             <!-- CA Chain Section -->
-            <div class="border-t border-cyan-900/30 pt-4 mt-4">
+            <div class="border-t border-gray-700 pt-4 mt-4">
                 <div class="flex justify-between items-center mb-2">
                     <label class="block text-sm font-semibold text-slate-300">CA Certificate Chain (PEM Format)</label>
                     <button type="button" onclick="copyCaChain()" class="btn-neon py-1 px-3 rounded text-xs font-medium">Copy</button>
                 </div>
                 <textarea id="caChainOutput" readonly rows="12" class="code-cyber w-full px-4 py-3 rounded-lg font-mono text-sm resize-y"></textarea>
 
-                <button type="button" onclick="downloadCaChain()" class="btn-neon w-full mt-4 py-3 px-6 rounded-lg text-sm font-bold transition-all hover:scale-105">
+                <button type="button" onclick="downloadCaChain()" class="btn-neon w-full mt-4 py-3 px-6 rounded-lg text-sm font-bold transition-all ">
                     Download CA Chain
                 </button>
             </div>
@@ -155,10 +155,10 @@
         const span = document.getElementById(spanId);
         if (input.files.length > 0) {
             span.textContent = input.files[0].name;
-            span.classList.add('text-cyan-400', 'font-semibold');
+            span.classList.add('text-blue-400', 'font-semibold');
         } else {
             span.textContent = 'No file chosen';
-            span.classList.remove('text-cyan-400', 'font-semibold');
+            span.classList.remove('text-blue-400', 'font-semibold');
         }
     }
 
@@ -186,7 +186,7 @@
         select.disabled = true;
         select.innerHTML = '<option value="">Loading certificates from all Key Vaults...</option>';
         helpText.textContent = 'Loading certificates from ' + CONFIGURED_VAULT_URLS.length + ' Key Vault(s)...';
-        helpText.className = 'text-xs text-cyan-400 mt-1';
+        helpText.className = 'text-xs text-blue-400 mt-1';
         try {
             const response = await fetch('/list-akv-certificates', {
                 method: 'POST',

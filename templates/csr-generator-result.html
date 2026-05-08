@@ -18,7 +18,7 @@
 
     <div class="glass-panel p-5 mb-6 rounded-lg">
         <div class="flex justify-between items-center mb-3">
-            <h2 class="text-xl font-bold text-cyan-300">Private Key</h2>
+            <h2 class="text-xl font-bold text-white">Private Key</h2>
             <button class="btn-neon px-3 py-1.5 rounded-lg text-sm font-medium transition-all" onclick="copyToClipboard('private_key', this)">
                 Copy
             </button>
@@ -29,7 +29,7 @@
 
     <div class="glass-panel p-5 mb-6 rounded-lg">
         <div class="flex justify-between items-center mb-3">
-            <h2 class="text-xl font-bold text-cyan-300">Certificate Signing Request (CSR)</h2>
+            <h2 class="text-xl font-bold text-white">Certificate Signing Request (CSR)</h2>
             <button class="btn-neon px-3 py-1.5 rounded-lg text-sm font-medium transition-all" onclick="copyToClipboard('csr', this)">
                 Copy
             </button>
@@ -38,10 +38,10 @@
     </div>
 
     <div class="flex flex-col sm:flex-row gap-4">
-        <a href="/csr-generator" class="btn-neon flex-1 text-center py-3 px-6 rounded-lg font-semibold transition-all hover:scale-[1.02]">
+        <a href="/csr-generator" class="btn-neon flex-1 text-center py-3 px-6 rounded-lg font-semibold transition-all ">
             Generate Another CSR
         </a>
-        <button class="btn-neon-solid flex-1 py-3 px-6 rounded-lg font-bold transition-all hover:scale-[1.02]" onclick="downloadFiles()">
+        <button class="btn-neon-solid flex-1 py-3 px-6 rounded-lg font-bold transition-all " onclick="downloadFiles()">
             Download as Files
         </button>
     </div>

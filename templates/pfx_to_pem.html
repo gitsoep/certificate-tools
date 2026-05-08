@@ -16,7 +16,7 @@
         <div>
             <label for="pfx_file" class="block text-sm font-semibold text-slate-300 mb-2">PFX File <span class="text-red-400">*</span></label>
             <div class="upload-zone rounded-lg p-6 text-center cursor-pointer" onclick="document.getElementById('pfx_file').click()">
-                <svg class="w-8 h-8 mx-auto text-cyan-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                <svg class="w-8 h-8 mx-auto text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                 <p class="text-sm text-slate-400" id="pfxFileName">Choose PFX File (.pfx, .p12)</p>
             </div>
             <input type="file" id="pfx_file" name="pfx_file" accept=".pfx,.p12" required onchange="updateFileName(this, 'pfxFileName')" class="hidden">
@@ -28,7 +28,7 @@
                    class="input-cyber w-full px-4 py-3 rounded-lg">
         </div>
 
-        <button type="submit" id="submitBtn" class="btn-neon-solid w-full py-4 px-6 rounded-lg text-lg font-bold transition-all hover:scale-[1.02]">
+        <button type="submit" id="submitBtn" class="btn-neon-solid w-full py-4 px-6 rounded-lg text-lg font-bold transition-all ">
             Extract to PEM
         </button>
     </form>
@@ -37,7 +37,7 @@
     <div class="hidden mt-8 space-y-4" id="results">
         <div class="glass-panel p-5 rounded-lg" id="privateKeySection">
             <div class="flex justify-between items-center mb-3">
-                <h2 class="text-xl font-bold text-cyan-300">Private Key</h2>
+                <h2 class="text-xl font-bold text-white">Private Key</h2>
                 <button class="btn-neon px-3 py-1.5 rounded-lg text-sm font-medium transition-all" onclick="copyToClipboard('private_key', this)">
                     Copy
                 </button>
@@ -47,7 +47,7 @@
 
         <div class="glass-panel p-5 rounded-lg" id="certificateSection">
             <div class="flex justify-between items-center mb-3">
-                <h2 class="text-xl font-bold text-cyan-300">Certificate</h2>
+                <h2 class="text-xl font-bold text-white">Certificate</h2>
                 <button class="btn-neon px-3 py-1.5 rounded-lg text-sm font-medium transition-all" onclick="copyToClipboard('certificate', this)">
                     Copy
                 </button>
@@ -57,7 +57,7 @@
 
         <div class="hidden glass-panel p-5 rounded-lg" id="chainSection">
             <div class="flex justify-between items-center mb-3">
-                <h2 class="text-xl font-bold text-cyan-300">Chain Certificates</h2>
+                <h2 class="text-xl font-bold text-white">Chain Certificates</h2>
                 <button class="btn-neon px-3 py-1.5 rounded-lg text-sm font-medium transition-all" onclick="copyToClipboard('chain', this)">
                     Copy
                 </button>
@@ -65,7 +65,7 @@
             <textarea id="chain" readonly class="code-cyber w-full h-48 p-4 text-sm text-slate-300 resize-none"></textarea>
         </div>
 
-        <button onclick="downloadAll()" class="btn-neon-solid w-full py-4 px-6 rounded-lg text-lg font-bold transition-all hover:scale-[1.02]">
+        <button onclick="downloadAll()" class="btn-neon-solid w-full py-4 px-6 rounded-lg text-lg font-bold transition-all ">
             Download All as Files
         </button>
     </div>
@@ -78,10 +78,10 @@
         const span = document.getElementById(spanId);
         if (input.files.length > 0) {
             span.textContent = input.files[0].name;
-            span.classList.add('text-cyan-400');
+            span.classList.add('text-blue-400');
         } else {
             span.textContent = 'Choose PFX File (.pfx, .p12)';
-            span.classList.remove('text-cyan-400');
+            span.classList.remove('text-blue-400');
         }
     }
 
