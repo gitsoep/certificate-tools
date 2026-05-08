@@ -1,20 +1,14 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<div class="cyber-grid-bg min-h-screen flex items-center justify-center p-4">
-    <!-- Floating particles effect via subtle radial gradients -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl"></div>
-    </div>
-
-    <div class="relative max-w-md w-full">
+<div class="theme-content cyber-grid-bg min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
         <!-- Login Card -->
-        <div class="glass-panel neon-glow p-8 md:p-10 page-enter">
+        <div class="glass-panel p-8 md:p-10 page-enter">
             <div class="text-center mb-8">
                 <!-- Lock Icon -->
-                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center neon-glow-pulse">
-                    <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-700/50 border border-gray-600 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
                 </div>
@@ -30,7 +24,7 @@
 
             <div class="space-y-4">
                 <a href="{{ url_for('login') }}"
-                   class="btn-neon-solid block w-full text-center font-bold py-4 px-6 rounded-lg text-lg transition-all hover:scale-[1.02]">
+                   class="btn-neon-solid block w-full text-center font-bold py-4 px-6 rounded-lg text-lg transition-all ">
                     <span class="flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
@@ -47,7 +41,7 @@
 
             <div class="mt-8 alert-cyber p-4 rounded-lg">
                 <p class="text-xs text-slate-400">
-                    <strong class="text-cyan-400">Why login?</strong><br class="mb-1">
+                    <strong class="text-blue-400">Why login?</strong><br class="mb-1">
                     Azure login is required to access your Azure Key Vault resources securely using your own credentials.
                 </p>
             </div>

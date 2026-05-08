@@ -4,31 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ app_title }}{% endblock %}</title>
+    <script>/* FOUC prevention – apply saved theme before first paint */
+    (function(){var t=localStorage.getItem('certtools-theme')||'classic';document.documentElement.setAttribute('data-theme',t);})()</script>
     <script src="/static/tailwindcss.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: {
-                            bg: '#0a0e1a',
-                            panel: '#0f172a',
-                            card: '#1e293b',
-                            border: 'rgba(0, 240, 255, 0.2)',
-                        },
-                        neon: {
-                            cyan: '#00f0ff',
-                            blue: '#3b82f6',
-                            dim: '#0891b2',
-                        }
-                    },
-                    fontFamily: {
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
     <link rel="stylesheet" href="/static/styles.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {% block head_extra %}{% endblock %}
@@ -38,12 +16,13 @@
     {% include 'sidebar.html' %}
 
     <main class="flex-1 p-4 md:p-8 lg:p-10 overflow-y-auto min-h-screen">
-        <div class="max-w-5xl mx-auto page-enter">
+        <div class="{% block content_class %}max-w-5xl{% endblock %} mx-auto page-enter">
             {% block content %}{% endblock %}
         </div>
     </main>
     {% endblock %}
 
+    <script src="/static/theme.js"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

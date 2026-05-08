@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% set active_page = 'certificate-list' %}
 
+{% block content_class %}max-w-full{% endblock %}
+
 {% block head_extra %}
 <style>
     .status-active { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
@@ -23,7 +25,7 @@
     </div>
 
     <div id="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-10 w-10 border-2 border-cyan-500 border-t-transparent"></div>
+        <div class="inline-block animate-spin rounded-full h-10 w-10 border-2 border-blue-500 border-t-transparent"></div>
         <p class="mt-4 text-slate-400">Loading certificates...</p>
     </div>
 
@@ -33,7 +35,7 @@
     </div>
 
     <div id="no-certs" class="hidden alert-cyber p-4 mb-6 rounded-lg">
-        <h3 class="font-bold mb-1 text-cyan-400">No Certificates Found</h3>
+        <h3 class="font-bold mb-1 text-blue-400">No Certificates Found</h3>
         <p class="text-slate-400 text-sm">No certificates found in Azure Blob Storage. Sign a CSR with Azure Key Vault to create certificates.</p>
     </div>
 
@@ -64,7 +66,7 @@
     </div>
 
     <div id="certificates" class="hidden">
-        <div class="overflow-x-auto rounded-lg border border-cyan-900/20">
+        <div class="overflow-x-auto rounded-lg border border-gray-700">
             <table class="table-cyber min-w-full">
                 <thead>
                     <tr>
@@ -198,7 +200,7 @@
             })(),
             (() => {
                 const td = document.createElement('td');
-                td.className = 'px-4 py-3 whitespace-nowrap text-sm text-cyan-400 font-medium';
+                td.className = 'px-4 py-3 whitespace-nowrap text-sm text-blue-400 font-medium';
                 td.textContent = cert.ca_directory;
                 return td;
             })(),
@@ -238,7 +240,7 @@
                 const link = document.createElement('a');
                 link.href = cert.url;
                 link.target = '_blank';
-                link.className = 'text-cyan-400 hover:text-cyan-300 font-medium transition-colors';
+                link.className = 'text-blue-400 hover:text-blue-300 font-medium transition-colors';
                 link.title = 'Download';
                 link.textContent = 'Download';
                 td.appendChild(link);

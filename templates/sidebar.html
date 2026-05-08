@@ -1,22 +1,22 @@
-<!-- Cyberpunk Sidebar -->
+<!-- Sidebar -->
 <button class="lg:hidden fixed top-4 left-4 z-50 p-3 rounded-lg btn-neon" id="menu-toggle" onclick="toggleMenu()">
     <div class="w-5 h-5 flex flex-col justify-center items-center gap-1" id="hamburger">
-        <span class="hamburger-line block w-5 h-0.5 bg-cyan-400"></span>
-        <span class="hamburger-line block w-5 h-0.5 bg-cyan-400"></span>
-        <span class="hamburger-line block w-5 h-0.5 bg-cyan-400"></span>
+        <span class="hamburger-line block w-5 h-0.5 bg-gray-400"></span>
+        <span class="hamburger-line block w-5 h-0.5 bg-gray-400"></span>
+        <span class="hamburger-line block w-5 h-0.5 bg-gray-400"></span>
     </div>
 </button>
 
 <aside class="sidebar-cyber fixed lg:sticky lg:top-0 inset-y-0 left-0 w-64 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-40 lg:h-screen flex flex-col" id="sidebar">
     <!-- Logo -->
-    <div class="p-5 border-b border-cyan-900/30">
+    <div class="p-5 border-b border-gray-700/50">
         <a href="/" class="flex items-center gap-3 group">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-900/20 border border-cyan-500/30 flex items-center justify-center neon-glow-pulse">
-                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
             </div>
-            <span class="text-lg font-bold neon-text group-hover:neon-text-subtle transition-all">Cert Tools</span>
+            <span class="text-lg font-bold text-white">Cert Tools</span>
         </a>
     </div>
 
@@ -24,43 +24,43 @@
     <nav class="flex-1 overflow-y-auto py-4">
         <!-- Services Section -->
         <div class="px-4 mb-2">
-            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">Services</span>
+            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Services</span>
         </div>
         <ul class="space-y-0.5 px-2">
             <li>
-                <a href="/" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'home' %}active border-cyan-400{% else %}border-transparent{% endif %}">
+                <a href="/" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'home' %}active border-blue-500{% else %}border-transparent{% endif %}">
                     <svg class="nav-icon w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    <span class="nav-label text-sm {% if active_page == 'home' %}text-cyan-400{% else %}text-slate-300{% endif %}">Home</span>
+                    <span class="nav-label text-sm {% if active_page == 'home' %}text-blue-400{% else %}text-slate-300{% endif %}">Home</span>
                 </a>
             </li>
             <li>
-                <a href="/csr-generator" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'csr-generator' %}active border-cyan-400{% else %}border-transparent{% endif %}">
+                <a href="/csr-generator" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'csr-generator' %}active border-blue-500{% else %}border-transparent{% endif %}">
                     <svg class="nav-icon w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-                    <span class="nav-label text-sm {% if active_page == 'csr-generator' %}text-cyan-400{% else %}text-slate-300{% endif %}">Generate CSR</span>
+                    <span class="nav-label text-sm {% if active_page == 'csr-generator' %}text-blue-400{% else %}text-slate-300{% endif %}">Generate CSR</span>
                 </a>
             </li>
             <li>
-                <a href="/decoder" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'decoder' %}active border-cyan-400{% else %}border-transparent{% endif %}">
+                <a href="/decoder" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'decoder' %}active border-blue-500{% else %}border-transparent{% endif %}">
                     <svg class="nav-icon w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z"/></svg>
-                    <span class="nav-label text-sm {% if active_page == 'decoder' %}text-cyan-400{% else %}text-slate-300{% endif %}">Decoder</span>
+                    <span class="nav-label text-sm {% if active_page == 'decoder' %}text-blue-400{% else %}text-slate-300{% endif %}">Decoder</span>
                 </a>
             </li>
             <li>
-                <a href="/csr-signer" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'csr-signer' %}active border-cyan-400{% else %}border-transparent{% endif %}">
+                <a href="/csr-signer" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'csr-signer' %}active border-blue-500{% else %}border-transparent{% endif %}">
                     <svg class="nav-icon w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    <span class="nav-label text-sm {% if active_page == 'csr-signer' %}text-cyan-400{% else %}text-slate-300{% endif %}">Sign CSR</span>
+                    <span class="nav-label text-sm {% if active_page == 'csr-signer' %}text-blue-400{% else %}text-slate-300{% endif %}">Sign CSR</span>
                 </a>
             </li>
             <li>
-                <a href="/pfx-converter" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'pfx-converter' %}active border-cyan-400{% else %}border-transparent{% endif %}">
+                <a href="/pfx-converter" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'pfx-converter' %}active border-blue-500{% else %}border-transparent{% endif %}">
                     <svg class="nav-icon w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    <span class="nav-label text-sm {% if active_page == 'pfx-converter' %}text-cyan-400{% else %}text-slate-300{% endif %}">PEM to PFX</span>
+                    <span class="nav-label text-sm {% if active_page == 'pfx-converter' %}text-blue-400{% else %}text-slate-300{% endif %}">PEM to PFX</span>
                 </a>
             </li>
             <li>
-                <a href="/pfx-to-pem" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'pfx-to-pem' %}active border-cyan-400{% else %}border-transparent{% endif %}">
+                <a href="/pfx-to-pem" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'pfx-to-pem' %}active border-blue-500{% else %}border-transparent{% endif %}">
                     <svg class="nav-icon w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
-                    <span class="nav-label text-sm {% if active_page == 'pfx-to-pem' %}text-cyan-400{% else %}text-slate-300{% endif %}">PFX to PEM</span>
+                    <span class="nav-label text-sm {% if active_page == 'pfx-to-pem' %}text-blue-400{% else %}text-slate-300{% endif %}">PFX to PEM</span>
                 </a>
             </li>
         </ul>
@@ -68,19 +68,19 @@
         <!-- Endpoint Services (auth required) -->
         {% if user %}
         <div class="px-4 mt-6 mb-2">
-            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-600">Endpoints</span>
+            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Endpoints</span>
         </div>
         <ul class="space-y-0.5 px-2">
             <li>
-                <a href="/pki-mtls" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'pki-mtls' %}active border-cyan-400{% else %}border-transparent{% endif %}">
+                <a href="/pki-mtls" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'pki-mtls' %}active border-blue-500{% else %}border-transparent{% endif %}">
                     <svg class="nav-icon w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
-                    <span class="nav-label text-sm {% if active_page == 'pki-mtls' %}text-cyan-400{% else %}text-slate-300{% endif %}">PKI mTLS</span>
+                    <span class="nav-label text-sm {% if active_page == 'pki-mtls' %}text-blue-400{% else %}text-slate-300{% endif %}">PKI mTLS</span>
                 </a>
             </li>
             <li>
-                <a href="/certificate-list" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'certificate-list' %}active border-cyan-400{% else %}border-transparent{% endif %}">
+                <a href="/certificate-list" class="nav-item-cyber flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-2 {% if active_page == 'certificate-list' %}active border-blue-500{% else %}border-transparent{% endif %}">
                     <svg class="nav-icon w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                    <span class="nav-label text-sm {% if active_page == 'certificate-list' %}text-cyan-400{% else %}text-slate-300{% endif %}">Certificate List</span>
+                    <span class="nav-label text-sm {% if active_page == 'certificate-list' %}text-blue-400{% else %}text-slate-300{% endif %}">Certificate List</span>
                 </a>
             </li>
         </ul>
@@ -88,11 +88,18 @@
     </nav>
 
     <!-- Bottom Section -->
-    <div class="mt-auto border-t border-cyan-900/30">
+    <div class="mt-auto border-t border-gray-700/50">
+        <!-- Theme Toggle -->
+        <div class="px-4 pt-3 pb-1">
+            <button id="theme-toggle" onclick="themeManager.cycle()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-all" title="Switch theme">
+                <span class="theme-icon text-base leading-none">🌙</span>
+                <span class="theme-label text-xs text-slate-400">Midnight</span>
+            </button>
+        </div>
         {% if user %}
         <div class="p-4">
             <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold neon-glow">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-xs font-bold ">
                     {{ user.name[0] if user.name else 'U' }}
                 </div>
                 <div class="flex-1 min-w-0">
