@@ -11,13 +11,16 @@
 
     var THEMES = [
         { id: 'midnight', label: 'Midnight', icon: '\u{1F319}' },
-        { id: 'classic',  label: 'Classic',  icon: '\u{2600}\u{FE0F}' }
+        { id: 'light',  label: 'Light',    icon: '\u{2600}\u{FE0F}' },
+        { id: 'dark',     label: 'Dark',     icon: '\u{1F311}' },
+        { id: 'split',    label: 'Split',    icon: '\u{25D1}' },
+        { id: 'neon',     label: 'Neon',     icon: '\u{1F4A1}' }
     ];
 
     var STORAGE_KEY = 'certtools-theme';
 
     function getTheme() {
-        return localStorage.getItem(STORAGE_KEY) || 'classic';
+        return localStorage.getItem(STORAGE_KEY) || 'split';
     }
 
     function applyTheme(id) {

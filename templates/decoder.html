@@ -197,7 +197,11 @@
         document.getElementById('subject-info').innerHTML = subjectHtml || '<div class="text-slate-500">No subject information found</div>';
 
         const keySize = data.public_key.size || 'Unknown';
-        document.getElementById('key-info').innerHTML = `<div class="py-2"><strong class="text-slate-300">Key Size:</strong> <span class="text-blue-400 font-mono">${keySize} bits</span></div>`;
+        const keySizeNum = parseInt(keySize, 10);
+        const keySizeWeak = !isNaN(keySizeNum) && keySizeNum < 4096;
+        const keySizeClass = keySizeWeak ? 'text-red-500 font-bold' : 'text-blue-400';
+        const keySizeWarning = keySizeWeak ? ' <span class="bg-red-600 text-white px-2 py-0.5 rounded text-xs font-bold ml-2 animate-pulse">⚠ WEAK</span>' : '';
+        document.getElementById('key-info').innerHTML = `<div class="py-2"><strong class="text-slate-300">Key Size:</strong> <span class="${keySizeClass} font-mono">${keySize} bits</span>${keySizeWarning}</div>`;
 
         if (data.extended_key_usage) {
             document.getElementById('eku-info').innerHTML = `<div class="text-slate-400">${escapeHtml(data.extended_key_usage)}</div>`;
@@ -206,7 +210,11 @@
             document.getElementById('eku-section').classList.add('hidden');
         }
 
-        document.getElementById('signature-info').innerHTML = `<div class="text-slate-400 font-mono">${data.signature_algorithm}</div>`;
+        const sigAlgo = data.signature_algorithm || '';
+        const sigInsecure = /md5|sha-?1/i.test(sigAlgo);
+        const sigClass = sigInsecure ? 'text-red-500 font-bold' : 'text-slate-400';
+        const sigWarning = sigInsecure ? ' <span class="bg-red-600 text-white px-2 py-0.5 rounded text-xs font-bold ml-2 animate-pulse">⚠ INSECURE</span>' : '';
+        document.getElementById('signature-info').innerHTML = `<div class="${sigClass} font-mono">${escapeHtml(sigAlgo)}</div>${sigWarning}`;
 
         const otherExtensions = data.extensions.filter(ext => ext.name !== 'extendedKeyUsage');
         if (otherExtensions && otherExtensions.length > 0) {
