@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_title }}</title>
+    <script src="/static/tailwindcss.js"></script>
+    <script src="/static/theme.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body class="bg-neutral-900 min-h-screen flex">
+    {% set active_page = 'csr-signer-akv' %}
+    {% include 'sidebar.html' %}
+    
+    <div class="flex-1 p-6 md:p-10">
+    <div class="max-w-4xl bg-white shadow-2xl p-8 md:p-12" id="main-container">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4" id="page-title">☁️ Azure Key Vault CSR Signer</h1>
+        <p class="text-xl text-gray-600 mb-8" id="page-subtitle">Sign CSR with CA from Azure Key Vault</p>
+        
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
+            <span class="text-blue-700">ℹ️ Sign a Certificate Signing Request using a CA certificate stored in Azure Key Vault. Requires Azure authentication.</span>
+        </div>
+        
+        {% if user %}
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+            <p class="text-green-700">
+                <strong>✅ Authenticated as:</strong> {{ user.name or user.preferred_username or user.email }}
+            </p>
+        </div>
+        {% else %}
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
+            <p class="text-yellow-700">
+                <strong>⚠️ Authentication Required:</strong> You must be logged in with your Azure account to use this feature.
+            </p>
+        </div>
+        {% endif %}
+        
+        <div class="hidden bg-red-50 border-l-4 border-red-500 p-4 mb-6" id="errorMessage"></div>
+        <div class="hidden bg-green-50 border-l-4 border-green-500 p-4 mb-6" id="successMessage"></div>
+        
+        <form id="signerForm" enctype="multipart/form-data" class="space-y-6">
+            <!-- CSR Input -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">CSR <span class="text-red-500">*</span></label>
+                <div class="mb-3">
+                    <label class="inline-flex items-center mr-6">
+                        <input type="radio" name="csr_input_method" value="file" onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-orange-600">
+                        <span class="ml-2 text-gray-700">Upload File</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="csr_input_method" value="paste" checked onchange="toggleInputMethod('csr')" class="form-radio h-4 w-4 text-orange-600">
+                        <span class="ml-2 text-gray-700">Paste Text</span>
+                    </label>
+                </div>
+                <div id="csr_file_input" class="hidden flex flex-col space-y-2">
+                    <label for="csr_file" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
+                        📁 Choose CSR File (.csr, .pem)
+                    </label>
+                    <input type="file" id="csr_file" name="csr_file" accept=".csr,.pem" onchange="updateFileName(this, 'csrFileName')" class="hidden">
+                    <span class="text-sm text-gray-600" id="csrFileName">No file chosen</span>
+                </div>
+                <div id="csr_text_input">
+                    <textarea name="csr_text" rows="10" placeholder="Paste your CSR in PEM format here..." class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition font-mono text-sm"></textarea>
+                </div>
+            </div>
+            
+            <!-- Validity Days -->
+            <div>
+                <label for="validity_days" class="block text-sm font-semibold text-gray-700 mb-2">Certificate Validity (Days)</label>
+                <input type="number" id="validity_days" name="validity_days" value="365" min="1" max="3650" placeholder="365"
+                       class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
+            </div>
+            
+            <div class="border-t border-gray-300 pt-6"></div>
+            
+            <!-- Azure Key Vault Configuration -->
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Azure Key Vault Configuration</h2>
+            
+            {% if vault_urls %}
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                <p class="text-blue-700 text-sm font-semibold mb-2">📦 Configured Key Vaults ({{ vault_urls|length }}):</p>
+                <ul class="list-disc list-inside text-blue-600 text-sm">
+                    {% for vault_url in vault_urls %}
+                    <li>{{ vault_url }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% else %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4">
+                <p class="text-yellow-700 text-sm">⚠️ No Key Vaults configured. Set AZURE_KEYVAULT_URLS in your environment.</p>
+            </div>
+            {% endif %}
+            
+            <div>
+                <label for="certificate_name" class="block text-sm font-semibold text-gray-700 mb-2">CA Certificate <span class="text-red-500">*</span></label>
+                <select id="certificate_name" name="certificate_name" required {% if not vault_urls %}disabled{% endif %}
+                       class="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition bg-white">
+                    <option value="">{% if vault_urls %}Loading certificates...{% else %}No Key Vaults configured{% endif %}</option>
+                </select>
+                <p class="text-sm text-gray-500 mt-1" id="cert_help_text">{% if vault_urls %}Loading certificates from all configured Key Vaults...{% else %}Configure Key Vaults to load certificates{% endif %}</p>
+                <!-- Hidden field to store vault URL -->
+                <input type="hidden" id="vault_url" name="vault_url">
+            </div>
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                <p class="text-yellow-700 text-sm">
+                    <strong>ℹ️ How it works:</strong> When you sign a CSR, your Azure credentials are used to access the Key Vault. You must have appropriate permissions on the Key Vault to retrieve certificates and secrets.
+                </p>
+            </div>
+            
+            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
+                ☁️ Sign CSR with Azure Key Vault
+            </button>
+        </form>
+        
+        <!-- Result Section -->
+        <div id="resultSection" class="hidden mt-8 space-y-4">
+            <div class="border-t-4 border-green-500 pt-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">✅ Signed Certificate</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-semibold text-gray-700">Certificate (PEM Format)</label>
+                            <button type="button" onclick="copyCertificate()" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 transition">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <textarea id="certificateOutput" readonly rows="15" class="w-full px-4 py-3 border border-gray-300 bg-gray-50 font-mono text-sm resize-y"></textarea>
+                    </div>
+                    
+                    <button type="button" onclick="downloadCertificate()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
+                        💾 Download Certificate
+                    </button>
+                    
+                    <!-- Blob Storage URL -->
+                    <div id="blobUrlSection" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">☁️ Uploaded to Azure Blob Storage:</p>
+                        <a id="blobUrlLink" href="#" target="_blank" class="text-blue-600 hover:text-blue-800 underline break-all text-sm"></a>
+                    </div>
+                    
+                    <!-- CA Chain Section -->
+                    <div class="border-t border-gray-300 pt-4 mt-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-semibold text-gray-700">CA Certificate Chain (PEM Format)</label>
+                                <button type="button" onclick="copyCaChain()" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 transition">
+                                    📋 Copy
+                                </button>
+                            </div>
+                            <textarea id="caChainOutput" readonly rows="15" class="w-full px-4 py-3 border border-gray-300 bg-gray-50 font-mono text-sm resize-y"></textarea>
+                        </div>
+                        
+                        <button type="button" onclick="downloadCaChain()" class="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
+                            💾 Download CA Chain
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+    <script>
+        // Store configured vault URLs from server
+        const CONFIGURED_VAULT_URLS = {{ vault_urls|tojson|safe }};
+        
+        function toggleInputMethod(type) {
+            const fileInput = document.getElementById(type + '_file_input');
+            const textInput = document.getElementById(type + '_text_input');
+            const method = document.querySelector('input[name="' + type + '_input_method"]:checked').value;
+            
+            if (method === 'file') {
+                fileInput.classList.remove('hidden');
+                textInput.classList.add('hidden');
+            } else {
+                fileInput.classList.add('hidden');
+                textInput.classList.remove('hidden');
+            }
+        }
+        
+        function updateFileName(input, spanId) {
+            const span = document.getElementById(spanId);
+            if (input.files.length > 0) {
+                span.textContent = input.files[0].name;
+                span.classList.remove('text-gray-600');
+                span.classList.add('text-green-600', 'font-semibold');
+            } else {
+                span.textContent = 'No file chosen';
+                span.classList.remove('text-green-600', 'font-semibold');
+                span.classList.add('text-gray-600');
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 60000);
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = '✅ ' + message;
+            successDiv.classList.remove('hidden');
+            setTimeout(() => {
+                successDiv.classList.add('hidden');
+            }, 3000);
+        }
+        
+        let certificateData = '';
+        let caChainData = '';
+        
+        // Load certificates from all configured vaults on page load
+        async function loadAllCertificates() {
+            if (!CONFIGURED_VAULT_URLS || CONFIGURED_VAULT_URLS.length === 0) {
+                return;
+            }
+            
+            const select = document.getElementById('certificate_name');
+            const helpText = document.getElementById('cert_help_text');
+            
+            // Show loading state
+            select.disabled = true;
+            select.innerHTML = '<option value="">Loading certificates from all Key Vaults...</option>';
+            helpText.textContent = '⏳ Loading certificates from ' + CONFIGURED_VAULT_URLS.length + ' Key Vault(s)...';
+            helpText.className = 'text-sm text-blue-600 mt-1';
+            
+            try {
+                const response = await fetch('/list-akv-certificates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ vault_urls: CONFIGURED_VAULT_URLS })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.certificates && result.certificates.length > 0) {
+                        select.innerHTML = '<option value="">-- Select a certificate --</option>';
+                        
+                        result.certificates.forEach(cert => {
+                            const option = document.createElement('option');
+                            option.value = JSON.stringify({ name: cert.name, vault_url: cert.vault_url });
+                            option.textContent = cert.name + ' (' + cert.vault_name + ')' + (cert.enabled ? '' : ' - disabled');
+                            if (!cert.enabled) {
+                                option.disabled = true;
+                            }
+                            select.appendChild(option);
+                        });
+                        
+                        select.disabled = false;
+                        helpText.textContent = `✅ Found ${result.certificates.length} certificate(s) across ${CONFIGURED_VAULT_URLS.length} Key Vault(s)`;
+                        helpText.className = 'text-sm text-green-600 mt-1';
+                        
+                        // Show warnings if any vaults had errors
+                        if (result.vault_errors && result.vault_errors.length > 0) {
+                            let errorMsg = '⚠️ ' + result.vault_errors.length + ' vault(s) had errors. ';
+                            helpText.textContent += ' ' + errorMsg;
+                            helpText.className = 'text-sm text-yellow-600 mt-1';
+                        }
+                    } else {
+                        select.innerHTML = '<option value="">No certificates found</option>';
+                        helpText.textContent = '⚠️ No certificates found in any configured Key Vault';
+                        helpText.className = 'text-sm text-yellow-600 mt-1';
+                    }
+                } else {
+                    const error = await response.json();
+                    select.innerHTML = '<option value="">Failed to load certificates</option>';
+                    helpText.textContent = '❌ ' + (error.error || 'Failed to load certificates');
+                    helpText.className = 'text-sm text-red-600 mt-1';
+                }
+            } catch (error) {
+                select.innerHTML = '<option value="">Error loading certificates</option>';
+                helpText.textContent = '❌ Network error: ' + error.message;
+                helpText.className = 'text-sm text-red-600 mt-1';
+            }
+        }
+        
+        // Update form submission to extract cert info from JSON value
+        document.getElementById('certificate_name').addEventListener('change', function() {
+            if (this.value) {
+                try {
+                    const certInfo = JSON.parse(this.value);
+                    document.getElementById('vault_url').value = certInfo.vault_url;
+                } catch (e) {
+                    // If not JSON, assume it's just the cert name (backwards compatibility)
+                    console.warn('Certificate value is not JSON:', e);
+                }
+            }
+        });
+        
+        function copyCertificate() {
+            const textarea = document.getElementById('certificateOutput');
+            textarea.select();
+            document.execCommand('copy');
+            showSuccess('Certificate copied to clipboard!');
+        }
+        
+        function copyCaChain() {
+            const textarea = document.getElementById('caChainOutput');
+            textarea.select();
+            document.execCommand('copy');
+            showSuccess('CA chain copied to clipboard!');
+        }
+        
+        function downloadCertificate() {
+            const blob = new Blob([certificateData], { type: 'application/x-pem-file' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'certificate.crt';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showSuccess('Certificate downloaded!');
+        }
+        
+        function downloadCaChain() {
+            const blob = new Blob([caChainData], { type: 'application/x-pem-file' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ca-chain.crt';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showSuccess('CA chain downloaded!');
+        }
+        
+        document.getElementById('signerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Connecting to Azure Key Vault...';
+            
+            // Hide previous results
+            document.getElementById('resultSection').classList.add('hidden');
+            
+            const formData = new FormData(this);
+            
+            // Extract certificate name and vault URL from the select value
+            const certSelectValue = document.getElementById('certificate_name').value;
+            if (certSelectValue) {
+                try {
+                    const certInfo = JSON.parse(certSelectValue);
+                    formData.set('certificate_name', certInfo.name);
+                    formData.set('vault_url', certInfo.vault_url);
+                } catch (e) {
+                    // Value is not JSON, use as-is (backwards compatibility)
+                    formData.set('certificate_name', certSelectValue);
+                }
+            }
+            
+            try {
+                const response = await fetch('/sign-csr-akv', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Store certificate data
+                    certificateData = result.certificate;
+                    caChainData = result.ca_chain || '';
+                    
+                    // Display certificate in text field
+                    document.getElementById('certificateOutput').value = certificateData;
+                    
+                    // Display CA chain in text field
+                    document.getElementById('caChainOutput').value = caChainData;
+                    document.getElementById('certificateOutput').value = certificateData;
+                    
+                    // Display CA chain in text field
+                    document.getElementById('caChainOutput').value = caChainData;
+                    
+                    // Display blob URL if available
+                    if (result.blob_url) {
+                        const blobUrlSection = document.getElementById('blobUrlSection');
+                        const blobUrlLink = document.getElementById('blobUrlLink');
+                        blobUrlLink.href = result.blob_url;
+                        blobUrlLink.textContent = result.blob_url;
+                        blobUrlSection.classList.remove('hidden');
+                    } else {
+                        document.getElementById('blobUrlSection').classList.add('hidden');
+                    }
+                    
+                    // Show result section
+                    document.getElementById('resultSection').classList.remove('hidden');
+                    
+                    // Scroll to result
+                    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    showSuccess('Certificate signed successfully!');
+                    
+                    // Reset CSR input only
+                    document.querySelector('[name="csr_text"]').value = '';
+                    document.getElementById('csr_file').value = '';
+                    document.getElementById('csrFileName').textContent = 'No file chosen';
+                } else {
+                    const error = await response.json();
+                    showError(error.error || 'Failed to sign CSR');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '☁️ Sign CSR with Azure Key Vault';
+            }
+        });
+        
+        // Load certificates on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadAllCertificates();
+        });
+    </script>
+</body>
+</html>

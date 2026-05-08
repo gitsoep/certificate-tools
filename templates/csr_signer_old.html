@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_title }}</title>
+    <script src="/static/tailwindcss.js"></script>
+    <script src="/static/theme.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body class="bg-neutral-900 min-h-screen flex">
+    {% set active_page = 'csr-signer' %}
+    {% include 'sidebar.html' %}
+    
+    <div class="flex-1 p-6 md:p-10">
+    <div class="max-w-4xl bg-white shadow-2xl p-8 md:p-12" id="main-container">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4" id="page-title">✍️ CSR Signer</h1>
+        <p class="text-xl text-gray-600 mb-8" id="page-subtitle">Sign a Certificate Signing Request</p>
+        
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 ">
+            <span class="text-blue-700">ℹ️ Upload a CSR file to generate a signed certificate. Optionally provide CA certificate and key for CA-signed certificates.</span>
+        </div>
+        
+        <div class="hidden bg-red-50 border-l-4 border-red-500 p-4 mb-6" id="errorMessage"></div>
+        <div class="hidden bg-green-50 border-l-4 border-green-500 p-4 mb-6" id="successMessage"></div>
+        
+        <form id="signerForm" enctype="multipart/form-data" class="space-y-6">
+            <div>
+                <label for="csr" class="block text-sm font-semibold text-gray-700 mb-2">CSR File <span class="text-red-500">*</span></label>
+                <div class="flex flex-col space-y-2">
+                    <label for="csr" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
+                        📁 Choose CSR File (.csr, .pem)
+                    </label>
+                    <input type="file" id="csr" name="csr" accept=".csr,.pem" required onchange="updateFileName(this, 'csrFileName')" class="hidden">
+                    <span class="text-sm text-gray-600" id="csrFileName">No file chosen</span>
+                </div>
+            </div>
+            
+            <div>
+                <label for="validity_days" class="block text-sm font-semibold text-gray-700 mb-2">Certificate Validity (Days)</label>
+                <input type="number" id="validity_days" name="validity_days" value="365" min="1" max="3650" placeholder="365"
+                       class="w-full px-4 py-3 border border-gray-300  focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
+            </div>
+            
+            <div class="border-t border-gray-300 pt-6"></div>
+            
+            <div>
+                <label for="ca_cert" class="block text-sm font-semibold text-gray-700 mb-2">CA Certificate File (Optional)</label>
+                <div class="flex flex-col space-y-2">
+                    <label for="ca_cert" class="inline-block bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
+                        📁 Choose CA Certificate (.crt, .cer, .pem)
+                    </label>
+                    <input type="file" id="ca_cert" name="ca_cert" accept=".crt,.cer,.pem" onchange="updateFileName(this, 'caCertFileName')" class="hidden">
+                    <span class="text-sm text-gray-600" id="caCertFileName">No file chosen (self-signed)</span>
+                </div>
+            </div>
+            
+            <div>
+                <label for="ca_key" class="block text-sm font-semibold text-gray-700 mb-2">CA Private Key File (Optional)</label>
+                <div class="flex flex-col space-y-2">
+                    <label for="ca_key" class="inline-block bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 cursor-pointer text-center transition-colors">
+                        📁 Choose CA Private Key (.pem, .key)
+                    </label>
+                    <input type="file" id="ca_key" name="ca_key" accept=".pem,.key" onchange="updateFileName(this, 'caKeyFileName')" class="hidden">
+                    <span class="text-sm text-gray-600" id="caKeyFileName">No file chosen (self-signed)</span>
+                </div>
+            </div>
+            
+            <div>
+                <label for="ca_key_password" class="block text-sm font-semibold text-gray-700 mb-2">CA Private Key Password (If encrypted)</label>
+                <input type="password" id="ca_key_password" name="ca_key_password" placeholder="Leave empty if key is not encrypted"
+                       class="w-full px-4 py-3 border border-gray-300  focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
+            </div>
+            
+            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 shadow-lg transform hover:scale-105 transition-all duration-200">
+                ✍️ Sign CSR and Download Certificate
+            </button>
+        </form>
+    </div>
+    </div>
+    
+    <script>
+        function updateFileName(input, spanId) {
+            const span = document.getElementById(spanId);
+            if (input.files.length > 0) {
+                span.textContent = input.files[0].name;
+                span.classList.remove('text-gray-600');
+                span.classList.add('text-green-600', 'font-semibold');
+            } else {
+                if (spanId.includes('ca')) {
+                    span.textContent = 'No file chosen (self-signed)';
+                } else {
+                    span.textContent = 'No file chosen';
+                }
+                span.classList.remove('text-green-600', 'font-semibold');
+                span.classList.add('text-gray-600');
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = '✅ ' + message;
+            successDiv.classList.remove('hidden');
+            setTimeout(() => {
+                successDiv.classList.add('hidden');
+            }, 3000);
+        }
+        
+        document.getElementById('signerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Signing...';
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/sign-csr', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    // Download the certificate
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'certificate.crt';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showSuccess('Certificate signed and downloaded successfully!');
+                    
+                    // Reset form
+                    this.reset();
+                    document.getElementById('csrFileName').textContent = 'No file chosen';
+                    document.getElementById('caCertFileName').textContent = 'No file chosen (self-signed)';
+                    document.getElementById('caKeyFileName').textContent = 'No file chosen (self-signed)';
+                } else {
+                    const error = await response.json();
+                    showError(error.error || 'Failed to sign CSR');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✍️ Sign CSR and Download Certificate';
+            }
+        });
+    </script>
+</body>
+</html>
