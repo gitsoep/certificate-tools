@@ -359,11 +359,12 @@
                 setInputValue('key_size', data.key_size ? data.key_size + ' bits' : 'N/A');
                 setInputValue('signature_algorithm', data.signature_algorithm || 'N/A');
 
-                // Highlight weak key size (< 4096)
+                // Highlight weak key size (< 4096 for RSA only)
                 const keySizeEl = document.getElementById('key_size');
                 if (keySizeEl) {
                     const ks = parseInt(data.key_size, 10);
-                    if (!isNaN(ks) && ks < 4096) {
+                    const isRSA = /rsa/i.test(data.key_algorithm || '');
+                    if (!isNaN(ks) && ks < 4096 && isRSA) {
                         keySizeEl.classList.add('!text-red-500', '!font-bold', '!border-red-500');
                         keySizeEl.value += ' ⚠ WEAK';
                     } else {
