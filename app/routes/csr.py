@@ -90,12 +90,14 @@ def generate_csr():
             return render_template('csr-generator-result.html',
                                  private_key=private_key_pem,
                                  csr=csr_pem,
+                                 common_name=common_name,
                                  show_private_key=True,
                                  user=session.get("user"),
                                  app_title=current_app.config['APP_TITLE'])
         else:
             return render_template('csr-generator-result.html',
                                  csr=csr_pem,
+                                 common_name=common_name,
                                  show_private_key=False,
                                  user=session.get("user"),
                                  app_title=current_app.config['APP_TITLE'])

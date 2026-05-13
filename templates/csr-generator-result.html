@@ -64,13 +64,14 @@
     }
 
     function downloadFiles() {
+        const commonName = {{ common_name | tojson }};
         {% if show_private_key %}
         const privateKey = document.getElementById('private_key').value;
-        downloadFile(privateKey, 'private-key.pem');
+        downloadFile(privateKey, commonName + '.key');
         setTimeout(() => {
         {% endif %}
             const csr = document.getElementById('csr').value;
-            downloadFile(csr, 'certificate-request.csr');
+            downloadFile(csr, commonName + '.csr');
         {% if show_private_key %}
         }, 100);
         {% endif %}
