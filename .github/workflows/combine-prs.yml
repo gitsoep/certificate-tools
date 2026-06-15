@@ -1,0 +1,34 @@
+name: Combine PRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      branchPrefix:
+        description: 'Branch prefix to find combinable PRs'
+        required: true
+        default: 'dependabot'
+      mustBeGreen:
+        description: 'Only combine PRs that are passing checks'
+        type: boolean
+        required: true
+        default: true
+      combineBranchName:
+        description: 'Name of the combined branch'
+        required: true
+        default: 'combine-prs'
+
+jobs:
+  combine-prs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Combine PRs
+        uses: github/combine-prs@v5.1.0
+        with:
+          branch_prefix: ${{ github.event.inputs.branchPrefix }}
+          ci_required: ${{ github.event.inputs.mustBeGreen }}
+          combine_branch_name: ${{ github.event.inputs.combineBranchName }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
