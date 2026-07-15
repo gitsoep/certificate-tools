@@ -285,8 +285,12 @@ def list_akv_certificates():
                         'vault_url': vault_url,
                         'vault_name': vault_name
                     })
-            except Exception as e:
-                vault_errors.append({'vault_url': vault_url, 'error': str(e)})
+            except Exception:
+                logger.exception('Error listing certificates for vault: %s', vault_url)
+                vault_errors.append({
+                    'vault_url': vault_url,
+                    'error': 'Failed to list certificates for this vault.'
+                })
         
         response = {'certificates': all_certificates}
         if vault_errors:
