@@ -30,15 +30,23 @@ def create_app(config_class=Config):
     from .utils.errors import register_error_handlers
     register_error_handlers(app)
     
+    # Make analytics HTML available to all templates
+    @app.context_processor
+    def inject_analytics():
+        return {'analytics_html': app.config.get('ANALYTICS_HTML', '')}
+    
     # Security headers
     @app.after_request
     def set_security_headers(response):
+        analytics_enabled = bool(app.config.get('ANALYTICS_HTML'))
+        extra_connect_src = ' https://openpanel.soep.org' if analytics_enabled else ''
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline'; "
             "style-src 'self' 'unsafe-inline'; "
             "img-src 'self' data:; "
             "font-src 'self'; "
+            f"connect-src 'self'{extra_connect_src}; "
             "form-action 'self'; "
             "frame-ancestors 'none'; "
             "base-uri 'self'"

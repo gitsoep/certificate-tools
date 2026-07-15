@@ -21,6 +21,9 @@ class Config:
     # Application settings
     APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
     
+    # Optional analytics HTML injected into the base template <head>
+    ANALYTICS_HTML = os.environ.get('ANALYTICS_HTML', '')
+    
     # Azure AD Configuration
     AZURE_CLIENT_ID = os.environ.get('AZURE_CLIENT_ID')
     AZURE_CLIENT_SECRET = os.environ.get('AZURE_CLIENT_SECRET')
