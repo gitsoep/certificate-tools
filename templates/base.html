@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/static/styles.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {% block head_extra %}{% endblock %}
+    {% if analytics_html %}{{ analytics_html|safe }}{% endif %}
 </head>
 <body class="cyber-grid-bg min-h-screen flex text-slate-200">
     {% block body %}
