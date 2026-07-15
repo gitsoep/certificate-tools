@@ -24,6 +24,9 @@ class Config:
     # Optional analytics HTML injected into the base template <head>
     ANALYTICS_HTML = os.environ.get('ANALYTICS_HTML', '')
     
+    # Optional extra connect-src origin for the Content-Security-Policy
+    CONNECT_SRC = os.environ.get('CONNECT_SRC', '')
+    
     # Azure AD Configuration
     AZURE_CLIENT_ID = os.environ.get('AZURE_CLIENT_ID')
     AZURE_CLIENT_SECRET = os.environ.get('AZURE_CLIENT_SECRET')

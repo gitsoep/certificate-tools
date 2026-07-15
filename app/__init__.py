@@ -38,8 +38,8 @@ def create_app(config_class=Config):
     # Security headers
     @app.after_request
     def set_security_headers(response):
-        analytics_enabled = bool(app.config.get('ANALYTICS_HTML'))
-        extra_connect_src = ' https://openpanel.soep.org' if analytics_enabled else ''
+        connect_src = app.config.get('CONNECT_SRC', '')
+        extra_connect_src = f' {connect_src}' if connect_src else ''
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline'; "
