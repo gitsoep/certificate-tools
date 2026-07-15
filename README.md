@@ -60,17 +60,18 @@ A comprehensive certificate management web application built with Flask that han
 ## Requirements
 
 - Python 3.11+
-- Flask 3.1.2
-- cryptography 46.0.4
-- Werkzeug 3.1.5
-- Gunicorn 25.0.1 (for production deployment)
-- azure-identity 1.15.0+ (for Azure Key Vault integration)
-- azure-keyvault-certificates 4.8.0+ (for Azure Key Vault integration)
-- azure-keyvault-secrets 4.8.0+ (for Azure Key Vault integration)
-- azure-storage-blob 12.19.0+ (for Azure Blob Storage integration)
-- msal 1.26.0+ (for Microsoft authentication)
-- flask-session 0.5.0+ (for server-side sessions)
-- python-dotenv 1.0.0+ (for environment configuration)
+- Flask 3.1.3
+- cryptography 49.0.0
+- Werkzeug 3.1.8
+- Gunicorn 26.0.0 (for production deployment)
+- azure-identity 1.25.3+ (for Azure Key Vault integration)
+- azure-keyvault-certificates 4.11.1+ (for Azure Key Vault integration)
+- azure-keyvault-secrets 4.11.0+ (for Azure Key Vault integration)
+- azure-storage-blob 12.30.0+ (for Azure Blob Storage integration)
+- msal 1.37.0+ (for Microsoft authentication)
+- flask-session 0.8.0+ (for server-side sessions)
+- flask-wtf 1.3.0+ (for CSRF protection)
+- python-dotenv 1.2.2+ (for environment configuration)
 
 ## Installation
 
@@ -412,6 +413,13 @@ AZURE_KEYVAULT_URLS=https://your-vault.vault.azure.net/
 # Azure Blob Storage (optional)
 AZURE_BLOB_STORAGE_URL=https://your-storage.blob.core.windows.net/
 AZURE_BLOB_STORAGE_CONTAINER=storage
+
+# Optional analytics snippet injected into the <head> of every page
+ANALYTICS_HTML="<script>...</script>"
+
+# Optional extra origin appended to the Content-Security-Policy connect-src directive
+# (e.g. the endpoint used by your analytics script)
+CONNECT_SRC=https://analytics.example.com
 
 # CSR Generation Defaults
 DEFAULT_COUNTRY=NL
