@@ -71,9 +71,15 @@ class Config:
     SECRET_KEY = _resolve_secret_key()
     SESSION_TYPE = 'filesystem'
     MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 1 * 1024 * 1024))  # 1 MB default
+    SESSION_COOKIE_NAME = 'certificate_tools_session'
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
+    # Pin the cookie path to '/' so it never depends on X-Forwarded-Prefix (ProxyFix
+    # x_prefix). A path-scoped cookie causes shadowing: the browser keeps an old
+    # 'session' cookie at a different path and sends it to '/', so the freshly
+    # authenticated session is never read back and the user appears logged out.
+    SESSION_COOKIE_PATH = '/'
     
     # Application settings
     APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
