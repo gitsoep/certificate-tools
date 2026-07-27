@@ -2,16 +2,73 @@
 Application Configuration
 """
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
+
+
+def _resolve_secret_key():
+    """Resolve a stable Flask secret key.
+
+    A stable secret key is required so that signed session cookies remain valid
+    across all Gunicorn workers and across application restarts. Using a random
+    per-process value (e.g. os.urandom) breaks authentication because the OAuth
+    login flow spans multiple requests that may be handled by different workers.
+
+    Precedence:
+      1. FLASK_SECRET_KEY environment variable (recommended for production).
+      2. A key persisted to disk, auto-generated on first run so that all
+         workers and restarts share the same value.
+    """
+    env_key = os.environ.get('FLASK_SECRET_KEY')
+    if env_key:
+        return env_key
+
+    key_path = os.environ.get(
+        'FLASK_SECRET_KEY_FILE',
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.flask_secret_key')
+    )
+
+    try:
+        if os.path.exists(key_path):
+            with open(key_path, 'r', encoding='utf-8') as f:
+                existing = f.read().strip()
+            if existing:
+                return existing
+
+        generated = os.urandom(32).hex()
+        # Write atomically and restrict permissions to the owner.
+        fd = os.open(key_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            f.write(generated)
+        logger.warning(
+            "FLASK_SECRET_KEY not set; generated a persistent secret key at %s. "
+            "Set FLASK_SECRET_KEY explicitly for production deployments.",
+            key_path
+        )
+        return generated
+    except FileExistsError:
+        # Another worker created the file between our check and create; read it.
+        with open(key_path, 'r', encoding='utf-8') as f:
+            return f.read().strip()
+    except OSError as exc:
+        logger.error(
+            "Could not persist an auto-generated FLASK_SECRET_KEY (%s). Falling back "
+            "to an ephemeral key; sessions will not be shared across workers/restarts. "
+            "Set FLASK_SECRET_KEY to fix this.",
+            exc
+        )
+        return os.urandom(32).hex()
 
 
 class Config:
     """Base configuration class."""
     
     # Flask settings
-    SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', os.urandom(24).hex())
+    SECRET_KEY = _resolve_secret_key()
     SESSION_TYPE = 'filesystem'
     MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 1 * 1024 * 1024))  # 1 MB default
     SESSION_COOKIE_SECURE = True
