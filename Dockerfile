@@ -4,10 +4,14 @@ FROM python:alpine
 # Set working directory
 WORKDIR /app
 
+# Release version, supplied by CI from the Git tag
+ARG APP_VERSION=dev
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    FLASK_APP=run.py
+    FLASK_APP=run.py \
+    APP_VERSION=${APP_VERSION}
 
 # Copy requirements first for better caching
 COPY requirements.txt .
