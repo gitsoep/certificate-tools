@@ -83,6 +83,10 @@ class Config:
     
     # Application settings
     APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
+
+    # Release version, baked in at image build time from the Git tag
+    APP_VERSION = os.environ.get('APP_VERSION', 'dev')
+    GITHUB_REPO_URL = os.environ.get('GITHUB_REPO_URL', 'https://github.com/gitsoep/certificate-tools').rstrip('/')
     
     # Optional analytics HTML injected into the base template <head>
     ANALYTICS_HTML = os.environ.get('ANALYTICS_HTML', '')

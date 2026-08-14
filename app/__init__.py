@@ -34,6 +34,19 @@ def create_app(config_class=Config):
     @app.context_processor
     def inject_analytics():
         return {'analytics_html': app.config.get('ANALYTICS_HTML', '')}
+
+    # Make the release version available to all templates
+    @app.context_processor
+    def inject_version():
+        version = app.config.get('APP_VERSION', 'dev')
+        repo_url = app.config.get('GITHUB_REPO_URL', '')
+        if version and version[0].isdigit():
+            release_url = f'{repo_url}/releases/tag/v{version}'
+        elif version.startswith('v') and version[1:2].isdigit():
+            release_url = f'{repo_url}/releases/tag/{version}'
+        else:
+            release_url = f'{repo_url}/releases'
+        return {'app_version': version, 'release_url': release_url}
     
     # Security headers
     @app.after_request
