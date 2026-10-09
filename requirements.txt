@@ -4,7 +4,7 @@ Werkzeug==3.1.9
 gunicorn==26.2.0
 azure-identity>=1.26.0
 azure-keyvault-certificates>=4.11.2
-azure-keyvault-secrets>=4.11.2
+azure-keyvault-secrets>=4.11.3
 azure-storage-blob>=12.31.0
 msal>=1.39.0
 flask-session>=0.8.0
