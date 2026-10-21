@@ -94,12 +94,17 @@
 
     <!-- Bottom Section -->
     <div class="mt-auto border-t border-gray-700/50">
-        <!-- Theme Toggle -->
+        <!-- Theme Picker -->
         <div class="px-4 pt-3 pb-1">
-            <button id="theme-toggle" onclick="themeManager.cycle()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-all" title="Switch theme">
-                <span class="theme-icon text-base leading-none">🌙</span>
-                <span class="theme-label text-xs text-slate-400">Midnight</span>
-            </button>
+            <div class="theme-picker relative" id="theme-picker">
+                <button id="theme-toggle" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="theme-menu"
+                        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-all" title="Choose theme">
+                    <span class="theme-icon text-base leading-none">🌙</span>
+                    <span class="theme-label flex-1 text-left text-xs text-slate-400">Midnight</span>
+                    <svg class="theme-caret w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                </button>
+                <ul id="theme-menu" class="theme-menu" role="listbox" aria-label="Theme" tabindex="-1" hidden></ul>
+            </div>
         </div>
         {% if user %}
         <div class="p-4">

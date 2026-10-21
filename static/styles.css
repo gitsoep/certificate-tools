@@ -258,6 +258,108 @@
   opacity: 0.8;
 }
 
+/* === Theme Picker Dropdown === */
+:root {
+  --menu-bg: #161e2c;
+  --menu-fg: #e5e7eb;
+  --menu-muted: #9ca3af;
+  --menu-border: rgba(255, 255, 255, 0.08);
+  --menu-hover: rgba(255, 255, 255, 0.06);
+  --menu-accent: #3b82f6;
+  --menu-shadow: 0 -12px 32px -8px rgba(0, 0, 0, 0.6);
+}
+
+.theme-caret { transition: transform 0.15s ease; }
+#theme-toggle[aria-expanded="true"] .theme-caret { transform: rotate(180deg); }
+
+.theme-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 50;
+  max-height: 18rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  background: var(--menu-bg);
+  border: 1px solid var(--menu-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--menu-shadow);
+  outline: none;
+  animation: themeMenuIn 0.12s ease-out;
+}
+.theme-menu[hidden] { display: none; }
+
+@keyframes themeMenuIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--menu-fg);
+  cursor: pointer;
+  user-select: none;
+}
+.theme-option.is-active { background: var(--menu-hover); }
+.theme-option-icon,
+#theme-toggle .theme-icon {
+  width: 1.25rem;
+  text-align: center;
+  line-height: 1;
+  font-family: system-ui, "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols 2", "Noto Color Emoji", sans-serif;
+}
+.theme-option-label { flex: 1; }
+.theme-option-check { color: var(--menu-accent); font-weight: 700; visibility: hidden; }
+.theme-option[aria-selected="true"] .theme-option-label { font-weight: 600; }
+.theme-option[aria-selected="true"] .theme-option-check { visibility: visible; }
+
+[data-theme="light"] {
+  --menu-bg: #ffffff;
+  --menu-fg: #0f172a;
+  --menu-muted: #64748b;
+  --menu-border: #e2e8f0;
+  --menu-hover: #f1f5f9;
+  --menu-accent: #2563eb;
+  --menu-shadow: 0 -12px 32px -12px rgba(15, 23, 42, 0.25);
+}
+:is([data-theme="dark"], [data-theme="split"]) {
+  --menu-bg: #141414;
+  --menu-border: #2a2a2a;
+}
+[data-theme="neon"] {
+  --menu-bg: #12001d;
+  --menu-fg: #f0d0ff;
+  --menu-border: #ff00ff55;
+  --menu-hover: rgba(255, 0, 255, 0.15);
+  --menu-accent: #00ffff;
+  --menu-shadow: 0 0 18px rgba(255, 0, 255, 0.35);
+}
+[data-theme="mosadex"] {
+  --menu-bg: #ffffff;
+  --menu-fg: #000000;
+  --menu-border: #EDE3E3;
+  --menu-hover: #FAF4F4;
+  --menu-accent: #D43C7B;
+  --menu-shadow: 0 -16px 40px -16px rgba(28, 28, 28, 0.3);
+}
+[data-theme="mosadex-dark"] {
+  --menu-bg: #252121;
+  --menu-fg: #ffffff;
+  --menu-border: #3A3333;
+  --menu-hover: #2E2929;
+  --menu-accent: #EA9EBD;
+}
+[data-theme^="mosadex"] .theme-menu { border-radius: 1rem; }
+[data-theme^="mosadex"] .theme-option { border-radius: 999px; }
+
 /* ========================================
    Theme System
    ========================================
