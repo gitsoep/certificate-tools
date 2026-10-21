@@ -35,6 +35,10 @@ def create_app(config_class=Config):
     def inject_analytics():
         return {'analytics_html': app.config.get('ANALYTICS_HTML', '')}
 
+    @app.context_processor
+    def inject_default_theme():
+        return {'default_theme': app.config.get('DEFAULT_THEME', 'split')}
+
     # Make the release version available to all templates
     @app.context_processor
     def inject_version():

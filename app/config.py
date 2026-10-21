@@ -84,6 +84,14 @@ class Config:
     # Application settings
     APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
 
+    # Theme used when the visitor has not picked one yet (must match an id in static/theme.js)
+    AVAILABLE_THEMES = ('midnight', 'light', 'dark', 'split', 'neon', 'mosadex')
+    DEFAULT_THEME = (os.environ.get('DEFAULT_THEME') or 'split').strip().lower()
+    if DEFAULT_THEME not in AVAILABLE_THEMES:
+        logging.warning("Unknown DEFAULT_THEME '%s', falling back to 'split'. Valid: %s",
+                        DEFAULT_THEME, ', '.join(AVAILABLE_THEMES))
+        DEFAULT_THEME = 'split'
+
     # Release version, baked in at image build time from the Git tag
     APP_VERSION = os.environ.get('APP_VERSION', 'dev')
     GITHUB_REPO_URL = os.environ.get('GITHUB_REPO_URL', 'https://github.com/gitsoep/certificate-tools').rstrip('/')

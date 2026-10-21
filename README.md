@@ -421,6 +421,10 @@ ANALYTICS_HTML="<script>...</script>"
 # (e.g. the endpoint used by your analytics script)
 CONNECT_SRC=https://analytics.example.com
 
+# Default theme for visitors who haven't picked one yet
+# (midnight, light, dark, split, neon, mosadex)
+DEFAULT_THEME=split
+
 # CSR Generation Defaults
 DEFAULT_COUNTRY=NL
 DEFAULT_STATE=Gelderland

@@ -6,6 +6,7 @@ metadata:
     {{- include "certificate-tools.labels" . | nindent 4 }}
 data:
   APP_TITLE: {{ .Values.config.appTitle | quote }}
+  DEFAULT_THEME: {{ .Values.config.defaultTheme | default "split" | quote }}
   EXTERNAL_URL: {{ .Values.config.externalUrl | quote }}
   AZURE_CLIENT_ID: {{ .Values.config.azure.clientId | quote }}
   AZURE_TENANT_ID: {{ .Values.config.azure.tenantId | quote }}

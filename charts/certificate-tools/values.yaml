@@ -116,6 +116,10 @@ affinity: {}
 config:
   # Application title
   appTitle: "Certificate Tools"
+
+  # Default UI theme for visitors who haven't picked one yet
+  # Options: midnight, light, dark, split, neon, mosadex
+  defaultTheme: "split"
   
   # External URL for OAuth callbacks (when behind reverse proxy)
   # Example: https://certificate-tools.example.com

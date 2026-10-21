@@ -71,6 +71,7 @@ The following table lists the configurable parameters and their default values.
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `config.appTitle` | Application title | `Certificate Tools` |
+| `config.defaultTheme` | Default UI theme (`midnight`, `light`, `dark`, `split`, `neon`, `mosadex`) | `split` |
 | `config.externalUrl` | External URL for OAuth callbacks | `""` |
 | `config.azure.clientId` | Azure AD Client ID | `""` |
 | `config.azure.tenantId` | Azure AD Tenant ID | `common` |

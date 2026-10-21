@@ -5,6 +5,7 @@
  *   1. Add a CSS block in styles.css:
  *      [data-theme="<id>"] main, [data-theme="<id>"] .theme-content { ... }
  *   2. Append an entry to THEMES below.
+ *   3. Add the id to AVAILABLE_THEMES in app/config.py (so DEFAULT_THEME accepts it).
  */
 (function () {
     'use strict';
@@ -21,7 +22,9 @@
     var STORAGE_KEY = 'certtools-theme';
 
     function getTheme() {
-        return localStorage.getItem(STORAGE_KEY) || 'split';
+        return localStorage.getItem(STORAGE_KEY)
+            || document.documentElement.getAttribute('data-default-theme')
+            || 'split';
     }
 
     function applyTheme(id) {

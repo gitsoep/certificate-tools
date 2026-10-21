@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-default-theme="{{ default_theme }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ app_title }}{% endblock %}</title>
     <script>/* FOUC prevention – apply saved theme before first paint */
-    (function(){var t=localStorage.getItem('certtools-theme')||'split';document.documentElement.setAttribute('data-theme',t);})()</script>
+    (function(){var d=document.documentElement,t=localStorage.getItem('certtools-theme')||d.getAttribute('data-default-theme')||'split';d.setAttribute('data-theme',t);})()</script>
     <script src="/static/tailwindcss.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">

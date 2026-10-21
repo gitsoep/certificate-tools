@@ -52,6 +52,11 @@ spec:
             configMapKeyRef:
               name: {{ include "certificate-tools.fullname" . }}
               key: APP_TITLE
+        - name: DEFAULT_THEME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "certificate-tools.fullname" . }}
+              key: DEFAULT_THEME
         - name: EXTERNAL_URL
           valueFrom:
             configMapKeyRef:
