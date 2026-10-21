@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="uuid-e3f10784-dad4-4e8e-b809-c5bc72eb68d9" data-name="Artwork" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 343 232">
+  <defs>
+    <linearGradient id="uuid-a903c192-93f1-4f62-8bd5-fb1695ab2204" x1="-1234.93" y1="149.92" x2="-1028.101" y2="70.526" gradientTransform="translate(1295.9334)" gradientUnits="userSpaceOnUse">
+      <stop offset=".15" stop-color="red"/>
+      <stop offset=".4" stop-color="#cd0064"/>
+      <stop offset=".6" stop-color="#9b3cff"/>
+      <stop offset=".75" stop-color="#4e77e4"/>
+      <stop offset=".85" stop-color="#0090e3"/>
+      <stop offset=".95" stop-color="#00aff0"/>
+    </linearGradient>
+  </defs>
+  <path d="M274.236,141.827c-10.118-.039-22.495-9.045-28.867-21.089h41.738c2.947,12.143-2.72,21.129-12.872,21.089ZM215.001,154.654c-16.344-.063-36.305-14.459-46.597-33.916h67.39c4.76,19.616-4.393,33.979-20.793,33.916ZM222.875,77.299c16.344.063,36.255,14.459,46.547,33.916h-67.389c-4.76-19.616,4.443-33.979,20.843-33.916ZM125.163,175.497c-26.462-.102-58.698-23.258-75.361-54.759h109.08c7.707,31.759-7.167,54.862-33.719,54.759ZM117.103,56.456c26.462.102,58.743,23.258,75.406,54.759h-109.07c-7.707-31.759,7.113-54.862,33.665-54.759Z" fill="url(#uuid-a903c192-93f1-4f62-8bd5-fb1695ab2204)"/>
+</svg>
