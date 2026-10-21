@@ -85,7 +85,7 @@ class Config:
     APP_TITLE = os.environ.get('APP_TITLE', 'Certificate Tools')
 
     # Theme used when the visitor has not picked one yet (must match an id in static/theme.js)
-    AVAILABLE_THEMES = ('midnight', 'light', 'dark', 'split', 'neon', 'mosadex')
+    AVAILABLE_THEMES = ('midnight', 'light', 'dark', 'split', 'neon', 'mosadex', 'mosadex-dark')
     DEFAULT_THEME = (os.environ.get('DEFAULT_THEME') or 'split').strip().lower()
     if DEFAULT_THEME not in AVAILABLE_THEMES:
         logging.warning("Unknown DEFAULT_THEME '%s', falling back to 'split'. Valid: %s",

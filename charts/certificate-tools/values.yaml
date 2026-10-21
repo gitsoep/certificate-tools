@@ -118,7 +118,7 @@ config:
   appTitle: "Certificate Tools"
 
   # Default UI theme for visitors who haven't picked one yet
-  # Options: midnight, light, dark, split, neon, mosadex
+  # Options: midnight, light, dark, split, neon, mosadex, mosadex-dark
   defaultTheme: "split"
   
   # External URL for OAuth callbacks (when behind reverse proxy)

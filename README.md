@@ -422,7 +422,7 @@ ANALYTICS_HTML="<script>...</script>"
 CONNECT_SRC=https://analytics.example.com
 
 # Default theme for visitors who haven't picked one yet
-# (midnight, light, dark, split, neon, mosadex)
+# (midnight, light, dark, split, neon, mosadex, mosadex-dark)
 DEFAULT_THEME=split
 
 # CSR Generation Defaults

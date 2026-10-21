@@ -16,7 +16,8 @@
         { id: 'dark',     label: 'Dark',     icon: '\u{1F311}' },
         { id: 'split',    label: 'Split',    icon: '\u{25D1}' },
         { id: 'neon',     label: 'Neon',     icon: '\u{1F4A1}' },
-        { id: 'mosadex',  label: 'Mosadex',  icon: '\u{2B2D}' }
+        { id: 'mosadex',  label: 'Mosadex',  icon: '\u{2B2D}' },
+        { id: 'mosadex-dark', label: 'Mosadex Dark', icon: '\u{2B2C}' }
     ];
 
     var STORAGE_KEY = 'certtools-theme';
