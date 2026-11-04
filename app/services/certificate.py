@@ -1,6 +1,7 @@
 """
 Certificate operations service
 """
+import datetime
 import logging
 from cryptography import x509
 from cryptography.x509.oid import NameOID
@@ -116,6 +117,59 @@ class CertificateService:
             )
         return csr_builder.sign(private_key, hash_algorithm, default_backend())
     
+    # Extensions that must be set by the issuer, never copied from a CSR.
+    # Copying BasicConstraints would let a requester obtain a CA certificate.
+    ISSUER_CONTROLLED_EXTENSIONS = (
+        x509.AuthorityKeyIdentifier,
+        x509.SubjectKeyIdentifier,
+        x509.BasicConstraints,
+    )
+
+    @staticmethod
+    def get_signing_hash(signing_key):
+        """Get the hash algorithm to use when signing with the given private key."""
+        if isinstance(signing_key, (ed25519.Ed25519PrivateKey, ed448.Ed448PrivateKey)):
+            return None
+        return hashes.SHA256()
+
+    @staticmethod
+    def sign_csr(csr: x509.CertificateSigningRequest, issuer_name: x509.Name,
+                 issuer_public_key, signing_key, validity_days: int) -> x509.Certificate:
+        """Issue an end-entity certificate for a CSR.
+
+        Raises ValueError if the CSR signature is invalid.
+        """
+        if not csr.is_signature_valid:
+            raise ValueError('CSR signature is invalid')
+
+        now = datetime.datetime.now(datetime.UTC)
+        builder = (
+            x509.CertificateBuilder()
+            .subject_name(csr.subject)
+            .issuer_name(issuer_name)
+            .public_key(csr.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(now)
+            .not_valid_after(now + datetime.timedelta(days=validity_days))
+        )
+
+        for extension in csr.extensions:
+            if isinstance(extension.value, CertificateService.ISSUER_CONTROLLED_EXTENSIONS):
+                continue
+            builder = builder.add_extension(extension.value, critical=extension.critical)
+
+        builder = builder.add_extension(
+            x509.SubjectKeyIdentifier.from_public_key(csr.public_key()), critical=False
+        )
+        builder = builder.add_extension(
+            x509.AuthorityKeyIdentifier.from_issuer_public_key(issuer_public_key), critical=False
+        )
+        builder = builder.add_extension(
+            x509.BasicConstraints(ca=False, path_length=None), critical=True
+        )
+
+        return builder.sign(signing_key, CertificateService.get_signing_hash(signing_key))
+
     @staticmethod
     def load_certificate(cert_data: bytes) -> x509.Certificate:
         return x509.load_pem_x509_certificate(cert_data, default_backend())

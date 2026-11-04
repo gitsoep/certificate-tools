@@ -10,7 +10,7 @@ import urllib.parse
 from flask import Blueprint, render_template, request, jsonify, session, current_app, send_file, url_for
 from cryptography import x509
 from cryptography.x509.oid import NameOID
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.hazmat.backends import default_backend
 
@@ -382,51 +382,13 @@ def sign_csr_akv():
                 ca_chain_pem += CertificateService.serialize_certificate(chain_cert)
         
         # Build and sign certificate
-        cert_builder = x509.CertificateBuilder()
-        cert_builder = cert_builder.subject_name(csr.subject)
-        cert_builder = cert_builder.issuer_name(ca_cert.subject)
-        cert_builder = cert_builder.public_key(csr.public_key())
-        cert_builder = cert_builder.serial_number(x509.random_serial_number())
-        cert_builder = cert_builder.not_valid_before(datetime.datetime.now(datetime.UTC))
-        cert_builder = cert_builder.not_valid_after(
-            datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=validity_days)
-        )
-        
-        for extension in csr.extensions:
-            # Skip AKI and SKI from CSR - they must be derived from the actual signing CA
-            if isinstance(extension.value, (x509.AuthorityKeyIdentifier, x509.SubjectKeyIdentifier)):
-                continue
-            try:
-                cert_builder = cert_builder.add_extension(extension.value, critical=extension.critical)
-            except ValueError:
-                pass
-        
-        # Add correct Subject Key Identifier derived from the new certificate's public key
         try:
-            cert_builder = cert_builder.add_extension(
-                x509.SubjectKeyIdentifier.from_public_key(csr.public_key()),
-                critical=False
+            signed_certificate = CertificateService.sign_csr(
+                csr, ca_cert.subject, ca_cert.public_key(), private_key, validity_days
             )
-        except ValueError:
-            pass
-        
-        # Add correct Authority Key Identifier derived from the CA certificate
-        try:
-            cert_builder = cert_builder.add_extension(
-                x509.AuthorityKeyIdentifier.from_issuer_public_key(ca_cert.public_key()),
-                critical=False
-            )
-        except ValueError:
-            pass
-        
-        try:
-            cert_builder = cert_builder.add_extension(
-                x509.BasicConstraints(ca=False, path_length=None), critical=True
-            )
-        except ValueError:
-            pass
-        
-        signed_certificate = cert_builder.sign(private_key, hashes.SHA256(), default_backend())
+        except ValueError as e:
+            logger.error(f'Refusing to sign CSR: {str(e)}')
+            return jsonify({'error': 'The CSR signature is invalid.'}), 400
         cert_pem = CertificateService.serialize_certificate(signed_certificate)
         
         # Upload to blob storage if requested
