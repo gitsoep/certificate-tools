@@ -20,7 +20,6 @@ A comprehensive certificate management web application built with Flask that han
 
 ### Certificate Signing
 - ✍️ Sign CSRs with your own CA certificate
-- 🔏 Support for self-signed certificate generation
 - 📅 Configurable validity period
 - 🔐 Encrypted CA private key support
 - ☁️ **Azure Key Vault Integration** - Sign CSRs using CA certificates stored in Azure Key Vault
@@ -195,9 +194,7 @@ The application will be available at `http://localhost:5001` (or your configured
 
 3. Set the validity period (in days)
 
-4. Choose signing method:
-   - **Self-signed**: Generate a self-signed certificate
-   - **CA-signed**: Upload CA certificate and private key (with optional password)
+4. Upload the CA certificate and private key (with optional password)
 
 5. Click "Sign CSR"
 

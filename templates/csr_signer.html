@@ -7,7 +7,7 @@
     <p class="text-lg text-slate-400 mb-8">Sign a Certificate Signing Request</p>
 
     <div class="alert-cyber p-4 mb-8 rounded-lg">
-        <span class="text-slate-300">Upload a CSR file to generate a signed certificate. Optionally provide CA certificate and key for CA-signed certificates.</span>
+        <span class="text-slate-300">Upload a CSR file together with your CA certificate and private key to generate a signed certificate.</span>
     </div>
 
     <div class="hidden alert-danger p-4 mb-6 rounded-lg" id="errorMessage"></div>
@@ -33,8 +33,8 @@
 
         <!-- CA Section -->
         <div class="border-t border-gray-700 pt-6">
-            <h2 class="text-lg font-bold text-white mb-4">CA Configuration (Optional)</h2>
-            <p class="text-sm text-slate-500 mb-4">Leave empty for self-signed certificate</p>
+            <h2 class="text-lg font-bold text-white mb-4">CA Configuration</h2>
+            <p class="text-sm text-slate-500 mb-4">The CA certificate and private key used to sign the CSR</p>
 
             <div class="space-y-4">
                 <div>
@@ -42,7 +42,7 @@
                     <div class="upload-zone rounded-lg p-4 text-center cursor-pointer" onclick="document.getElementById('ca_cert').click()">
                         <p class="text-sm text-slate-500" id="caCertFileName">Choose CA Certificate (.crt, .cer, .pem)</p>
                     </div>
-                    <input type="file" id="ca_cert" name="ca_cert" accept=".crt,.cer,.pem" onchange="updateFileName(this, 'caCertFileName')" class="hidden">
+                    <input type="file" id="ca_cert" name="ca_cert" accept=".crt,.cer,.pem" required onchange="updateFileName(this, 'caCertFileName')" class="hidden">
                 </div>
 
                 <div>
@@ -50,7 +50,7 @@
                     <div class="upload-zone rounded-lg p-4 text-center cursor-pointer" onclick="document.getElementById('ca_key').click()">
                         <p class="text-sm text-slate-500" id="caKeyFileName">Choose CA Private Key (.pem, .key)</p>
                     </div>
-                    <input type="file" id="ca_key" name="ca_key" accept=".pem,.key" onchange="updateFileName(this, 'caKeyFileName')" class="hidden">
+                    <input type="file" id="ca_key" name="ca_key" accept=".pem,.key" required onchange="updateFileName(this, 'caKeyFileName')" class="hidden">
                 </div>
 
                 <div>
@@ -96,6 +96,11 @@
 
     document.getElementById('signerForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+
+        if (!document.getElementById('ca_cert').files.length || !document.getElementById('ca_key').files.length) {
+            showError('CA certificate and CA private key are required');
+            return;
+        }
 
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;

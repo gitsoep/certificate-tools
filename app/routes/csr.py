@@ -121,11 +121,6 @@ def csr_signer():
 def sign_csr():
     """Sign a CSR with a CA certificate."""
     try:
-        import datetime
-        from cryptography import x509
-        from cryptography.hazmat.primitives import hashes
-        from cryptography.hazmat.primitives.asymmetric import rsa
-        from cryptography.hazmat.backends import default_backend
         from flask import send_file
         import io
         
@@ -146,70 +141,32 @@ def sign_csr():
             logger.error(f'Invalid CSR file: {str(e)}')
             return jsonify({'error': 'Invalid CSR file format.'}), 400
         
-        if ca_cert_file and ca_key_file:
-            try:
-                ca_cert = CertificateService.load_certificate(ca_cert_file.read())
-            except Exception as e:
-                logger.error(f'Invalid CA certificate: {str(e)}')
-                return jsonify({'error': 'Invalid CA certificate format.'}), 400
-            
-            try:
-                ca_key_pwd = ca_key_password.encode('utf-8') if ca_key_password else None
-                ca_private_key = CertificateService.load_private_key(ca_key_file.read(), ca_key_pwd)
-            except Exception as e:
-                logger.error(f'Invalid CA private key: {str(e)}')
-                return jsonify({'error': 'Invalid CA private key or incorrect password.'}), 400
-            
-            issuer = ca_cert.subject
-            signing_key = ca_private_key
-        else:
-            signing_key = rsa.generate_private_key(
-                public_exponent=65537, key_size=2048, backend=default_backend()
-            )
-            issuer = csr.subject
-        
-        cert_builder = x509.CertificateBuilder()
-        cert_builder = cert_builder.subject_name(csr.subject)
-        cert_builder = cert_builder.issuer_name(issuer)
-        cert_builder = cert_builder.public_key(csr.public_key())
-        cert_builder = cert_builder.serial_number(x509.random_serial_number())
-        cert_builder = cert_builder.not_valid_before(datetime.datetime.now(datetime.UTC))
-        cert_builder = cert_builder.not_valid_after(
-            datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=validity_days)
-        )
-        
-        for extension in csr.extensions:
-            # Skip AKI and SKI from CSR - they must be derived from the actual signing CA
-            if isinstance(extension.value, (x509.AuthorityKeyIdentifier, x509.SubjectKeyIdentifier)):
-                continue
-            cert_builder = cert_builder.add_extension(extension.value, critical=extension.critical)
-        
-        # Add correct Subject Key Identifier derived from the new certificate's public key
-        try:
-            cert_builder = cert_builder.add_extension(
-                x509.SubjectKeyIdentifier.from_public_key(csr.public_key()),
-                critical=False
-            )
-        except ValueError:
-            pass
-        
-        # Add correct Authority Key Identifier derived from the signing key
-        try:
-            cert_builder = cert_builder.add_extension(
-                x509.AuthorityKeyIdentifier.from_issuer_public_key(signing_key.public_key()),
-                critical=False
-            )
-        except ValueError:
-            pass
+        if not ca_cert_file or not ca_key_file:
+            return jsonify({'error': 'CA certificate and CA private key are required'}), 400
         
         try:
-            cert_builder = cert_builder.add_extension(
-                x509.BasicConstraints(ca=False, path_length=None), critical=True
-            )
-        except ValueError:
-            pass
+            ca_cert = CertificateService.load_certificate(ca_cert_file.read())
+        except Exception as e:
+            logger.error(f'Invalid CA certificate: {str(e)}')
+            return jsonify({'error': 'Invalid CA certificate format.'}), 400
         
-        certificate = cert_builder.sign(signing_key, hashes.SHA256(), default_backend())
+        try:
+            ca_key_pwd = ca_key_password.encode('utf-8') if ca_key_password else None
+            ca_private_key = CertificateService.load_private_key(ca_key_file.read(), ca_key_pwd)
+        except Exception as e:
+            logger.error(f'Invalid CA private key: {str(e)}')
+            return jsonify({'error': 'Invalid CA private key or incorrect password.'}), 400
+        
+        if ca_private_key.public_key() != ca_cert.public_key():
+            return jsonify({'error': 'CA private key does not match the CA certificate.'}), 400
+        
+        try:
+            certificate = CertificateService.sign_csr(
+                csr, ca_cert.subject, ca_cert.public_key(), ca_private_key, validity_days
+            )
+        except ValueError as e:
+            logger.error(f'Refusing to sign CSR: {str(e)}')
+            return jsonify({'error': 'The CSR signature is invalid.'}), 400
         cert_pem = CertificateService.serialize_certificate(certificate)
         
         return send_file(
