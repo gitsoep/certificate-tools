@@ -37,7 +37,10 @@ A comprehensive certificate management web application built with Flask that han
 
 ### User Interface
 - 📝 Modern, responsive web interface
-- 🎨 Professional Mosadex branding (anthracite/orange color scheme)
+- 🎨 Theme picker dropdown in the sidebar with 7 themes: Midnight, Light, Dark, Split, Neon, Mosadex and Mosadex Dark
+  - Selection is remembered per browser (localStorage)
+  - Server-wide default configurable via `DEFAULT_THEME` (defaults to `split`)
+  - Keyboard accessible (arrow keys, Enter/Space, Escape)
 - 📱 Mobile-friendly with hamburger menu
 - 🔀 Easy navigation with sidebar menu
 - 📋 One-click copy to clipboard
@@ -61,17 +64,19 @@ A comprehensive certificate management web application built with Flask that han
 
 - Python 3.11+
 - Flask 3.1.3
-- cryptography 49.0.0
-- Werkzeug 3.1.8
-- Gunicorn 26.0.0 (for production deployment)
-- azure-identity 1.25.3+ (for Azure Key Vault integration)
-- azure-keyvault-certificates 4.11.1+ (for Azure Key Vault integration)
-- azure-keyvault-secrets 4.11.0+ (for Azure Key Vault integration)
-- azure-storage-blob 12.30.0+ (for Azure Blob Storage integration)
-- msal 1.37.0+ (for Microsoft authentication)
+- cryptography 50.0.2
+- Werkzeug 3.1.9
+- Gunicorn 26.2.0 (for production deployment)
+- azure-identity 1.27.0+ (for Azure Key Vault integration)
+- azure-keyvault-certificates 4.11.3+ (for Azure Key Vault integration)
+- azure-keyvault-secrets 4.11.3+ (for Azure Key Vault integration)
+- azure-storage-blob 12.31.0+ (for Azure Blob Storage integration)
+- msal 1.39.0+ (for Microsoft authentication)
 - flask-session 0.8.0+ (for server-side sessions)
 - flask-wtf 1.3.0+ (for CSRF protection)
-- python-dotenv 1.2.2+ (for environment configuration)
+- python-dotenv 1.2.4+ (for environment configuration)
+
+See [requirements.txt](requirements.txt) for the authoritative list.
 
 ## Installation
 
@@ -334,8 +339,9 @@ certificate-tools/
 │   └── pfx_to_pem.html         # PFX to PEM converter
 ├── static/                     # Static assets
 │   ├── tailwindcss.js          # CSS framework
-│   ├── theme.js                # Theme handling
-│   └── images/                 # Image assets
+│   ├── styles.css              # Theme styles and theme picker dropdown
+│   ├── theme.js                # Theme manager (theme list + picker)
+│   └── images/                 # Image assets (incl. mosadex/ logos)
 ├── charts/                     # Helm charts for Kubernetes
 │   └── certificate-tools/
 │       ├── Chart.yaml
@@ -344,9 +350,12 @@ certificate-tools/
 ├── .github/
 │   ├── workflows/
 │   │   ├── docker-publish.yml  # CI/CD pipeline for GHCR
-│   │   └── codeql.yml          # Code security analysis
+│   │   ├── codeql.yml          # Code security analysis
+│   │   ├── dependabot-auto-merge.yml  # Auto-merge Dependabot PRs
+│   │   └── combine-prs.yml     # Combine dependency PRs
 │   ├── dependabot.yml          # Dependency updates
 │   └── codeql/
+├── SECURITY.md                 # Security policy
 └── README.md                   # This file
 ```
 
@@ -421,8 +430,12 @@ ANALYTICS_HTML="<script>...</script>"
 # (e.g. the endpoint used by your analytics script)
 CONNECT_SRC=https://analytics.example.com
 
+# Application title shown in the UI
+APP_TITLE=Certificate Tools
+
 # Default theme for visitors who haven't picked one yet
 # (midnight, light, dark, split, neon, mosadex, mosadex-dark)
+# Unknown values fall back to split
 DEFAULT_THEME=split
 
 # CSR Generation Defaults
@@ -472,6 +485,11 @@ LOG_LEVEL=WARNING
 2. Private key, certificate, and chain certificates are extracted
 3. Each component is serialized to PEM format
 4. Results are displayed with individual download options
+
+### Adding a Theme
+1. Add CSS rules for `[data-theme="<id>"]` in `static/styles.css`
+2. Append an entry (`id`, `label`, `icon`) to `THEMES` in `static/theme.js`
+3. Add the id to `AVAILABLE_THEMES` in `app/config.py` so `DEFAULT_THEME` accepts it
 
 ## License
 
