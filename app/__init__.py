@@ -1,12 +1,56 @@
 """
 Certificate Tools - Flask Application Factory
 """
-from flask import Flask
+from flask import Flask, request
 from flask_session import Session
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.middleware.proxy_fix import ProxyFix
+import logging
+from urllib.parse import urlsplit
 
 from .config import Config
+
+logger = logging.getLogger(__name__)
+
+
+def _origin(url):
+    parts = urlsplit(url or '')
+    default_port = {'http': 80, 'https': 443}.get(parts.scheme)
+    try:
+        port = parts.port or default_port
+    except ValueError:
+        return None
+    return (parts.scheme, (parts.hostname or '').lower(), port)
+
+
+def _configure_csrf_origin_check(app):
+    """Validate the Referer/Origin of HTTPS form posts against EXTERNAL_URL.
+
+    Flask-WTF compares the Referer with request.host, which behind a reverse
+    proxy is often not the public hostname. When EXTERNAL_URL is configured it
+    is the authoritative public origin, so compare against that instead. The
+    CSRF token check itself is unaffected.
+    """
+    external_url = app.config.get('EXTERNAL_URL')
+    if not external_url:
+        return
+
+    app.config['WTF_CSRF_SSL_STRICT'] = False
+    expected = _origin(external_url)
+
+    @app.before_request
+    def check_csrf_origin():
+        if request.method not in app.config.get('WTF_CSRF_METHODS', {'POST', 'PUT', 'PATCH', 'DELETE'}):
+            return
+        if not request.is_secure:
+            return
+        source = request.headers.get('Origin') or request.referrer
+        if not source:
+            raise CSRFError('The referrer header is missing.')
+        if _origin(source) != expected:
+            logger.warning('CSRF origin mismatch: got %r, expected %r (request host %r)',
+                           source, external_url, request.host)
+            raise CSRFError('The referrer does not match the external URL.')
 
 
 def create_app(config_class=Config):
@@ -25,6 +69,7 @@ def create_app(config_class=Config):
     # Initialize extensions
     Session(app)
     CSRFProtect(app)
+    _configure_csrf_origin_check(app)
     
     # Register error handlers
     from .utils.errors import register_error_handlers
