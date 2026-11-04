@@ -46,3 +46,7 @@ Thumbs.db
 *.csr
 *.pem
 *.key
+
+# Node / Tailwind build output
+node_modules/
+static/tailwind.css

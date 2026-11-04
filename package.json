@@ -1,0 +1,12 @@
+{
+  "name": "certificate-tools",
+  "private": true,
+  "description": "Build tooling for the Certificate Tools stylesheet",
+  "scripts": {
+    "build:css": "tailwindcss -i ./assets/tailwind.css -o ./static/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./assets/tailwind.css -o ./static/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}

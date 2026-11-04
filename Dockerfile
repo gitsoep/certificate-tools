@@ -1,3 +1,17 @@
+# Build the Tailwind stylesheet
+FROM node:lts-alpine AS css
+
+WORKDIR /build
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY tailwind.config.js ./
+COPY assets/ assets/
+COPY templates/ templates/
+COPY static/ static/
+RUN npm run build:css
+
 # Use Python 3 alpine image as base
 FROM python:alpine
 
@@ -24,6 +38,7 @@ COPY run.py .
 COPY app/ app/
 COPY templates/ templates/
 COPY static/ static/
+COPY --from=css /build/static/tailwind.css static/tailwind.css
 
 # Create a non-root user
 RUN adduser -D -u 1000 appuser && \
