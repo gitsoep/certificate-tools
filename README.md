@@ -95,7 +95,9 @@ pip install -r requirements.txt
 npm ci
 npm run build:css
 ```
-   This compiles Tailwind CSS from the classes used in `templates/` and `static/*.js` into `static/tailwind.css`. Re-run it after adding new Tailwind classes, or use `npm run watch:css` while developing.
+   This uses the Tailwind CSS 4 CLI (`@tailwindcss/cli`) to compile classes used in `templates/` and `static/*.js` into `static/tailwind.css`. The imports and source paths are configured in `assets/tailwind.css`; no JavaScript Tailwind configuration is needed. Re-run it after adding new Tailwind classes, or use `npm run watch:css` while developing.
+
+   Tailwind CSS 4 requires Safari 16.4+, Chrome 111+, or Firefox 128+. When updating Tailwind, keep `tailwindcss` and `@tailwindcss/cli` on the same version and regenerate `package-lock.json` with `npm install` before committing both package files. Docker uses `npm ci`, which requires the manifest and lockfile to match.
 
 4. **Configure Azure Authentication** (required for Azure Key Vault features):
 
@@ -506,4 +508,3 @@ MIT License
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-

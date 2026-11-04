@@ -201,7 +201,7 @@
         const isRSA = /rsa/i.test(data.key_algorithm || '');
         const keySizeWeak = !isNaN(keySizeNum) && keySizeNum < 4096 && isRSA;
         const keySizeClass = keySizeWeak ? 'text-red-500 font-bold' : 'text-blue-400';
-        const keySizeWarning = keySizeWeak ? ' <span class="bg-red-600 text-white px-2 py-0.5 rounded text-xs font-bold ml-2 animate-pulse">⚠ WEAK</span>' : '';
+        const keySizeWarning = keySizeWeak ? ' <span class="bg-red-600 text-white px-2 py-0.5 rounded-sm text-xs font-bold ml-2 animate-pulse">⚠ WEAK</span>' : '';
         document.getElementById('key-info').innerHTML = `<div class="py-2"><strong class="text-slate-300">Key Size:</strong> <span class="${keySizeClass} font-mono">${keySize} bits</span>${keySizeWarning}</div>`;
 
         if (data.extended_key_usage) {
@@ -214,13 +214,13 @@
         const sigAlgo = data.signature_algorithm || '';
         const sigInsecure = /md5|sha-?1/i.test(sigAlgo);
         const sigClass = sigInsecure ? 'text-red-500 font-bold' : 'text-slate-400';
-        const sigWarning = sigInsecure ? ' <span class="bg-red-600 text-white px-2 py-0.5 rounded text-xs font-bold ml-2 animate-pulse">⚠ INSECURE</span>' : '';
+        const sigWarning = sigInsecure ? ' <span class="bg-red-600 text-white px-2 py-0.5 rounded-sm text-xs font-bold ml-2 animate-pulse">⚠ INSECURE</span>' : '';
         document.getElementById('signature-info').innerHTML = `<div class="${sigClass} font-mono">${escapeHtml(sigAlgo)}</div>${sigWarning}`;
 
         const otherExtensions = data.extensions.filter(ext => ext.name !== 'extendedKeyUsage');
         if (otherExtensions && otherExtensions.length > 0) {
             const extensionsHtml = otherExtensions.map(ext => {
-                const critical = ext.critical ? ' <span class="bg-red-500/20 text-red-400 px-2 py-0.5 rounded text-xs font-bold ml-2">CRITICAL</span>' : '';
+                const critical = ext.critical ? ' <span class="bg-red-500/20 text-red-400 px-2 py-0.5 rounded-sm text-xs font-bold ml-2">CRITICAL</span>' : '';
                 return `
                     <div class="py-3 border-b border-gray-700 last:border-b-0">
                         <strong class="text-slate-300">${formatFieldName(ext.name)}:</strong>${critical}

@@ -1,3 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Keep utilities unlayered so they retain the existing cascade with styles.css. */
+@import "tailwindcss/theme.css";
+@import "tailwindcss/preflight.css";
+@import "tailwindcss/utilities.css" source(none);
+
+@source "../templates";
+@source "../static/*.js";
+
+/* Preserve v3 hover behavior on touch devices. */
+@custom-variant hover (&:hover);
+
+/* Keep the existing border and button defaults when upgrading Preflight. */
+*, ::after, ::before, ::backdrop, ::file-selector-button {
+  border-color: var(--color-gray-200, currentColor);
+}
+
+button:not(:disabled), [role="button"]:not(:disabled) {
+  cursor: pointer;
+}
