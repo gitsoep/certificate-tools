@@ -242,9 +242,11 @@ def download():
 @bp.route('/list-akv-certificates', methods=['POST'])
 @login_required
 def list_akv_certificates():
-    """List certificates from Azure Key Vault(s)."""
+    """List certificates from Azure Key Vault(s) that the user is allowed to read."""
     try:
+        from concurrent.futures import ThreadPoolExecutor
         from azure.keyvault.certificates import CertificateClient
+        from azure.keyvault.secrets import SecretClient
         
         scope = current_app.config.get('AZURE_SCOPE')
         token = AuthService.get_token_from_cache(scope)
@@ -272,16 +274,40 @@ def list_akv_certificates():
         
         all_certificates = []
         vault_errors = []
+        unauthorized_count = 0
         
         for vault_url in vault_urls:
             try:
                 cert_client = CertificateClient(vault_url=vault_url, credential=credential)
+                secret_client = SecretClient(vault_url=vault_url, credential=credential)
                 vault_name = vault_url.split('//')[1].split('.')[0] if '//' in vault_url else vault_url
                 
-                for cert_props in cert_client.list_properties_of_certificates():
+                cert_names = [
+                    p.name for p in cert_client.list_properties_of_certificates() if p.enabled
+                ]
+                
+                def can_read(name, cert_client=cert_client, secret_client=secret_client):
+                    # Signing needs both the certificate and its private key (secret),
+                    # so the user must be able to read both.
+                    try:
+                        cert_client.get_certificate(name)
+                        secret_client.get_secret(name)
+                        return True
+                    except Exception as e:
+                        logger.info('User cannot read certificate %s in %s: %s',
+                                    name, vault_url, type(e).__name__)
+                        return False
+                
+                with ThreadPoolExecutor(max_workers=8) as executor:
+                    results = list(executor.map(can_read, cert_names))
+                
+                for name, readable in zip(cert_names, results):
+                    if not readable:
+                        unauthorized_count += 1
+                        continue
                     all_certificates.append({
-                        'name': cert_props.name,
-                        'enabled': cert_props.enabled,
+                        'name': name,
+                        'enabled': True,
                         'vault_url': vault_url,
                         'vault_name': vault_name
                     })
@@ -293,6 +319,8 @@ def list_akv_certificates():
                 })
         
         response = {'certificates': all_certificates}
+        if unauthorized_count:
+            response['unauthorized_count'] = unauthorized_count
         if vault_errors:
             response['vault_errors'] = vault_errors
         
