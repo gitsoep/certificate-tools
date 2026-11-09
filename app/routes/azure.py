@@ -239,6 +239,17 @@ def download():
         return jsonify({'error': 'Failed to download the certificate.'}), 500
 
 
+def _resolve_configured_vault_url(requested_url, configured_vault_urls):
+    """Return the matching configured Key Vault URL, or None if not allowed."""
+    if not isinstance(requested_url, str):
+        return None
+    normalized = requested_url.strip().rstrip('/').lower()
+    for configured_url in configured_vault_urls:
+        if configured_url.rstrip('/').lower() == normalized:
+            return configured_url
+    return None
+
+
 @bp.route('/list-akv-certificates', methods=['POST'])
 @login_required
 def list_akv_certificates():
@@ -260,12 +271,17 @@ def list_akv_certificates():
         request_vault_urls = request.json.get('vault_urls', []) if request.is_json else []
         
         if request_vault_urls:
-            # Validate requested URLs against the configured allowlist
-            allowed = {u.rstrip('/').lower() for u in configured_vault_urls}
+            # Map requested URLs onto the configured allowlist and use the configured
+            # values only, so no user-provided string is ever used as a request URL.
+            if not isinstance(request_vault_urls, list):
+                return jsonify({'error': 'vault_urls must be a list'}), 400
+            vault_urls = []
             for url in request_vault_urls:
-                if url.rstrip('/').lower() not in allowed:
-                    return jsonify({'error': f'Vault URL not in allowed list: {url}'}), 403
-            vault_urls = request_vault_urls
+                configured_url = _resolve_configured_vault_url(url, configured_vault_urls)
+                if configured_url is None:
+                    return jsonify({'error': 'Vault URL not in allowed list'}), 403
+                if configured_url not in vault_urls:
+                    vault_urls.append(configured_url)
         else:
             vault_urls = configured_vault_urls
         
@@ -374,13 +390,15 @@ def sign_csr_akv():
         if not vault_url:
             return jsonify({'error': 'Key Vault URL is required'}), 400
         
-        # Validate vault URL against configured allowlist to prevent SSRF
+        # Resolve to the configured vault URL to prevent SSRF
         configured_vault_urls = current_app.config.get('AZURE_KEYVAULT_URLS', [])
-        allowed = {u.rstrip('/').lower() for u in configured_vault_urls}
-        if vault_url.rstrip('/').lower() not in allowed:
+        vault_url = _resolve_configured_vault_url(vault_url, configured_vault_urls)
+        if vault_url is None:
             return jsonify({'error': 'Vault URL not in allowed list'}), 403
         if not certificate_name:
             return jsonify({'error': 'Certificate name is required'}), 400
+        if not re.fullmatch(r'[0-9A-Za-z-]{1,127}', certificate_name):
+            return jsonify({'error': 'Invalid certificate name'}), 400
         
         # Get CA certificate from Key Vault
         try:
