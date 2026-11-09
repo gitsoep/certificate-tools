@@ -207,13 +207,18 @@
                     select.disabled = false;
                     helpText.textContent = 'Found ' + result.certificates.length + ' certificate(s) across ' + CONFIGURED_VAULT_URLS.length + ' Key Vault(s)';
                     helpText.className = 'text-xs text-green-400 mt-1';
+                    if (result.unauthorized_count) {
+                        helpText.textContent += ' (' + result.unauthorized_count + ' hidden: no read access)';
+                    }
                     if (result.vault_errors && result.vault_errors.length > 0) {
                         helpText.textContent += ' (' + result.vault_errors.length + ' vault(s) had errors)';
                         helpText.className = 'text-xs text-yellow-400 mt-1';
                     }
                 } else {
                     select.innerHTML = '<option value="">No certificates found</option>';
-                    helpText.textContent = 'No certificates found in any configured Key Vault';
+                    helpText.textContent = result.unauthorized_count
+                        ? 'No certificates you have read access to (' + result.unauthorized_count + ' hidden)'
+                        : 'No certificates found in any configured Key Vault';
                     helpText.className = 'text-xs text-yellow-400 mt-1';
                 }
             } else {

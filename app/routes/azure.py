@@ -239,12 +239,25 @@ def download():
         return jsonify({'error': 'Failed to download the certificate.'}), 500
 
 
+def _resolve_configured_vault_url(requested_url, configured_vault_urls):
+    """Return the matching configured Key Vault URL, or None if not allowed."""
+    if not isinstance(requested_url, str):
+        return None
+    normalized = requested_url.strip().rstrip('/').lower()
+    for configured_url in configured_vault_urls:
+        if configured_url.rstrip('/').lower() == normalized:
+            return configured_url
+    return None
+
+
 @bp.route('/list-akv-certificates', methods=['POST'])
 @login_required
 def list_akv_certificates():
-    """List certificates from Azure Key Vault(s)."""
+    """List certificates from Azure Key Vault(s) that the user is allowed to read."""
     try:
+        from concurrent.futures import ThreadPoolExecutor
         from azure.keyvault.certificates import CertificateClient
+        from azure.keyvault.secrets import SecretClient
         
         scope = current_app.config.get('AZURE_SCOPE')
         token = AuthService.get_token_from_cache(scope)
@@ -258,12 +271,17 @@ def list_akv_certificates():
         request_vault_urls = request.json.get('vault_urls', []) if request.is_json else []
         
         if request_vault_urls:
-            # Validate requested URLs against the configured allowlist
-            allowed = {u.rstrip('/').lower() for u in configured_vault_urls}
+            # Map requested URLs onto the configured allowlist and use the configured
+            # values only, so no user-provided string is ever used as a request URL.
+            if not isinstance(request_vault_urls, list):
+                return jsonify({'error': 'vault_urls must be a list'}), 400
+            vault_urls = []
             for url in request_vault_urls:
-                if url.rstrip('/').lower() not in allowed:
-                    return jsonify({'error': f'Vault URL not in allowed list: {url}'}), 403
-            vault_urls = request_vault_urls
+                configured_url = _resolve_configured_vault_url(url, configured_vault_urls)
+                if configured_url is None:
+                    return jsonify({'error': 'Vault URL not in allowed list'}), 403
+                if configured_url not in vault_urls:
+                    vault_urls.append(configured_url)
         else:
             vault_urls = configured_vault_urls
         
@@ -272,16 +290,40 @@ def list_akv_certificates():
         
         all_certificates = []
         vault_errors = []
+        unauthorized_count = 0
         
         for vault_url in vault_urls:
             try:
                 cert_client = CertificateClient(vault_url=vault_url, credential=credential)
+                secret_client = SecretClient(vault_url=vault_url, credential=credential)
                 vault_name = vault_url.split('//')[1].split('.')[0] if '//' in vault_url else vault_url
                 
-                for cert_props in cert_client.list_properties_of_certificates():
+                cert_names = [
+                    p.name for p in cert_client.list_properties_of_certificates() if p.enabled
+                ]
+                
+                def can_read(name, cert_client=cert_client, secret_client=secret_client):
+                    # Signing needs both the certificate and its private key (secret),
+                    # so the user must be able to read both.
+                    try:
+                        cert_client.get_certificate(name)
+                        secret_client.get_secret(name)
+                        return True
+                    except Exception as e:
+                        logger.info('User cannot read certificate %s in %s: %s',
+                                    name, vault_url, type(e).__name__)
+                        return False
+                
+                with ThreadPoolExecutor(max_workers=8) as executor:
+                    results = list(executor.map(can_read, cert_names))
+                
+                for name, readable in zip(cert_names, results):
+                    if not readable:
+                        unauthorized_count += 1
+                        continue
                     all_certificates.append({
-                        'name': cert_props.name,
-                        'enabled': cert_props.enabled,
+                        'name': name,
+                        'enabled': True,
                         'vault_url': vault_url,
                         'vault_name': vault_name
                     })
@@ -293,6 +335,8 @@ def list_akv_certificates():
                 })
         
         response = {'certificates': all_certificates}
+        if unauthorized_count:
+            response['unauthorized_count'] = unauthorized_count
         if vault_errors:
             response['vault_errors'] = vault_errors
         
@@ -346,13 +390,15 @@ def sign_csr_akv():
         if not vault_url:
             return jsonify({'error': 'Key Vault URL is required'}), 400
         
-        # Validate vault URL against configured allowlist to prevent SSRF
+        # Resolve to the configured vault URL to prevent SSRF
         configured_vault_urls = current_app.config.get('AZURE_KEYVAULT_URLS', [])
-        allowed = {u.rstrip('/').lower() for u in configured_vault_urls}
-        if vault_url.rstrip('/').lower() not in allowed:
+        vault_url = _resolve_configured_vault_url(vault_url, configured_vault_urls)
+        if vault_url is None:
             return jsonify({'error': 'Vault URL not in allowed list'}), 403
         if not certificate_name:
             return jsonify({'error': 'Certificate name is required'}), 400
+        if not re.fullmatch(r'[0-9A-Za-z-]{1,127}', certificate_name):
+            return jsonify({'error': 'Invalid certificate name'}), 400
         
         # Get CA certificate from Key Vault
         try:

@@ -429,7 +429,11 @@
                         const opt = new Option(c.name, JSON.stringify({ name: c.name, vault_url: c.vault_url }));
                         select.options.add(opt);
                     });
-                    if (certs.length === 0) showAlert('No certificates found in any configured Key Vault');
+                    if (certs.length === 0) {
+                        showAlert(data.unauthorized_count
+                            ? 'No certificates you have read access to in the configured Key Vaults'
+                            : 'No certificates found in any configured Key Vault');
+                    }
                 }
             } catch (e) {
                 showAlert(e.message || String(e));
